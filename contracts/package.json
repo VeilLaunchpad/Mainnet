@@ -1,0 +1,36 @@
+{
+  "name": "veilpad-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network cotiTestnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.ts --network cotiMainnet",
+    "smoke": "hardhat run scripts/smoke.ts --network cotiTestnet",
+    "graduate": "hardhat run scripts/graduate.ts --network cotiTestnet",
+    "contracts:fees": "npm --prefix contracts run fees",
+    "contracts:portal": "npm --prefix contracts run deploy:portal",
+    "sdk:build": "npm --prefix sdk run build",
+    "fees": "hardhat run scripts/fees.ts --network cotiTestnet",
+    "deploy:portal": "hardhat run scripts/deploy-portal.ts --network cotiTestnet",
+    "portal:test": "hardhat run scripts/portal-test.ts --network cotiTestnet",
+    "trade": "hardhat run scripts/trade.ts --network cotiTestnet",
+    "verify": "hardhat run scripts/verify.ts --network cotiTestnet",
+    "launch": "hardhat run scripts/launch-vanity.ts --network cotiTestnet",
+    "assets": "hardhat run scripts/deploy-assets.ts --network cotiTestnet",
+    "veilpad:testnet": "hardhat run scripts/deploy-veilpad.ts --network cotiTestnet",
+    "veilpad:mainnet": "hardhat run scripts/deploy-veilpad.ts --network cotiMainnet",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.19",
+    "typescript": "^5.9.2",
+    "ts-node": "^10.9.2",
+    "dotenv": "^16.4.7"
+  },
+  "dependencies": {
+    "@coti-io/coti-contracts": "^1.3.5",
+    "@openzeppelin/contracts": "^5.1.0"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "@veilpad/sdk",
+  "version": "0.2.0",
+  "description": "TypeScript SDK for VEILPAD on COTI: launches, trading, candles, the privacy portal and the agents.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "smoke": "node smoke-test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "coti",
+    "privacy",
+    "veilpad",
+    "defi",
+    "launchpad",
+    "agents"
+  ],
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "viem": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "viem": {
+      "optional": true
+    }
+  },
+  "homepage": "https://veilpad-app.vercel.app/docs/sdk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/veilpad/veilpad.git",
+    "directory": "sdk"
+  },
+  "bugs": {
+    "url": "https://veilpad-app.vercel.app/docs/sdk"
+  },
+  "author": "VEILPAD",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

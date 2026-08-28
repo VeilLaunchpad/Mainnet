@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="VEILPAD token">
+  <defs>
+    <linearGradient id="vt-edge" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="vt-face" x1="40" y1="24" x2="216" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111a3d"/>
+      <stop offset="1" stop-color="#030d24"/>
+    </linearGradient>
+    <radialGradient id="vt-glow" cx="128" cy="104" r="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e29f6" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#1e29f6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="128" cy="128" r="128" fill="#030d24"/>
+  <circle cx="128" cy="128" r="128" fill="url(#vt-glow)"/>
+
+  <!-- The same shield the app wears, scaled up: a token should look like the
+       thing that issued it rather than like a generic coin. -->
+  <path d="M128 32 40 80v62c0 50 38 79 88 90 50-11 88-40 88-90V80l-88-48Z"
+        fill="url(#vt-face)" stroke="url(#vt-edge)" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M93 130l26 26 46-53"
+        fill="none" stroke="url(#vt-edge)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="128" y="212" text-anchor="middle"
+        font-family="'Space Grotesk',ui-sans-serif,system-ui,sans-serif"
+        font-size="26" font-weight="700" letter-spacing="3" fill="#8ea0d8">VEIL</text>
+</svg>

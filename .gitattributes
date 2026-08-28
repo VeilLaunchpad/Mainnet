@@ -1,0 +1,6 @@
+# Keep line endings LF in the repo. Python tooling on Windows silently rewrites
+# files to CRLF otherwise, which breaks source-parsing scripts like
+# scripts/build-master-table.mjs.
+* text=auto eol=lf
+*.png binary
+*.jpg binary

@@ -1,0 +1,44 @@
+{
+  "name": "veilpad",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VEILPAD on Railway - the agentic privacy superapp on COTI, deployed as one always-on service",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node --env-file-if-exists=.env .next/standalone/server.js",
+    "typecheck": "tsc --noEmit",
+    "telegram:status": "node scripts/telegram.mjs status",
+    "telegram:webhook": "node scripts/telegram.mjs webhook",
+    "telegram:profile": "node scripts/telegram.mjs profile",
+    "telegram:poll": "node scripts/telegram.mjs poll"
+  },
+  "dependencies": {
+    "@coti-io/coti-ethers": "^1.0.6",
+    "@coti-io/coti-sdk-private-messaging": "^0.2.3",
+    "@coti-io/coti-sdk-typescript": "^1.0.9",
+    "@tanstack/react-query": "^5.90.2",
+    "ethers": "^6.15.0",
+    "lightweight-charts": "^5.0.9",
+    "next": "^15.5.24",
+    "qrcode": "^1.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "viem": "^2.37.6",
+    "wagmi": "^2.17.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/node": "^22.18.6",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

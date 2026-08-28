@@ -1,0 +1,40 @@
+# Secrets. Never commit these.
+#
+# The deployer key in a local .env owns the staking contract, the treasury and
+# the factory. A single push of it is unrecoverable: scrapers find a private
+# key on GitHub within seconds of the commit landing, whatever you do next.
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Installed
+node_modules/
+contracts/node_modules/
+
+# Generated
+.next/
+out/
+build/
+dist/
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# The local index. It rebuilds itself from chain on first boot.
+data/
+*.sqlite
+*.sqlite-journal
+
+# Deploy tooling
+.vercel/
+.railway/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,259 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   VEILPAD design tokens.
+   Dark by default - the whole product is about what stays hidden,
+   so the surface is near-black with light leaking through it.
+   ───────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Surfaces are COTI navy rather than black. Pure near-black made large
+     areas read as dead space; navy keeps the page dark while still being a
+     colour, so empty regions look intentional instead of switched off. */
+  --color-ink-950: #030d24;
+  --color-ink-900: #04133d;
+  --color-ink-850: #071848;
+  --color-ink-800: #0a2057;
+  --color-ink-700: #102c6e;
+  --color-ink-600: #1a3d8f;
+  --color-ink-500: #2b55b0;
+
+  /* COTI's own electric blue, read off coti.io and privacy.coti.io where it is
+     the single most used colour on both. The token names stay `veil-*` so
+     every existing class keeps working. */
+  --color-veil-300: #8f99ff;
+  --color-veil-400: #5a67ff;
+  --color-veil-500: #1e29f6;
+  --color-veil-600: #1620c4;
+
+  /* The cyan COTI pairs with that blue. */
+  --color-cy-300: #7ef0ff;
+  --color-cy-400: #00e5ff;
+  --color-cy-500: #00b4d8;
+
+  --color-mint-400: #4ade80;
+  --color-rose-400: #fb7185;
+  --color-amber-400: #fbbf24;
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #030d24;
+  --fg: #e9eeff;
+  --muted: #8fa0c8;
+  /* Lines and cards pick up a blue cast so panels sit in the palette rather
+     than looking like grey rectangles dropped onto it. */
+  --line: rgba(120, 150, 255, 0.11);
+  --line-strong: rgba(120, 150, 255, 0.2);
+  --card: rgba(30, 60, 140, 0.09);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Legibility floor.
+
+   Body copy sat at 45% white, which measures 4.46:1 on the old
+   black and 4.48:1 on navy: just under the 4.5:1 that text at
+   this size needs. The three dimmest steps are lifted here
+   rather than at 215 call sites, so the visual hierarchy is
+   preserved and the change stays reviewable in one place.
+
+   These sit outside Tailwind's layers, so they win on cascade
+   order without needing !important.
+   ───────────────────────────────────────────────────────────── */
+.text-white\/30 { color: rgb(255 255 255 / 0.42); }
+.text-white\/35 { color: rgb(255 255 255 / 0.48); }
+.text-white\/45 { color: rgb(255 255 255 / 0.58); }
+
+* { border-color: var(--line); }
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-display);
+  background-image:
+    radial-gradient(1100px 620px at 12% -10%, rgba(30, 41, 246, 0.3), transparent 62%),
+    radial-gradient(900px 520px at 92% 4%, rgba(0, 229, 255, 0.13), transparent 58%),
+    radial-gradient(760px 700px at 50% 104%, rgba(30, 41, 246, 0.16), transparent 62%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+::selection { background: rgba(30, 41, 246, 0.45); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.5); background-clip: content-box; }
+
+@utility card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  backdrop-filter: blur(12px);
+}
+
+@utility card-hover {
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+.card-hover:hover {
+  border-color: rgba(0, 229, 255, 0.4);
+  background: rgba(255, 255, 255, 0.045);
+  transform: translateY(-2px);
+}
+
+@utility glow {
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.28), 0 12px 44px -12px rgba(30, 41, 246, 0.7);
+}
+
+@utility text-grad {
+  background: linear-gradient(96deg, #fff 6%, #8f99ff 42%, #00e5ff 94%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Hero surface.
+
+   The grid used to live on the section itself with a mask fading
+   it out. A mask applies to an element AND everything inside it,
+   so the fade was erasing the hero's own headline and copy along
+   with the grid lines. Painting it on a pseudo-element behind the
+   content keeps the fade where it was meant to be.
+   ───────────────────────────────────────────────────────────── */
+@utility grid-veil {
+  position: relative;
+  isolation: isolate;
+}
+
+.grid-veil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(rgba(120, 160, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 160, 255, 0.055) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 78% 62% at 50% 0%, #000 42%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Colour that moves. Three slow, offset blooms so the surface is never
+   a flat black rectangle, but never busy enough to fight the text. */
+.grid-veil::after {
+  content: "";
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 150%;
+  z-index: -1;
+  background:
+    radial-gradient(38% 44% at 18% 22%, rgba(30, 41, 246, 0.4), transparent 70%),
+    radial-gradient(34% 40% at 82% 12%, rgba(0, 229, 255, 0.24), transparent 72%),
+    radial-gradient(46% 38% at 55% 78%, rgba(45, 90, 255, 0.22), transparent 75%);
+  filter: blur(14px);
+  animation: veil-drift 26s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes veil-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-2.5%, 1.5%, 0) scale(1.06); }
+  100% { transform: translate3d(2%, -1%, 0) scale(1.02); }
+}
+
+/* A faint film of grain. Flat gradients on a dark screen band badly;
+   noise breaks the banding up and stops large areas reading as dead. */
+@utility grain {
+  position: relative;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Section dividers that glow rather than rule, so the page reads as
+   one continuous surface instead of stacked boxes. */
+@utility seam {
+  position: relative;
+}
+
+.seam::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(30, 41, 246, 0.5),
+    rgba(0, 229, 255, 0.35),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Motion is decoration here, so anyone who has asked for less gets none. */
+@media (prefers-reduced-motion: reduce) {
+  .grid-veil::after { animation: none; }
+}
+
+@keyframes veil-pulse {
+  0%, 100% { opacity: 0.42; }
+  50% { opacity: 1; }
+}
+.animate-pulse-slow { animation: veil-pulse 2.4s ease-in-out infinite; }
+
+@keyframes veil-rise {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-rise { animation: veil-rise 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes veil-shimmer {
+  0% { background-position: -420px 0; }
+  100% { background-position: 420px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.035) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.035) 75%);
+  background-size: 840px 100%;
+  animation: veil-shimmer 1.5s linear infinite;
+}
+
+/* Typing caret for streaming agent replies. */
+@keyframes veil-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 0.5ch;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--color-veil-400);
+  animation: veil-caret 1s step-end infinite;
+}

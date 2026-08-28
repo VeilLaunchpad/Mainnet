@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+data
+*.log
+*.tsbuildinfo
+README.md
+Dockerfile
+.dockerignore
+
+# The SDK is published from this repository but the web app does not import it,
+# so it stays out of the image.
+sdk

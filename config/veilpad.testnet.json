@@ -1,0 +1,1237 @@
+{
+  "$schema": "./veilpad.schema.json",
+  "app": {
+    "name": "VEILPAD",
+    "tagline": "The agentic privacy superapp on COTI",
+    "version": "0.1.0",
+    "network": "testnet"
+  },
+  "_comment": "MASTER TABLE - single source of truth for the COTI testnet deployment. Addresses and public config only; every secret stays in .env.local and is never committed. `npm run deploy:testnet` rewrites the `contracts.veilpad` block and flips each `status` to `deployed`.",
+  "chain": {
+    "id": 7082400,
+    "name": "COTI Testnet",
+    "shortName": "coti-testnet",
+    "networkId": 7082400,
+    "nativeCurrency": {
+      "name": "COTI",
+      "symbol": "COTI",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://testnet.coti.io/rpc"
+    ],
+    "ws": [
+      "wss://testnet.coti.io/ws"
+    ],
+    "explorer": {
+      "name": "CotiScan",
+      "url": "https://testnet.cotiscan.io",
+      "tx": "https://testnet.cotiscan.io/tx/{hash}",
+      "address": "https://testnet.cotiscan.io/address/{address}",
+      "token": "https://testnet.cotiscan.io/token/{address}"
+    },
+    "faucet": {
+      "kind": "discord",
+      "url": "https://discord.com/invite/Z4r8D6ez49",
+      "note": "Ask in the COTI Discord faucet channel. Testnet COTI only."
+    },
+    "bridge": {
+      "url": "https://bridge.coti.io",
+      "etaMinutes": [
+        2,
+        4
+      ],
+      "assets": [
+        "COTI",
+        "gCOTI"
+      ],
+      "counterparties": [
+        {
+          "name": "Ethereum Mainnet",
+          "chainId": 1
+        },
+        {
+          "name": "Ethereum Sepolia",
+          "chainId": 11155111
+        }
+      ],
+      "mechanism": "COTI's deposit address on Ethereum is an externally owned account watched by COTI's relayer, not a contract. No dApp can execute the transfer, and no major aggregator lists COTI, so the crossing is prepared and tracked in VEILPAD but signed against COTI's own interface."
+    }
+  },
+  "deployer": {
+    "address": "0xC6E17B753a03cf9245E25D4939F6efd2791F9f2b",
+    "funded": true,
+    "envKey": "DEPLOYER_PRIVATE_KEY",
+    "note": "Fund from the faucet above, then run `cd contracts && npm run deploy:testnet`."
+  },
+  "contracts": {
+    "_comment": "status: 'deployed' means the address is live on chain 7082400 and the app will use it. 'pending' means the UI degrades to a clear 'not deployed yet' state instead of reverting.",
+    "coti": {
+      "_comment": "Deployed and maintained by COTI, not by us. Already live.",
+      "accountOnboard": {
+        "address": "0x536A67f0cc46513E7d27a370ed1aF9FDcC7A5095",
+        "status": "deployed",
+        "role": "Derives the AES key that decrypts your own encrypted state. Wallet signs an RSA public key; the contract returns the AES key sealed to it; the SDK unwraps it in the browser.",
+        "envKey": "NEXT_PUBLIC_ACCOUNT_ONBOARD_TESTNET",
+        "abi": "accountOnboardAbi"
+      },
+      "privateMessaging": {
+        "address": "0xa4C514225Db5B8AE6eF1548d4CE912234A7CD954",
+        "status": "deployed",
+        "role": "End-to-end encrypted agent-to-agent messages. Routing metadata public and queryable; message bodies sealed to sender and recipient.",
+        "envKey": "NEXT_PUBLIC_PRIVATE_MESSAGING_TESTNET",
+        "abi": "privateMessagingAbi",
+        "mainnet": "0xe461F448cB935a14585F6f1a30F5b4C73ffF8c05",
+        "limits": {
+          "maxChunkCells": 3,
+          "maxChunksPerMessage": 64,
+          "epochDays": 14
+        }
+      }
+    },
+    "veilpad": {
+      "_comment": "Written by contracts/scripts/deploy.ts. Deploy order matters: WCOTI, then the two token deployers, then the factory (which takes both deployer addresses), then the registries.",
+      "wcoti": {
+        "address": "0x9569C225F4EBa6efcd73f5421F5A5126b566ed03",
+        "status": "deployed",
+        "deployOrder": 1,
+        "role": "WETH9-shaped wrapper. Uniswap V3 only speaks ERC-20, so native COTI needs one. No admin, no upgrade path.",
+        "envKey": "NEXT_PUBLIC_WCOTI_TESTNET",
+        "abi": "wcotiAbi"
+      },
+      "swapFactory": {
+        "address": "0x401D96dB62E04d2bb31C748e5E3Da16F99Ed317e",
+        "status": "deployed",
+        "deployOrder": 2,
+        "role": "VeilSwap pair factory. One pair per token pair, CREATE2 so the address is derivable before it exists.",
+        "envKey": "NEXT_PUBLIC_SWAP_FACTORY_TESTNET",
+        "abi": "veilSwapFactoryAbi"
+      },
+      "swapRouter": {
+        "address": "0x6b02aF47D37a7ce3d472D00598244D803A33Be41",
+        "status": "deployed",
+        "deployOrder": 3,
+        "role": "Wraps and unwraps native COTI around a swap, applies deadlines, exposes quotes. Holds no funds, has no admin.",
+        "envKey": "NEXT_PUBLIC_SWAP_ROUTER_TESTNET",
+        "abi": "veilSwapRouterAbi"
+      },
+      "privateTokenDeployer": {
+        "address": "0x335e9AAEdf8f1f920Eb88FBba5ccd9af579D5205",
+        "status": "deployed",
+        "deployOrder": 4,
+        "role": "Holds VeilToken creation code so the factory stays under the 24KB limit. Renounces its own admin role in the same transaction.",
+        "envKey": null
+      },
+      "publicTokenDeployer": {
+        "address": "0xF3f947f1b3FB103Ab2164004C4a3E247FAeD8FF0",
+        "status": "deployed",
+        "deployOrder": 5,
+        "role": "Same, for the transparent ERC-20 variant.",
+        "envKey": null
+      },
+      "factory": {
+        "address": "0xEaE25c294E12be6E458A881013C92c30dcda1614",
+        "status": "deployed",
+        "deployOrder": 6,
+        "role": "One transaction deploys a token and its bonding curve. Curve first, so the token can name it sole minter in its own constructor - no role handoff window.",
+        "envKey": "NEXT_PUBLIC_VEIL_FACTORY_TESTNET",
+        "abi": "veilFactoryAbi",
+        "constructorArgs": [
+          "treasury",
+          "privateTokenDeployer",
+          "publicTokenDeployer"
+        ]
+      },
+      "profileRegistry": {
+        "address": "0x837d1d1331a0a0598b3DCffA484B78bC6eCd6c0D",
+        "status": "deployed",
+        "deployOrder": 7,
+        "role": "Usernames that resolve on-chain. One handle per address, first come first served. Backs /profile/{username}.",
+        "envKey": "NEXT_PUBLIC_PROFILE_REGISTRY_TESTNET",
+        "abi": "profileRegistryAbi"
+      },
+      "agentRegistry": {
+        "address": "0x4472a6A2175CA298028994eE458391614Ac92722",
+        "status": "deployed",
+        "deployOrder": 8,
+        "role": "Owner, agent wallet and token for a tokenized agent - the triple that lets one agent verify another before transacting.",
+        "envKey": "NEXT_PUBLIC_AGENT_REGISTRY_TESTNET",
+        "abi": "agentRegistryAbi"
+      },
+      "veilCurve": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "status": "per-token",
+        "role": "Not a singleton. One curve is deployed per launch by the factory; read its address from `curveOf(token)` or from the Launched event.",
+        "envKey": "NEXT_PUBLIC_VEIL_CURVE_TESTNET",
+        "abi": "veilCurveAbi"
+      },
+      "swapPair": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "status": "per-token",
+        "role": "Not a singleton. One pair per graduated launch; read it from swapFactory.getPair(token, wcoti) or from the curve's Graduated event.",
+        "envKey": null,
+        "abi": "veilSwapPairAbi"
+      },
+      "portal": {
+        "address": "0x6b7a866CA3E7F0A001b0B2e2e3D462Ad1963A466",
+        "status": "deployed",
+        "role": "Privacy portal. Locks a public token and mints its private twin one to one; burns the twin to release the escrow.",
+        "envKey": "NEXT_PUBLIC_PORTAL_TESTNET"
+      },
+      "portalTokenDeployer": {
+        "address": "0x10a9dBE820c450A6e16fDCCfCe98F657d5983243",
+        "status": "deployed",
+        "role": "Holds VeilPortalToken creation code so the portal stays under the 24KB limit. Renounces its own admin on every twin it makes."
+      },
+      "portalTwin": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "status": "per-token",
+        "role": "Not a singleton. One private twin per wrapped token; read it from portal.twinOf(publicToken).",
+        "envKey": null
+      },
+      "locker": {
+        "address": "0x1e8b8188F0F6e6f2c83Ca9b2bf93ba41C8eF6f4a",
+        "status": "deployed"
+      },
+      "veilpadToken": {
+        "address": "0x2B1080DE29d97fc5591Bd065EA5454679a4E8888",
+        "status": "deployed",
+        "role": "The protocol token. One billion, minted once in the constructor, with no mint function afterwards.",
+        "envKey": "NEXT_PUBLIC_VEIL_TOKEN_TESTNET"
+      },
+      "veilpadTokenDeployer": {
+        "address": "0xBeeee471b25fFaE7074e3A0D1C5f381fb7E682A8",
+        "status": "deployed",
+        "role": "CREATE2 deployer that gave the protocol token its 8888 address. Holds no role over what it made.",
+        "envKey": "NEXT_PUBLIC_VEIL_TOKEN_DEPLOYER_TESTNET"
+      },
+      "veilTreasury": {
+        "address": "0xc4Af3051a4df941cE572B39a68Ed064D4aef0c7A",
+        "status": "deployed",
+        "role": "Reward reserve for staking. Only the staking contract may spend it, and no staked principal is ever held here.",
+        "envKey": "NEXT_PUBLIC_VEIL_TREASURY_TESTNET"
+      },
+      "veilStaking": {
+        "address": "0x99970943bE35FD228e334b731ca6579ff2D49dd7",
+        "status": "deployed",
+        "role": "Fixed-APY staking. Rewards are paid in VEILPAD from the treasury; principal never pays another user's reward.",
+        "envKey": "NEXT_PUBLIC_VEIL_STAKING_TESTNET"
+      },
+      "veilpadTokenTwin": {
+        "address": "0x9f8e53aeCCE42Db8225bAEBd0Fb0F28EFfCA782e",
+        "status": "deployed",
+        "role": "p.VEILPAD, the private twin. Minted one to one against VEILPAD locked in VeilPortal.",
+        "envKey": "NEXT_PUBLIC_VEIL_TOKEN_TWIN_TESTNET"
+      }
+    },
+    "uniswapV3": {
+      "_comment": "Not used. Kept so an external V3 deployment can be pointed at later. COTI has no Uniswap deployment, and a stock V2/V3 pair cannot price a PrivateERC20 at all: it derives reserves from balanceOf, which returns a ctUint256 ciphertext rather than a number. VeilSwap exists because of that, not for lack of trying.",
+      "status": "unused",
+      "factory": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "envKey": "NEXT_PUBLIC_UNIV3_FACTORY_TESTNET",
+        "abi": "univ3FactoryAbi"
+      },
+      "router": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "envKey": "NEXT_PUBLIC_UNIV3_ROUTER_TESTNET",
+        "abi": "univ3RouterAbi"
+      },
+      "quoter": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "envKey": "NEXT_PUBLIC_UNIV3_QUOTER_TESTNET",
+        "abi": "univ3QuoterAbi"
+      },
+      "positionManager": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "envKey": "NEXT_PUBLIC_UNIV3_POSITION_MANAGER_TESTNET",
+        "abi": "univ3PositionManagerAbi"
+      },
+      "pool": {
+        "abi": "univ3PoolAbi",
+        "note": "Per-pair, discovered via factory.getPool(tokenA, tokenB, fee)."
+      },
+      "feeTiers": [
+        {
+          "fee": 500,
+          "percent": 0.05,
+          "tickSpacing": 10
+        },
+        {
+          "fee": 3000,
+          "percent": 0.3,
+          "tickSpacing": 60
+        },
+        {
+          "fee": 10000,
+          "percent": 1,
+          "tickSpacing": 200,
+          "default": true
+        }
+      ],
+      "defaultFeeTier": 10000,
+      "wcotiForPools": "0x9569C225F4EBa6efcd73f5421F5A5126b566ed03"
+    }
+  },
+  "launch": {
+    "_comment": "Curve parameters as deployed by the factory. Owner-tunable via setParams - what makes sense on testnet (a 100 COTI graduation) is not what makes sense on mainnet.",
+    "launchFeeCoti": "0.01",
+    "tokenDecimals": 18,
+    "curve": {
+      "kind": "constant-product over virtual reserves",
+      "formula": "tokensOut = tokenReserve - (virtualCoti * curveSupply) / (virtualCoti + reserve + cotiIn)",
+      "virtualCotiWei": "2000000000000000000",
+      "virtualCoti": "2",
+      "curveSupply": "800000000",
+      "poolSupply": "200000000",
+      "totalSupplyAtGraduation": "1000000000",
+      "graduationTargetCoti": "2",
+      "tradeFeeBps": 100,
+      "tradeFeeRecipient": "token creator",
+      "note": "The curve mints on buy and burns on sell, so it never holds a token balance. On a private token its own balance would be ciphertext it cannot read.",
+      "_testnetNote": "Tuned down from the 100 COTI mainnet default by the deploy script. The faucet hands out ten, so a hundred-COTI graduation could never be demonstrated; factory.setParams carries the real value."
+    },
+    "graduation": {
+      "trigger": "reserve >= graduationTargetCoti",
+      "permissionless": true,
+      "action": "Trading on the curve freezes. The whole reserve is wrapped to WCOTI, the pool allocation is minted, and both sides go into a VeilSwap pair. LP shares are minted to the curve, which has no function that can move them.",
+      "lpRecipient": "the curve contract",
+      "lpLocked": true,
+      "lpLockNote": "LP shares are minted to the curve, which has no function that can transfer or burn them. Locked, not \"locked\".",
+      "fallback": "If no position manager is configured, the curve still freezes and holds the reserve so factory.seedPool can finish the job later, rather than trapping the raise.",
+      "venue": "VeilSwap (constant product, 0.3% fee, internal reserve accounting)"
+    },
+    "vanity": {
+      "suffix": "8888",
+      "mechanism": "CREATE2 with a salt mined in the browser before the transaction is sent",
+      "averageAttempts": 65536,
+      "note": "A mark a lookalike cannot cheaply fake. A VEILPAD launch that does not end in 8888 did not come from this factory."
+    },
+    "fixedSupply": "1000000000",
+    "devBuy": {
+      "optional": true,
+      "note": "Spent on the curve in the launch transaction. Public, like any other buy."
+    },
+    "allocation": {
+      "keep": "The whole allocation goes to the creator's wallet.",
+      "burn": "0 to 100 percent destroyed in the same transaction. Irreversible.",
+      "lock": "1 to 3650 days in a timelock with no owner and no early release.",
+      "note": "Applied immediately after the dev buy, inside the same transaction, so a creator cannot take delivery and then not do it."
+    }
+  },
+  "routes": {
+    "_comment": "Public surface. {ca} is a 0x token address, {username} a claimed handle, {slug} an agent slug.",
+    "home": "/",
+    "launchpad": "/launchpad",
+    "token": "/coti/{ca}",
+    "launch": "/launch",
+    "tokenizeAgent": "/launch?agent={slug}",
+    "agents": "/agents",
+    "agent": "/agents/{slug}",
+    "newAgent": "/agents/new",
+    "messages": "/messages",
+    "messageTo": "/messages?to={address}",
+    "bridge": "/bridge",
+    "dashboard": "/dashboard",
+    "profile": "/profile/{username}",
+    "profileSetup": "/profile/setup",
+    "about": "/about",
+    "docs": "/docs",
+    "docsPage": "/docs/{slug}",
+    "portal": "/portal",
+    "wallet": "/dashboard?tab=wallet",
+    "status": "/status",
+    "fees": "/legal/fees",
+    "sdk": "/docs/sdk",
+    "indexerDocs": "/docs/indexer",
+    "history": "/dashboard?tab=history",
+    "skills": "/skills",
+    "telegram": "/dashboard?tab=telegram",
+    "swap": "/swap",
+    "desk": "/desk"
+  },
+  "api": {
+    "_comment": "All server-side. Keys never reach the browser.",
+    "chat": {
+      "path": "/api/chat",
+      "method": "POST",
+      "transport": "SSE",
+      "body": [
+        "agent",
+        "threadId",
+        "message",
+        "address"
+      ],
+      "events": [
+        "thread",
+        "step",
+        "text",
+        "tool_start",
+        "tool_end",
+        "action",
+        "done",
+        "error"
+      ]
+    },
+    "agents": {
+      "path": "/api/agents",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "agent": {
+      "path": "/api/agents/{slug}",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ]
+    },
+    "agentTick": {
+      "path": "/api/agents/{slug}/tick",
+      "method": "POST",
+      "note": "Heartbeat. Agent wakes, looks around, speaks only if something changed."
+    },
+    "agentEvents": {
+      "path": "/api/agents/{slug}/events",
+      "method": "GET"
+    },
+    "threads": {
+      "path": "/api/threads",
+      "method": "GET"
+    },
+    "thread": {
+      "path": "/api/threads/{id}",
+      "methods": [
+        "GET",
+        "DELETE"
+      ]
+    },
+    "tokens": {
+      "path": "/api/tokens",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "token": {
+      "path": "/api/tokens/{address}",
+      "method": "GET"
+    },
+    "trades": {
+      "path": "/api/trades",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "profiles": {
+      "path": "/api/profile",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "profile": {
+      "path": "/api/profile/{username}",
+      "method": "GET"
+    },
+    "messages": {
+      "path": "/api/messages",
+      "method": "GET",
+      "note": "Routing metadata only. Bodies are decrypted in the browser."
+    },
+    "bridgeQuote": {
+      "path": "/api/bridge/quote",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "market": {
+      "path": "/api/market",
+      "method": "GET"
+    },
+    "stats": {
+      "path": "/api/stats",
+      "method": "GET"
+    },
+    "upload": {
+      "path": "/api/upload",
+      "method": "POST",
+      "note": "Pins to IPFS via Pinata. Max 5MB."
+    },
+    "seed": {
+      "path": "/api/seed",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "note": "Idempotent. Creates the six house agents."
+    },
+    "candles": {
+      "path": "/api/candles",
+      "method": "GET",
+      "query": [
+        "token",
+        "tf"
+      ],
+      "timeframes": [
+        "1m",
+        "5m",
+        "15m",
+        "1h",
+        "4h",
+        "1d"
+      ],
+      "note": "OHLCV built from Traded and Swap events. Empty buckets carry the previous close forward; the final candle closes on the live quote."
+    },
+    "portal": {
+      "path": "/api/portal",
+      "method": "GET",
+      "note": "Private twins and their public escrow. Escrow is readable so anyone can verify full backing."
+    },
+    "comments": {
+      "path": "/api/comments",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "note": "Token thread. Public comments carry a wallet signature; private ones store only a transaction hash."
+    },
+    "indexerStatus": {
+      "path": "/api/indexer/status",
+      "method": "GET",
+      "note": "Health, head block, service checks. 503 when the RPC or the index is unreachable."
+    },
+    "history": {
+      "path": "/api/history",
+      "method": "GET",
+      "query": [
+        "address",
+        "limit",
+        "kind"
+      ],
+      "note": "One timeline per address. Trades and portal crossings come from chain events; the rest from the index. Private transfer amounts never appear."
+    },
+    "verify": {
+      "path": "/api/verify",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "note": "Source verification on CotiScan, which runs Blockscout. Fired automatically after every launch."
+    },
+    "telegramWebhook": {
+      "path": "/api/telegram/webhook",
+      "method": "POST",
+      "note": "Telegram posts updates here. Authenticated by a secret derived from the bot token."
+    },
+    "telegramLink": {
+      "path": "/api/telegram/link",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "note": "Redeem a chat link code. The code proves the chat, the connected wallet proves the address."
+    },
+    "bridgeTrack": {
+      "path": "/api/bridge/track",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "note": "Snapshots the destination balance when a crossing starts, then detects the arrival by comparing against it. Needs nothing from the bridge."
+    }
+  },
+  "agents": {
+    "_comment": "House agents, seeded on first boot. Regenerated from src/lib/seed.ts - do not hand-edit. Users create their own on top of these.",
+    "house": [
+      {
+        "id": "ag_concierge",
+        "slug": "veil",
+        "name": "VEIL",
+        "kind": "research",
+        "autonomy": "approval",
+        "tagline": "Your way into everything on COTI.",
+        "house": true,
+        "url": "/agents/veil"
+      },
+      {
+        "id": "ag_shade",
+        "slug": "shade",
+        "name": "SHADE",
+        "kind": "trader",
+        "autonomy": "approval",
+        "tagline": "Private Trading Agent. No front-running. No copy-trading. Just protected alpha.",
+        "house": true,
+        "url": "/agents/shade"
+      },
+      {
+        "id": "ag_forge",
+        "slug": "forge",
+        "name": "FORGE",
+        "kind": "launcher",
+        "autonomy": "approval",
+        "tagline": "Turns an idea into a shipped token before the conversation ends.",
+        "house": true,
+        "url": "/agents/forge"
+      },
+      {
+        "id": "ag_relay",
+        "slug": "relay",
+        "name": "RELAY",
+        "kind": "social",
+        "autonomy": "approval",
+        "tagline": "Agent-to-agent comms. Encrypted end to end, on-chain.",
+        "house": true,
+        "url": "/agents/relay"
+      },
+      {
+        "id": "ag_ledger",
+        "slug": "ledger",
+        "name": "LEDGER",
+        "kind": "ops",
+        "autonomy": "approval",
+        "tagline": "Balances, bridging, transaction triage. The boring things, done right.",
+        "house": true,
+        "url": "/agents/ledger"
+      },
+      {
+        "id": "ag_oracle",
+        "slug": "oracle",
+        "name": "ORACLE",
+        "kind": "research",
+        "autonomy": "advisory",
+        "tagline": "Digs through chain state, market data and the live web. Shows its work.",
+        "house": true,
+        "url": "/agents/oracle"
+      }
+    ],
+    "kinds": [
+      "trader",
+      "launcher",
+      "social",
+      "research",
+      "ops"
+    ],
+    "autonomyLevels": [
+      {
+        "key": "advisory",
+        "meaning": "Reads and recommends. Proposes a transaction only when asked."
+      },
+      {
+        "key": "approval",
+        "meaning": "Proposes freely as signable cards. The user signs; the agent never holds keys."
+      },
+      {
+        "key": "auto",
+        "meaning": "Acts within configured limits and reports every action. Needs a server signer."
+      }
+    ],
+    "runtime": {
+      "maxToolStepsPerTurn": 6,
+      "historyMessages": 16,
+      "toolResultChars": 1400,
+      "heartbeatSecondsMin": 30,
+      "heartbeatSecondsMax": 3600,
+      "memoryFactsMax": 60
+    }
+  },
+  "tools": {
+    "_comment": "Regenerated from src/lib/agent-tools.ts - do not hand-edit. 'read' tools hit the chain, market or index; 'action' tools return a signable proposal, so the agent decides and the wallet executes.",
+    "count": 22,
+    "actionCount": 4,
+    "byAgentKind": {
+      "trader": [
+        "get_chain_info",
+        "get_coti_market",
+        "get_coti_candles",
+        "search_web",
+        "get_native_balance",
+        "read_token",
+        "list_launches",
+        "get_token",
+        "quote_trade",
+        "propose_trade",
+        "watch_token",
+        "get_watchlist",
+        "find_pairs",
+        "remember",
+        "recall",
+        "log_event",
+        "set_heartbeat"
+      ],
+      "launcher": [
+        "get_chain_info",
+        "get_coti_market",
+        "search_web",
+        "read_token",
+        "list_launches",
+        "get_token",
+        "propose_launch",
+        "get_profile",
+        "remember",
+        "recall",
+        "log_event"
+      ],
+      "social": [
+        "get_chain_info",
+        "get_profile",
+        "list_agents",
+        "send_private_message",
+        "search_web",
+        "remember",
+        "recall",
+        "log_event"
+      ],
+      "research": [
+        "get_chain_info",
+        "get_coti_market",
+        "get_coti_candles",
+        "search_web",
+        "read_token",
+        "list_launches",
+        "get_token",
+        "find_pairs",
+        "get_profile",
+        "list_agents",
+        "remember",
+        "recall",
+        "log_event",
+        "set_heartbeat"
+      ],
+      "ops": [
+        "get_chain_info",
+        "get_native_balance",
+        "read_token",
+        "get_token",
+        "list_launches",
+        "propose_bridge",
+        "send_private_message",
+        "get_profile",
+        "list_agents",
+        "remember",
+        "recall",
+        "log_event"
+      ]
+    },
+    "catalog": [
+      {
+        "name": "get_chain_info",
+        "description": "Current COTI network: chain id, explorer, faucet, launch economics, and which VEILPAD contracts are actually deployed. Call this before promising an action that needs a contract.",
+        "kind": "read"
+      },
+      {
+        "name": "get_coti_market",
+        "description": "Live COTI/USD price, 24h change, market cap and volume. This is the denominator for every price quoted on VEILPAD.",
+        "kind": "read"
+      },
+      {
+        "name": "get_coti_candles",
+        "description": "OHLC candles for COTI/USD. Use for trend and volatility reasoning before proposing a trade.",
+        "kind": "read"
+      },
+      {
+        "name": "search_web",
+        "description": "Search the live web for news, sentiment or protocol docs. Use it before making a market claim you are not certain about.",
+        "kind": "read"
+      },
+      {
+        "name": "get_native_balance",
+        "description": "Native COTI balance of an address. Defaults to the connected wallet.",
+        "kind": "read"
+      },
+      {
+        "name": "read_token",
+        "description": "Read an on-chain token: name, symbol, decimals and whether it is a COTI PrivateERC20 with encrypted balances.",
+        "kind": "read"
+      },
+      {
+        "name": "list_launches",
+        "description": "List tokens launched on VEILPAD. Sort by 'new', 'progress' (closest to graduating into its VeilSwap pair) or 'graduated'.",
+        "kind": "read"
+      },
+      {
+        "name": "get_token",
+        "description": "Full detail on one VEILPAD token: metadata, bonding-curve state, graduation progress, VeilSwap pair and recent trades.",
+        "kind": "read"
+      },
+      {
+        "name": "quote_trade",
+        "description": "Price a buy or sell before proposing it. Uses the bonding curve pre-graduation and the VeilSwap router once the token has a pair.",
+        "kind": "read"
+      },
+      {
+        "name": "get_profile",
+        "description": "Look up a VEILPAD profile by username or address. Returns their launches, agents and public activity.",
+        "kind": "read"
+      },
+      {
+        "name": "list_agents",
+        "description": "List agents registered on VEILPAD, optionally filtered by kind ('trader', 'social', 'research', 'ops').",
+        "kind": "read"
+      },
+      {
+        "name": "propose_trade",
+        "description": "Propose a buy or sell for the user to sign. Always quote_trade first so the numbers you state are real. Explain your reasoning in the chat, not only in the reason field.",
+        "kind": "action"
+      },
+      {
+        "name": "propose_launch",
+        "description": "Propose launching a new private token on VEILPAD. The user signs the launch transaction; the token starts on a bonding curve and graduates into a VeilSwap pair.",
+        "kind": "action"
+      },
+      {
+        "name": "send_private_message",
+        "description": "Send an end-to-end encrypted on-chain message to another agent or wallet via COTI PrivateMessaging. Body is ciphertext; only sender and recipient can decrypt it.",
+        "kind": "action"
+      },
+      {
+        "name": "propose_bridge",
+        "description": "Propose bridging COTI or gCOTI between Ethereum and COTI. Returns a signable card pointing at the official COTI bridge.",
+        "kind": "action"
+      },
+      {
+        "name": "remember",
+        "description": "Persist a durable fact about the user, the market or your own strategy. Memory survives across sessions and is injected into every future conversation, so write facts, not chatter.",
+        "kind": "read"
+      },
+      {
+        "name": "recall",
+        "description": "Read back everything you have remembered so far.",
+        "kind": "read"
+      },
+      {
+        "name": "log_event",
+        "description": "Post an entry to your public activity feed - a thesis, a watch, a warning. Shows on your agent page and in the owner's dashboard.",
+        "kind": "read"
+      },
+      {
+        "name": "set_heartbeat",
+        "description": "Wake yourself up on a timer to re-check the market without being prompted. Set seconds to 0 to stop. This is what makes you an agent instead of a chatbot.",
+        "kind": "read"
+      },
+      {
+        "name": "watch_token",
+        "description": "Add or remove a token from the user's watchlist so you can track it on every heartbeat.",
+        "kind": "read"
+      },
+      {
+        "name": "get_watchlist",
+        "description": "Read the connected wallet's watchlist with each token's current curve or pool state.",
+        "kind": "read"
+      },
+      {
+        "name": "find_pairs",
+        "description": "Search external DEX aggregators for a ticker to sanity-check a token against the wider market.",
+        "kind": "read"
+      }
+    ]
+  },
+  "services": {
+    "_comment": "Base URLs only. Every credential lives in .env.local under the named env key and is used server-side; none of these are ever sent to the browser.",
+    "brain": {
+      "role": "Agent reasoning. OpenAI-compatible pool with automatic failover.",
+      "envKey": "LLM_POOL",
+      "entries": 12,
+      "models": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.6-27b",
+        "openai/gpt-oss-20b",
+        "qwen/qwen3.8-27b"
+      ],
+      "accounts": 3,
+      "presetsEnvKey": "LLM_PRESETS",
+      "presets": {
+        "groq": "https://api.groq.com/openai/v1",
+        "gemini": "https://generativelanguage.googleapis.com/v1beta/openai",
+        "cerebras": "https://api.cerebras.ai/v1",
+        "mistral": "https://api.mistral.ai/v1",
+        "openrouter": "https://openrouter.ai/api/v1",
+        "deepseek": "https://api.deepseek.com/v1",
+        "together": "https://api.together.xyz/v1",
+        "openai": "https://api.openai.com/v1"
+      },
+      "rateLimit": {
+        "groqFreeTierTpm": 8000,
+        "scope": "per API key, per model, per minute",
+        "strategy": "Round-robin across all 12 entries, honour retry-after, park a throttled entry, then one full retry sweep before failing the turn.",
+        "implication": "Prompt size costs the agent its next turn, not just money. Adding tools or lengthening the system prompt is a real budget decision."
+      }
+    },
+    "search": {
+      "role": "Live web research for the agents.",
+      "envKey": "EXA_KEYS",
+      "url": "https://api.exa.ai/search",
+      "keys": 3,
+      "fallback": "DuckDuckGo, so research never fully stops working."
+    },
+    "market": {
+      "coingecko": {
+        "url": "https://api.coingecko.com/api/v3",
+        "envKey": "COINGECKO_KEY",
+        "role": "COTI/USD price, 24h change, OHLC candles."
+      },
+      "geckoterminal": {
+        "url": "https://api.geckoterminal.com/api/v2",
+        "envKey": null
+      },
+      "dexscreener": {
+        "url": "https://api.dexscreener.com",
+        "envKey": null,
+        "role": "Cross-check a ticker against the wider market."
+      }
+    },
+    "ipfs": {
+      "role": "Token logos and avatars.",
+      "provider": "Pinata",
+      "url": "https://api.pinata.cloud",
+      "envKey": "PINATA_JWT",
+      "gateway": "https://ipfs.io/ipfs/",
+      "maxUploadBytes": 5242880
+    },
+    "bridgeAggregator": {
+      "role": "Any pair the official COTI bridge does not cover.",
+      "provider": "Relay",
+      "url": "https://api.relay.link",
+      "envKey": "RELAY_API_KEY"
+    },
+    "evmData": {
+      "provider": "Moralis",
+      "url": "https://deep-index.moralis.io/api/v2.2",
+      "envKey": "MORALIS_API_KEY",
+      "status": "configured, not yet wired"
+    }
+  },
+  "storage": {
+    "_comment": "The chain is the source of truth for balances, ownership and messages. SQLite only holds what a chain cannot cheaply serve. Uses node:sqlite (built into Node 22+) so there is no native build step.",
+    "engine": "node:sqlite",
+    "path": "data/veilpad.db",
+    "tables": {
+      "profiles": "username -> address, display name, bio, avatar, banner",
+      "tokens": "launch metadata: name, symbol, image, creator, curve, pool, graduated",
+      "trades": "recorded fills, used to draw the price chart a private token cannot otherwise provide",
+      "agents": "agent brains: persona, autonomy, memory, heartbeat, status",
+      "threads": "one conversation per agent per user",
+      "messages": "full transcript including tool calls and results, so a reload resumes the same relationship",
+      "agent_events": "what an agent posted on its own initiative",
+      "watchlist": "address -> token, checked on every heartbeat",
+      "kv": "misc key/value"
+    }
+  },
+  "privacy": {
+    "model": "Garbled circuits executed by an MPC network. Contracts compute over ciphertext.",
+    "private": [
+      "Token balances, as ciphertext in contract storage",
+      "The size of every transfer",
+      "Aggregate supply of a private token",
+      "Message bodies, sealed to sender and recipient"
+    ],
+    "public": [
+      "That a transfer or swap happened, and against which contract",
+      "Message routing metadata: sender, recipient, timestamp, epoch, chunk count",
+      "Uniswap V3 pool reserves and price - an AMM needs them",
+      "Native COTI balances and gas spend"
+    ],
+    "keyHandling": "The AES key is derived through the on-chain onboarding handshake and unwrapped in the browser. It is cached per address in localStorage and never reaches the server. Every decrypt on this site happens on the user's machine.",
+    "totalSupplyNote": "A PrivateERC20 returns totalSupply() = 0 on purpose. Publishing an aggregate would leak what the encryption protects. Treat 0 as a signal, not an error.",
+    "tradeOff": "MPC means trusting the network operator, consensus and the precompile implementation. Solidity cannot re-prove MPC soundness on-chain. COTI states this in its own interface docs, and so do we.",
+    "boundary": "COTI encrypts amounts, balances, and computation inputs and outputs. It does not encrypt metadata: sender, recipient, timestamp and the fact a transaction occurred stay public. Selective disclosure, not disappearance.",
+    "keyModel": "Each user holds their own AES key issued through a precompile. The network key is split across nodes with threshold cryptography, so no single node can reconstruct it and no operator, validator or node ever holds plaintext."
+  },
+  "deployedAt": "2026-08-26T20:29:16.488Z",
+  "deployedChainId": 7082400,
+  "dex": {
+    "_comment": "Why VEILPAD ships its own DEX rather than integrating one.",
+    "name": "VeilSwap",
+    "model": "Uniswap V2 style constant product, x*y=k",
+    "feeBps": 30,
+    "minimumLiquidity": 1000,
+    "reserveAccounting": "internal",
+    "whyInternal": "Uniswap V2 derives reserves from balanceOf(address(this)). A COTI PrivateERC20 returns a ctUint256 ciphertext from balanceOf, not a number, so a stock V2 pair would compute garbage reserves and be drained immediately. VeilSwap pairs pull tokens themselves with transferFrom and credit their own reserves, so the amount is known because the pair moved it.",
+    "tradeOffs": [
+      "A raw transfer into a pair is an unclaimable donation, since balances are never read.",
+      "Fee-on-transfer tokens are unsupported.",
+      "Both are acceptable; reading an encrypted balance is not possible at all."
+    ],
+    "lpToken": "Each pair is itself a public ERC-20 for its LP shares. LP balances must be transferable and readable, so they are deliberately not private."
+  },
+  "fees": {
+    "_comment": "Read from the deployed contracts by contracts/scripts/fees.ts. Do not hand-edit; run the script instead.",
+    "currency": "COTI",
+    "launch": {
+      "amount": "0.01",
+      "unit": "COTI",
+      "paidTo": "treasury",
+      "when": "once, at launch",
+      "contract": "0xA2022ccD76B1860CbBB4d26E69bA82539a314614"
+    },
+    "curveTrade": {
+      "bps": 100,
+      "percent": 1,
+      "paidTo": "token creator",
+      "when": "every buy and every sell on the bonding curve",
+      "note": "Fees do not count toward the graduation reserve, so a curve fills on real deposits only."
+    },
+    "swap": {
+      "bps": 30,
+      "percent": 0.3,
+      "paidTo": "liquidity providers",
+      "when": "every swap against a VeilSwap pair",
+      "note": "Retained in the pair's reserves, which is what makes an LP share appreciate."
+    },
+    "portal": {
+      "bps": 0,
+      "percent": 0,
+      "paidTo": "nobody",
+      "when": "wrapping into privacy and back out",
+      "note": "The portal charges nothing. You pay gas, and MPC operations cost more gas than ordinary ones."
+    },
+    "profileClaim": {
+      "amount": "0.0",
+      "unit": "COTI",
+      "paidTo": "treasury"
+    },
+    "agentRegistration": {
+      "amount": "0.0",
+      "unit": "COTI",
+      "paidTo": "treasury"
+    },
+    "messaging": {
+      "amount": "0",
+      "unit": "COTI",
+      "note": "No protocol fee. Encrypted messages cost gas, and a long message is split into chunks that each cost more."
+    },
+    "graduation": {
+      "amount": "0",
+      "unit": "COTI",
+      "note": "Graduation is permissionless and takes no cut. The whole reserve goes into the pair."
+    },
+    "notCharged": [
+      "No fee to read anything, on chain or through the API.",
+      "No fee to unwrap. Value that crossed into privacy can always come back.",
+      "No fee to remove liquidity from a pair.",
+      "No subscription, no priority tier, no fee to talk to an agent."
+    ],
+    "gasNotes": [
+      "A launch costs roughly 4M gas.",
+      "A private buy is around 720k, a private sell around 1.46M.",
+      "A wrap into privacy is around 3.2M the first time a twin is created, then far less.",
+      "Reading is always free."
+    ]
+  },
+  "sdk": {
+    "package": "@veilpad/sdk",
+    "path": "sdk/",
+    "docs": "/docs/sdk",
+    "surface": "read only",
+    "note": "Typed client over the indexer. Signing is deliberately left to the caller's wallet library."
+  },
+  "verification": {
+    "explorer": "CotiScan",
+    "engine": "Blockscout v11",
+    "method": "Solidity standard JSON input from Hardhat build-info",
+    "automatic": true,
+    "note": "Submitted after every launch. What is published is exactly what compiled the bytecode."
+  },
+  "assets": {
+    "_comment": "Stand-ins for the assets the COTI privacy portal carries on mainnet. Deployed by contracts/scripts/deploy-assets.ts. They have no value; decimals match the real assets so the portal behaves the way it will on mainnet.",
+    "testnet": true,
+    "faucet": "Every stand-in has an open faucet(). 1000 units per call.",
+    "tokens": [
+      {
+        "symbol": "wETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "address": "0x32C051a7fF84fA3deb69b189C6884a485A6BcE95",
+        "represents": "Ether bridged to COTI"
+      },
+      {
+        "symbol": "wBTC",
+        "name": "Wrapped BTC",
+        "decimals": 8,
+        "address": "0x842e29965DD411446E81E5741D0147e9B80Fa816",
+        "represents": "Bitcoin bridged to COTI"
+      },
+      {
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "address": "0x1A225f0e47bD94D35327e22a66ABf31216c532FA",
+        "represents": "Tether on COTI"
+      },
+      {
+        "symbol": "USDC.e",
+        "name": "Bridged USDC",
+        "decimals": 6,
+        "address": "0x1B6DD88e113D064c8f28ee80A9eba2EA27224D4a",
+        "represents": "Bridged USD Coin on COTI"
+      },
+      {
+        "symbol": "wADA",
+        "name": "Wrapped ADA",
+        "decimals": 6,
+        "address": "0x81BFE2BCedA11C9012ED525dD887BE7021178214",
+        "represents": "Cardano bridged to COTI"
+      },
+      {
+        "symbol": "gCOTI",
+        "name": "Governance COTI",
+        "decimals": 18,
+        "address": "0x9cD24f7118Ae75E8dfbC3a36826aAff534F25C4c",
+        "represents": "COTI governance token"
+      }
+    ]
+  },
+  "telegram": {
+    "bot": "VeilPadBot",
+    "url": "https://t.me/VeilPadBot",
+    "custody": "none",
+    "note": "The bot reads and reasons. It never holds a key and never signs; anything that moves value opens on the site for the user's own wallet.",
+    "modes": {
+      "poll": "npm run telegram",
+      "webhook": "npm run telegram:webhook"
+    }
+  },
+  "bridge": {
+    "_comment": "COTI's own bridges. Read off chain, not copied from a docs table. The privacy bridges are verified contracts VEILPAD calls directly; the cross-chain route has no contract on either side and is closed on testnet because COTI does not publish testnet recipient addresses.",
+    "privacyBridges": {
+      "COTI": {
+        "bridge": "0xb8Bb4fe953eAa53D528FAc95C1d9955B2b60D582",
+        "token": null,
+        "privateToken": "0x6cE8907414986E73De9e7D28d62Ea2080F8E88E1",
+        "decimals": 18,
+        "oracleSymbol": "COTI",
+        "native": true
+      },
+      "gCOTI": {
+        "bridge": "0x8A6ca3984Cb187f90C9Bd24c71C70eF97A71A8fA",
+        "token": "0x878a42D3cB737DEC9E6c7e7774d973F46fd8ed4C",
+        "privateToken": "0x1503b02a4Aa27812306c65116FD23b733603F142",
+        "decimals": 18,
+        "oracleSymbol": "GCOTI",
+        "native": false
+      },
+      "WETH": {
+        "bridge": "0x1841071A0296364739370a6d2F64c0eE46361fA0",
+        "token": "0x8bca4e6bbE402DB4aD189A316137aD08206154FB",
+        "privateToken": "0xF009BADb181d471995a1CFF406C3Db7B180F64eA",
+        "decimals": 18,
+        "oracleSymbol": "ETH",
+        "native": false
+      },
+      "WBTC": {
+        "bridge": "0x362faD66210401ADfAf27B98776F1e8D21dfc529",
+        "token": "0x5dBDb2E5D51c3FFab5D6B862Caa11FCe1D83F492",
+        "privateToken": "0xB50F1680a4C69145ABc09A2A71c8D5b8051578cF",
+        "decimals": 8,
+        "oracleSymbol": "WBTC",
+        "native": false
+      },
+      "USDT": {
+        "bridge": "0x73116aa5a50cADca47FD03Ca0B80D133346442FA",
+        "token": "0x9e961430053cd5AbB3b060544cEcCec848693Cf0",
+        "privateToken": "0xcEF137E96eDF68EE99D4CdEa7085f154d74895cD",
+        "decimals": 6,
+        "oracleSymbol": "USDT",
+        "native": false
+      },
+      "USDC.e": {
+        "bridge": "0x9C92Ad40553758C3d11Dcd8495Ee0ce3fd8fE0A1",
+        "token": "0x63f3D2Cc8F5608F57ce6E5Aa3590A2Beb428D19C",
+        "privateToken": "0x37f78dcCd15876F74391EF1F01b76557D9FF1dea",
+        "decimals": 6,
+        "oracleSymbol": "USDC",
+        "native": false
+      },
+      "WADA": {
+        "bridge": "0x3cB6e1E9cd504669DAb49910c30cDAfA8D05B641",
+        "token": "0xe3E2cd3Abf412c73a404b9b8227B71dE3CfE829D",
+        "privateToken": "0x1245f50a3E9129A219b4bf66D10fEaEA47467B69",
+        "decimals": 6,
+        "oracleSymbol": "ADA",
+        "native": false
+      }
+    },
+    "priceOracle": "0xD5EeD24e909AdE249b688671e32dcc013B236B74",
+    "feeModel": "Quoted in native COTI against COTI's price oracle. estimateDepositFee returns the oracle lastUpdated stamps and the transfer must hand them back; the contract compares them for equality and reverts with OracleTimestampMismatch (0x997c558e) otherwise.",
+    "crossChain": {
+      "available": true,
+      "_comment": "COTI publishes no testnet addresses for these routes. Each one was recovered from completed transfers in COTI's own tracking service and confirmed on chain: 16 of 16 Sepolia transfers landed on one recipient, 8 of 8 native plus 25 of 25 gCOTI on the other. No contract is involved on either side; a relayer watches the recipient and credits the sending address on the far chain.",
+      "ethChainId": 11155111,
+      "ethName": "Sepolia",
+      "cotiChainId": 7082400,
+      "recipients": {
+        "sepolia": "0x0fc92f51278c6d024ab6feb3527017f66d1dad4d",
+        "coti": "0x48aba7324aabb772fbbc34d2747221bbd4bfa530"
+      },
+      "assets": {
+        "COTI": {
+          "ethToken": "0xDa8454e9fbDEEb466F5BAB64084aF86D5D9caB20",
+          "cotiToken": null,
+          "decimals": 18
+        },
+        "gCOTI": {
+          "ethToken": "0x36d9A8CB77f24595D853F9C56384870758eA668d",
+          "cotiToken": "0x7AC988eb3E45fe6ADB05DFaf609c8DBb4A902cdC",
+          "decimals": 18
+        }
+      },
+      "mainnetRecipients": {
+        "ethereum": "0x439D73635B9590E9d9e2CC9eCAB832B057d2E25B",
+        "coti": "0x61bf10a1a27b2d99de0a59a06200a62ed579d685"
+      },
+      "creditsSender": true
+    },
+    "tracking": {
+      "base": "https://testnet-apps-1-gw.coti.io/workflow-orchestrator-service",
+      "endpoints": [
+        "/tracking/by-tx-hash",
+        "/tracking/get-transactions",
+        "/tracking/get-all-transactions",
+        "/health"
+      ],
+      "note": "page_size must be a multiple of four: each transfer occupies four rows."
+    }
+  },
+  "staking": {
+    "_comment": "Fixed APY per pool, paid in VEILPAD from VeilTreasury. Every pool is capped, and the caps are what bound what the treasury can owe.",
+    "rewardToken": "0x2B1080DE29d97fc5591Bd065EA5454679a4E8888",
+    "treasury": "0xc4Af3051a4df941cE572B39a68Ed064D4aef0c7A",
+    "staking": "0x99970943bE35FD228e334b731ca6579ff2D49dd7",
+    "pools": [
+      {
+        "pid": 0,
+        "asset": "COTI",
+        "token": null,
+        "native": true,
+        "apyPercent": 10,
+        "capTokens": "2000000.0"
+      },
+      {
+        "pid": 1,
+        "asset": "VEIL",
+        "token": "0x2B1080DE29d97fc5591Bd065EA5454679a4E8888",
+        "native": false,
+        "apyPercent": 18,
+        "capTokens": "20000000.0"
+      }
+    ]
+  },
+  "token": {
+    "_comment": "The protocol token, not a launch. Fixed supply and no minter.",
+    "address": "0x2B1080DE29d97fc5591Bd065EA5454679a4E8888",
+    "symbol": "VEIL",
+    "name": "VEILPAD",
+    "decimals": 18,
+    "totalSupply": "1000000000",
+    "mintable": false,
+    "vanitySuffix": "8888",
+    "privateTwin": "0x9f8e53aeCCE42Db8225bAEBd0Fb0F28EFfCA782e",
+    "treasuryAllocation": "200000000"
+  }
+}
