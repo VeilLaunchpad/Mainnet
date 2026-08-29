@@ -120,6 +120,13 @@ async function main() {
         ["VeilpadToken", v.veilpadToken?.address],
         ["VeilTreasury", v.veilTreasury?.address],
         ["VeilStaking", v.veilStaking?.address],
+        // The NFT stack lives under its own key rather than contracts.veilpad,
+        // because it was deployed separately and has its own official entry.
+        ["VeilNFTFactory", table.nft?.factory],
+        ["VeilNFTEditionsFactory", table.nft?.editionsFactory],
+        ["VeilNFTMarket", table.nft?.market],
+        ["VeilNFTStaking", table.nft?.staking],
+        ["VeilNFTDrop", table.nft?.official?.genesis?.address],
       ].filter((t): t is [string, string] => !!t[1] && t[1] !== ethers.ZeroAddress);
 
   const submitted: string[] = [];
