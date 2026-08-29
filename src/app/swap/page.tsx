@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { parseEther, type Address } from "viem";
@@ -49,8 +49,22 @@ function DefiInner() {
   const [custom, setCustom] = useState("");
   const [customToken, setCustomToken] = useState<PoolRow | null>(null);
   const [lookingUp, setLookingUp] = useState(false);
-  const [selected, setSelected] = useState<string>(params.get("token") || "");
-  const [side, setSide] = useState<"buy" | "sell">("buy");
+  /**
+   * Which token this page opened on.
+   *
+   * Three shapes are accepted so a link from anywhere in the app lands
+   * somewhere useful:
+   *
+   *   ?token=0x…              the token itself
+   *   ?base=0x…&quote=0x…     a pair, the way a market link is usually written
+   *
+   * Every VeilSwap pair is against COTI, so a base/quote link is resolved to
+   * whichever side is not COTI - that is the token being traded, and the other
+   * side is what it is priced in. A pair with COTI on neither side cannot be
+   * routed here, and the page says so rather than silently picking one.
+   */
+  const [selected, setSelected] = useState<string>(() => initialToken(params));
+  const [side, setSide] = useState<"buy" | "sell">(() => initialSide(params));
   const [amount, setAmount] = useState("");
   const [quote, setQuote] = useState<string | null>(null);
   const [quoting, setQuoting] = useState(false);
@@ -520,4 +534,47 @@ function WhyVeilSwap() {
       </p>
     </div>
   );
+}
+
+/* ── reading a market link ─────────────────────────────────────────────── */
+
+/**
+ * The addresses that mean "COTI itself" rather than an ERC-20.
+ *
+ * Carbon writes native COTI as the 0xEeee… sentinel, the launchpad writes it
+ * as the zero address, and WCOTI is a real contract. All three mean the same
+ * side of a pair here.
+ */
+const COTI_ALIASES = new Set(
+  [
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "0x0000000000000000000000000000000000000000",
+  ].map((a) => a.toLowerCase()),
+);
+
+function isCoti(addr: string): boolean {
+  return COTI_ALIASES.has(addr.toLowerCase());
+}
+
+function initialToken(params: URLSearchParams | ReadonlyURLSearchParams): string {
+  const token = params.get("token");
+  if (token && isAddress(token)) return token;
+
+  const base = params.get("base") ?? "";
+  const quote = params.get("quote") ?? "";
+
+  // Whichever side is not COTI is the thing being traded.
+  if (isAddress(base) && !isCoti(base)) return base;
+  if (isAddress(quote) && !isCoti(quote)) return quote;
+  return "";
+}
+
+/**
+ * `base` is what the link is a market *for*, so arriving from one means the
+ * reader is looking at that asset. Buying it is the sensible default; selling
+ * is one tap away.
+ */
+function initialSide(params: URLSearchParams | ReadonlyURLSearchParams): "buy" | "sell" {
+  const base = params.get("base") ?? "";
+  return isAddress(base) && isCoti(base) ? "sell" : "buy";
 }

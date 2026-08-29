@@ -7,13 +7,18 @@ import { useNetwork } from "@/components/network-provider";
 import { explorerAddress, OFFICIAL_MAINNET_TOKEN } from "@/lib/chain";
 
 /**
- * Every pair on Carbon DeFi, COTI's other venue.
+ * Every order-book pair on COTI, presented as VEILPAD's own explore surface.
  *
- * Carbon is an order book rather than an AMM, and the difference is the whole
- * reason this page exists. On a constant-product pair, liquidity is a pool and a
- * price always exists. On Carbon, liquidity is the sum of the orders people have
- * posted, so a pair with no strategies has no price at all - not a broken
- * listing, just nobody quoting yet.
+ * The numbers are read from COTI's public order-book indexes (Carbon's API,
+ * internally - see lib/carbon.ts). That is a data source, not a brand: the page
+ * carries no third-party badge, and its Trade button goes to VeilSwap rather
+ * than sending the reader somewhere else.
+ *
+ * An order book is not an AMM, and the difference is the whole reason this page
+ * exists. On a constant-product pair, liquidity is a pool and a price always
+ * exists. Here liquidity is the sum of the orders people have posted, so a pair
+ * with no strategies has no price at all - not a broken listing, just nobody
+ * quoting yet.
  *
  * VEIL is highlighted when it appears, because the first question anyone asks
  * here is whether the protocol token is tradable and where.
@@ -45,7 +50,6 @@ interface Payload {
   pairs: Pair[];
 }
 
-const CARBON = "https://coti.carbondefi.xyz";
 
 export default function ExplorePage() {
   const { net } = useNetwork();
@@ -74,28 +78,26 @@ export default function ExplorePage() {
     <Section
       className="py-10"
       kicker="Explore"
-      title="Pairs on Carbon DeFi"
-      sub="COTI's order-book venue, alongside VeilSwap. Liquidity here is the sum of the orders people have posted, not a pool, so a pair with no strategies simply has nobody quoting it."
+      title="Every pair on COTI"
+      sub="Order-book depth from across the chain, alongside VeilSwap. Liquidity here is the sum of the orders people have posted rather than a pool, so a pair with no strategies simply has nobody quoting it yet."
       right={
-        <a
-          href={CARBON}
-          target="_blank"
-          rel="noreferrer"
+        <Link
+          href="/swap"
           className="rounded-xl border border-white/12 px-4 py-2.5 text-[13px] font-medium text-white/65 transition hover:border-white/25 hover:text-white"
         >
-          Open Carbon ↗
-        </a>
+          Open Swap
+        </Link>
       }
     >
       {data && !data.available ? (
-        <Empty title="Not available here" body={data.reason ?? "Carbon is not on this network."} />
+        <Empty title="Not available here" body={data.reason ?? "Order-book pairs are not indexed on this network."} />
       ) : (
         <>
           <div className="mb-6 grid gap-3 sm:grid-cols-3">
             <Stat
               label="Pairs"
               value={data ? String(data.pairs.length) : "…"}
-              sub="Listed on Carbon"
+              sub="Quoted on chain"
             />
             <Stat
               label="Total liquidity"
@@ -113,10 +115,10 @@ export default function ExplorePage() {
             <div className="mb-5 flex items-start gap-3 rounded-xl border border-white/[0.09] bg-white/[0.02] px-4 py-3">
               <span className="mt-0.5 shrink-0 text-[15px]">ℹ️</span>
               <p className="text-[12.5px] leading-relaxed text-white/55">
-                <b className="text-white/80">VEIL is not quoted on Carbon yet.</b> Carbon holds no
-                pool: a pair exists only once somebody posts an order for it, which is why its chart
-                reads &ldquo;price data not available&rdquo; rather than showing zero. VEIL trades
-                today on{" "}
+                <b className="text-white/80">VEIL has no order-book quote yet.</b> An order book
+                holds no pool: a pair exists only once somebody posts an order for it, which is why
+                its chart reads &ldquo;price data not available&rdquo; rather than showing zero.
+                VEIL trades today on{" "}
                 <Link href="/swap" className="text-cy-300 hover:underline">
                   VeilSwap
                 </Link>
@@ -193,7 +195,7 @@ export default function ExplorePage() {
                             ${p.liquidityUsd.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                           </span>
                         ) : p.nativeDepth ? (
-                          // Read from the chain before Carbon has priced it, so
+                          // Read from the chain before the order book has priced it, so
                           // the depth is stated in COTI rather than guessed in USD.
                           <span className="text-white/70">
                             {(Number(p.nativeDepth) / 1e18).toLocaleString("en-US", {
@@ -206,14 +208,15 @@ export default function ExplorePage() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <a
-                          href={`${CARBON}/trade/market?base=${p.token0}&quote=${p.token1}`}
-                          target="_blank"
-                          rel="noreferrer"
+                        {/* Trading happens here, on VeilSwap, not on someone
+                            else's site. The pair is carried through so the
+                            swap opens on the same market the row describes. */}
+                        <Link
+                          href={`/swap?base=${p.token0}&quote=${p.token1}`}
                           className="rounded-lg border border-white/12 px-3 py-1.5 text-[12px] font-medium text-white/70 transition hover:border-cy-400/45 hover:text-white"
                         >
-                          Trade ↗
-                        </a>
+                          Trade
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -223,9 +226,9 @@ export default function ExplorePage() {
           )}
 
           <p className="mt-6 max-w-3xl text-[12px] leading-relaxed text-white/40">
-            Figures come from Carbon&apos;s own API. Liquidity is taken from its CoinGecko ticker
-            feed rather than its TVL endpoint, which returns errors on most pairs and inflated
-            numbers on the rest.
+            Trade counts and liquidity are read from COTI&apos;s public order-book indexes.
+            Liquidity uses the CoinGecko ticker feed rather than the TVL endpoint, which returns
+            errors on most pairs and inflated numbers on the rest.
           </p>
         </>
       )}

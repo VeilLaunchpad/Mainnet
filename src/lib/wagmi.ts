@@ -10,6 +10,20 @@ import { cotiMainnet, cotiTestnet } from "./chain";
  * public key for the AES handshake, and MetaMask-class injected providers are
  * the path that actually works today.
  */
+/**
+ * Browser reads go through our own origin, not straight to COTI.
+ *
+ * COTI's mainnet RPC answers with `Access-Control-Allow-Origin` sent twice,
+ * which a browser reads as the single invalid value "*, *" and blocks. Every
+ * read from the page therefore failed while the identical call from a script
+ * succeeded - the symptom was pages showing "nothing here" instead of an error.
+ *
+ * `/api/rpc/<network>` forwards to the same node from the server, where CORS
+ * does not apply. If COTI fixes the header this can go back to a direct URL;
+ * until then this is what makes the app work in a browser at all.
+ */
+const proxied = (net: "mainnet" | "testnet") => "/api/rpc/" + net;
+
 export const wagmiConfig = createConfig({
   // Ethereum is here because the cross-chain bridge signs its outbound leg
   // there. Without it wagmi cannot switch the wallet and the transfer
@@ -25,8 +39,8 @@ export const wagmiConfig = createConfig({
    */
   multiInjectedProviderDiscovery: true,
   transports: {
-    [cotiTestnet.id]: http(cotiTestnet.rpcUrls.default.http[0]),
-    [cotiMainnet.id]: http(cotiMainnet.rpcUrls.default.http[0]),
+    [cotiTestnet.id]: http(proxied("testnet")),
+    [cotiMainnet.id]: http(proxied("mainnet")),
     [sepolia.id]: http(),
     [mainnet.id]: http(),
   },

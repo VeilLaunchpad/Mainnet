@@ -62,6 +62,15 @@ export default function StakePage() {
   const { report, show } = useResult();
 
   const [pools, setPools] = useState<PoolCard[] | null>(null);
+  /**
+   * Why the list is empty, when it is empty for a reason.
+   *
+   * This page used to turn every failure into "No pools yet", which is the
+   * worst thing it could say: it reads as a fact about the chain when it is
+   * really a fact about the request. A genuine RPC outage looked exactly like
+   * a network with nothing deployed on it.
+   */
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [mine, setMine] = useState<Record<number, MyStake>>({});
   const [reserve, setReserve] = useState<bigint | null>(null);
   const [paidOut, setPaidOut] = useState<bigint | null>(null);
@@ -157,7 +166,11 @@ export default function StakePage() {
   }, [publicClient, ready, staking, treasury, address]);
 
   useEffect(() => {
-    load().catch(() => setPools([]));
+    setLoadError(null);
+    load().catch((e: unknown) => {
+      setPools([]);
+      setLoadError(String((e as Error)?.message ?? e).split("\n")[0].slice(0, 200));
+    });
   }, [load]);
 
   /**
@@ -223,6 +236,15 @@ export default function StakePage() {
         <div className="grid gap-4 lg:grid-cols-2">
           <Skeleton className="h-64 rounded-2xl" />
           <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      ) : loadError ? (
+        <div className="card px-6 py-10 text-center">
+          <h3 className="text-[15px] font-semibold text-amber-300">Could not read the pools</h3>
+          <p className="mx-auto mt-1.5 max-w-md text-[13px] text-white/45">
+            The staking contract is deployed on {net}; this is the app failing to reach it, not an
+            empty network.
+          </p>
+          <p className="mono mx-auto mt-3 max-w-lg break-words text-[11px] text-white/30">{loadError}</p>
         </div>
       ) : pools.length === 0 ? (
         <Empty title="No pools yet" body="Nothing has been opened for staking on this network." />
