@@ -457,6 +457,63 @@ const veilswap: DocPage = {
       ],
     },
     {
+      id: "routing",
+      title: "Swapping tokens VeilSwap has no pool for",
+      blocks: [
+        {
+          type: "p",
+          text: "VeilSwap only has pools for tokens launched here. That used to mean every other token on COTI - gCOTI, WETH, wADA, the stablecoins, anything bridged - simply could not be traded in this app, even though the chain has depth for all of them. The swap page now routes to whichever venue can actually fill the trade.",
+        },
+        {
+          type: "steps",
+          items: [
+            {
+              title: "VeilSwap first",
+              text: "If a pool exists, it wins. A constant-product pool prices continuously, fills in one hop, and cannot run out partway through a trade.",
+            },
+            {
+              title: "Otherwise the order book",
+              text: "COTI's order book holds posted orders for most tokens on the chain. If it has depth for the pair, the trade fills there instead - same page, same two clicks.",
+            },
+          ],
+        },
+        {
+          type: "note",
+          tone: "info",
+          title: "Why the venue is shown",
+          text: "A pool and an order book are not interchangeable. An order book can fill part of a trade and then run out of orders, and a pool cannot. When that happens the quote says so and prices only the part that can actually be filled, rather than quoting an amount and reverting on send.",
+        },
+        {
+          type: "h3",
+          text: "How an order-book route is built",
+          id: "matching",
+        },
+        {
+          type: "p",
+          text: "An order-book trade is not a path through pools. The contract takes a list of specific orders and how much of the input each one receives, and fills exactly what it is told - so the matching a DEX router would do on chain has to happen before the transaction is sent. VEILPAD reads every order on the pair, works out each one's price and how much it can absorb, and fills the cheapest first.",
+        },
+        {
+          type: "code",
+          lang: "text",
+          code: `marginal price   ((A·y + B·z) / (z · 2^48))²      target per source
+capacity         y·z·2^96 / ((A·y + B·z)·B)       source needed to drain it`,
+          caption: "The contract's own curve, re-derived. A and B are compressed floats: mantissa in the low 48 bits, exponent above.",
+        },
+        {
+          type: "note",
+          tone: "warn",
+          title: "Two ways to get this subtly wrong",
+          text: "The marginal price is the SQUARE of that ratio - using it unsquared still sorts the book by a monotonic function of price, so the route looks fine while filling in the wrong order. And the order book charges a 0.2% fee out of the target amount, so a locally computed quote comes out high by exactly 1/(1 - fee) and reads like a rounding error. Both were caught by checking against the contract's own calculateTradeTargetAmount before any of it shipped.",
+        },
+        {
+          type: "note",
+          tone: "good",
+          title: "The contract has the last word",
+          text: "This code picks which orders to fill. It never decides what you are told you will receive: the final number comes from the venue itself, and if the venue will not price the route, no quote is offered at all rather than one this app invented.",
+        },
+      ],
+    },
+    {
       id: "router",
       title: "The router",
       blocks: [

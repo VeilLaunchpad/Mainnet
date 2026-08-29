@@ -79,7 +79,7 @@ export default function ExplorePage() {
       className="py-10"
       kicker="Explore"
       title="Every pair on COTI"
-      sub="Order-book depth from across the chain, alongside VeilSwap. Liquidity here is the sum of the orders people have posted rather than a pool, so a pair with no strategies simply has nobody quoting it yet."
+      sub="Order-book depth from across the chain, alongside VeilSwap. Every pair here is tradable on VeilSwap — if there is no pool for a token, the swap fills against these orders instead. Liquidity here is the sum of what people have posted rather than a pool, so a pair with no strategies simply has nobody quoting it yet."
       right={
         <Link
           href="/swap"

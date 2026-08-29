@@ -12,6 +12,8 @@ import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { fmtNum, fmtUnits, parseUnits, shortAddr, isAddress } from "@/lib/format";
 import { explorerTx, explorerAddress } from "@/lib/chain";
 import { ensureAllowance } from "@/lib/allowance";
+import { CARBON_CONTROLLER, CARBON_NATIVE } from "@/lib/carbon";
+import { carbonRouteAbi } from "@/lib/carbon-route";
 
 interface PoolRow {
   address: string;
@@ -22,6 +24,27 @@ interface PoolRow {
   graduated: boolean;
   decimals: number;
 }
+
+/** A token with no VeilSwap pool. Not an error here - just a different route. */
+const NO_PAIR = "0x0000000000000000000000000000000000000000" as Address;
+
+interface QuoteOk {
+  ok: true;
+  venue: "veilswap" | "carbon";
+  venueLabel: string;
+  side: "buy" | "sell";
+  token: string;
+  decimals: number;
+  amountIn: string;
+  amountOut: string;
+  partial: boolean;
+  note: string;
+  /** Carbon only: the exact orders to fill. */
+  actions?: { strategyId: string; amount: string }[];
+  strategiesUsed?: number;
+}
+
+type QuoteResponse = QuoteOk | { ok: false; error: string; message?: string };
 
 export default function DefiPage() {
   return (
@@ -67,6 +90,8 @@ function DefiInner() {
   const [side, setSide] = useState<"buy" | "sell">(() => initialSide(params));
   const [amount, setAmount] = useState("");
   const [quote, setQuote] = useState<string | null>(null);
+  /** The winning route, kept so the trade fills exactly what was quoted. */
+  const [route, setRoute] = useState<QuoteOk | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [busy, setBusy] = useState(false);
   const [tx, setTx] = useState<string | null>(null);
@@ -74,8 +99,10 @@ function DefiInner() {
 
   const routerReady = isDeployed(addresses.swapRouter) && isDeployed(addresses.wcoti);
 
-  // A pasted address is a first-class option: anything with a pair can be
-  // traded here, whether or not the launchpad has ever indexed it.
+  // A pasted address is a first-class option: any ERC-20 on COTI can be traded
+  // here, whether or not the launchpad ever indexed it and whether or not
+  // VeilSwap has a pool for it. If VeilSwap cannot price it, the order book is
+  // asked instead, so the requirement is only that the token exists.
   const all = useMemo(
     () => (customToken ? [...(pools ?? []), customToken] : (pools ?? [])),
     [pools, customToken],
@@ -85,25 +112,27 @@ function DefiInner() {
   useEffect(() => {
     const target = custom.trim();
     setCustomToken(null);
-    if (!isAddress(target) || !publicClient || !isDeployed(addresses.swapFactory)) return;
+    if (!isAddress(target) || !publicClient) return;
     if ((pools ?? []).some((p) => p.address.toLowerCase() === target.toLowerCase())) return;
 
     let alive = true;
     setLookingUp(true);
     const timer = setTimeout(async () => {
       try {
-        const pair = (await publicClient.readContract({
-          address: addresses.swapFactory,
-          abi: veilSwapFactoryAbi,
-          functionName: "getPair",
-          args: [target as Address, addresses.wcoti],
-        })) as Address;
+        // A pool is nice to have, not a requirement. Its absence just means the
+        // quote will come from the order book instead.
+        const pair = isDeployed(addresses.swapFactory)
+          ? ((await publicClient
+              .readContract({
+                address: addresses.swapFactory,
+                abi: veilSwapFactoryAbi,
+                functionName: "getPair",
+                args: [target as Address, addresses.wcoti],
+              })
+              .catch(() => NO_PAIR)) as Address)
+          : NO_PAIR;
 
-        if (!isDeployed(pair)) {
-          if (alive) setCustomToken(null);
-          return;
-        }
-
+        // Reading the metadata is the real test that this is a token at all.
         const [symbol, name, decimals] = await Promise.all([
           publicClient.readContract({ address: target as Address, abi: erc20Abi, functionName: "symbol" }),
           publicClient.readContract({ address: target as Address, abi: erc20Abi, functionName: "name" }),
@@ -145,28 +174,45 @@ function DefiInner() {
       .catch(() => setPools([]));
   }, []);
 
-  // Quotes come from the router, not a local formula, so the number on screen
-  // is the number the pair will actually pay.
+  /**
+   * Quotes come from the routing endpoint, which decides the venue.
+   *
+   * VeilSwap when it has a pool, the order book when it does not. Both answers
+   * come from the respective contract rather than a formula in this file, so
+   * the number on screen is the number the trade will actually pay - and the
+   * route it picked is carried back so the swap below fills the same orders
+   * that were quoted.
+   */
   useEffect(() => {
     setQuote(null);
+    setRoute(null);
     setErr(null);
-    if (!routerReady || !selected || !amount || Number(amount) <= 0 || !publicClient) return;
+    if (!selected || !amount || Number(amount) <= 0) return;
 
     let alive = true;
     setQuoting(true);
     const timer = setTimeout(async () => {
       try {
-        const decimals = active?.decimals ?? 18;
-        const amountIn = side === "buy" ? parseEther(amount) : parseUnits(amount, decimals);
-        const out = (await publicClient.readContract({
-          address: addresses.swapRouter,
-          abi: veilSwapRouterAbi,
-          functionName: side === "buy" ? "quoteBuyWithCoti" : "quoteSellForCoti",
-          args: [selected as Address, amountIn],
-        })) as bigint;
-        if (alive) setQuote(fmtUnits(out, side === "buy" ? decimals : 18, 6));
+        const res = await fetch(
+          "/api/swap/quote?token=" + selected + "&side=" + side + "&amount=" + amount,
+        );
+        const q = (await res.json()) as QuoteResponse;
+        if (!alive) return;
+
+        if (!q.ok) {
+          setQuote(null);
+          setRoute(null);
+          setErr(q.message ?? "Nothing can fill this trade right now.");
+          return;
+        }
+
+        setRoute(q);
+        setQuote(fmtUnits(q.amountOut, side === "buy" ? q.decimals : 18, 6));
       } catch {
-        if (alive) setQuote(null);
+        if (alive) {
+          setQuote(null);
+          setRoute(null);
+        }
       } finally {
         if (alive) setQuoting(false);
       }
@@ -176,12 +222,61 @@ function DefiInner() {
       alive = false;
       clearTimeout(timer);
     };
-  }, [amount, side, selected, routerReady, publicClient, active?.decimals]);
+  }, [amount, side, selected, net]);
+
+  /**
+   * Fills the exact orders the quote named.
+   *
+   * An order-book trade is not a path through pools - it is a list of specific
+   * strategies and how much of the input each one takes. The server worked that
+   * out; sending anything else would fill different orders at a different price
+   * than the one on screen, so the actions are passed through untouched.
+   *
+   * `minReturn` is the protection. Somebody else can trade the same orders
+   * between the quote and the confirmation, and the contract will refuse rather
+   * than fill at whatever is left.
+   */
+  async function tradeOnOrderBook(r: QuoteOk, deadline: bigint): Promise<`0x${string}`> {
+    const actions = (r.actions ?? []).map((a) => ({
+      strategyId: BigInt(a.strategyId),
+      amount: BigInt(a.amount),
+    }));
+    if (actions.length === 0) throw new Error("The quote carried no orders to fill.");
+
+    const token = selected as Address;
+    const source = r.side === "buy" ? CARBON_NATIVE : token;
+    const target = r.side === "buy" ? token : CARBON_NATIVE;
+    const amountIn = BigInt(r.amountIn);
+    const minReturn = (BigInt(r.amountOut) * 97n) / 100n; // 3%
+
+    if (r.side === "sell") {
+      await ensureAllowance({
+        publicClient,
+        writeContractAsync,
+        owner: address as Address,
+        token,
+        spender: CARBON_CONTROLLER,
+        amount: amountIn,
+      });
+    }
+
+    return writeContractAsync({
+      address: CARBON_CONTROLLER,
+      abi: carbonRouteAbi,
+      functionName: "tradeBySourceAmount",
+      args: [source, target, actions, deadline, minReturn],
+      value: r.side === "buy" ? amountIn : 0n,
+      gas: 16_000_000n,
+    });
+  }
 
   async function swap() {
     if (!address) return setErr("Connect a wallet first.");
-    if (!routerReady) return setErr("VeilSwap is not configured on this network.");
     if (!selected || !amount) return;
+    if (!route) return setErr("Waiting for a quote.");
+    if (route.venue === "veilswap" && !routerReady) {
+      return setErr("VeilSwap is not configured on this network.");
+    }
 
     setBusy(true);
     setErr(null);
@@ -192,7 +287,9 @@ function DefiInner() {
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 900);
       let hash: `0x${string}`;
 
-      if (side === "buy") {
+      if (route.venue === "carbon") {
+        hash = await tradeOnOrderBook(route, deadline);
+      } else if (side === "buy") {
         hash = await writeContractAsync({
           address: addresses.swapRouter,
           abi: veilSwapRouterAbi,
@@ -237,7 +334,7 @@ function DefiInner() {
           cotiIn: side === "buy" ? amount : quote || "0",
           tokenOut: side === "buy" ? quote || "0" : amount,
           txHash: hash,
-          venue: "veilswap",
+          venue: route.venue,
         }),
       }).catch(() => undefined);
 
@@ -328,6 +425,32 @@ function DefiInner() {
                     {side === "buy" ? active?.symbol || "" : "COTI"}
                   </span>
                 </div>
+
+                {/* Which venue filled it. Worth saying: a pool and an order
+                    book behave differently, and only one of them can run out
+                    halfway through a trade. */}
+                {route && (
+                  <div className="mt-2 border-t border-white/[0.06] pt-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge tone={route.venue === "veilswap" ? "veil" : "cy"}>
+                        {route.venue === "veilswap" ? "VeilSwap pool" : "Order book"}
+                      </Badge>
+                      {route.venue === "carbon" && route.strategiesUsed ? (
+                        <span className="mono text-[10px] text-white/30">
+                          {route.strategiesUsed} order{route.strategiesUsed === 1 ? "" : "s"}
+                        </span>
+                      ) : null}
+                    </div>
+                    {route.partial && (
+                      <p className="mt-1.5 text-[10px] leading-relaxed text-amber-300/80">
+                        Not enough depth for the whole amount. This quote fills{" "}
+                        {fmtUnits(route.amountIn, side === "buy" ? 18 : route.decimals, 6)}{" "}
+                        {side === "buy" ? "COTI" : active?.symbol || "token"} — the rest would have
+                        nothing to trade against.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <label className="mt-3 block text-[11px] font-semibold text-white/60">
@@ -342,18 +465,22 @@ function DefiInner() {
               {custom && (
                 <p className="mt-1 text-[10px] leading-relaxed text-white/30">
                   {lookingUp
-                    ? "Looking for a pair..."
+                    ? "Reading the token..."
                     : customToken
-                      ? "Found " + customToken.symbol + " with a live pair."
+                      ? "Found " +
+                        customToken.symbol +
+                        (isDeployed(customToken.pool)
+                          ? ". It has a VeilSwap pool."
+                          : ". No VeilSwap pool, so it routes through the order book.")
                       : isAddress(custom)
-                        ? "No VeilSwap pair exists for that token, so there is nothing to trade against."
+                        ? "Nothing at that address answers like an ERC-20 on this network."
                         : "That is not a contract address."}
                 </p>
               )}
 
               <button
                 onClick={swap}
-                disabled={busy || !routerReady || !selected || !amount}
+                disabled={busy || !selected || !amount || !route}
                 className={
                   "mt-3 w-full rounded-xl py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40 " +
                   (side === "buy"
@@ -570,11 +697,16 @@ function initialToken(params: URLSearchParams | ReadonlyURLSearchParams): string
 }
 
 /**
- * `base` is what the link is a market *for*, so arriving from one means the
- * reader is looking at that asset. Buying it is the sensible default; selling
- * is one tap away.
+ * Which direction to open on.
+ *
+ * An explicit ?side= wins. Otherwise: buy.
+ *
+ * A market link can name COTI as its base - "COTI/USDCe" is a real row on the
+ * Explore page - and it is tempting to read that as "you are looking at COTI,
+ * so you must want to sell the other side for it". That opens a sell form for a
+ * token the reader almost certainly does not hold. Every swap here is against
+ * COTI anyway, so buying the other side is the useful default in both cases.
  */
 function initialSide(params: URLSearchParams | ReadonlyURLSearchParams): "buy" | "sell" {
-  const base = params.get("base") ?? "";
-  return isAddress(base) && isCoti(base) ? "sell" : "buy";
+  return params.get("side") === "sell" ? "sell" : "buy";
 }
