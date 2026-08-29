@@ -109,11 +109,37 @@ function DefiInner() {
   );
   const active = all.find((p) => p.address.toLowerCase() === selected.toLowerCase());
 
+  /**
+   * The address that needs its metadata read: a pasted one if there is one,
+   * otherwise whatever is currently selected.
+   *
+   * The selection does not only come from the dropdown. A market link -
+   * /swap?base=…&quote=… - names a token the launchpad has never indexed, and a
+   * <select> whose value matches none of its options silently renders the first
+   * one instead. That is not a cosmetic glitch: the picker read "VEIL" while
+   * the form was quoting and would have bought something else entirely. So the
+   * selection is resolved the same way a pasted address is, and becomes a real
+   * option in the list.
+   */
+  const wanted = useMemo(() => {
+    const pasted = custom.trim();
+    if (isAddress(pasted)) return pasted;
+    return isAddress(selected) ? selected : "";
+  }, [custom, selected]);
+
   useEffect(() => {
-    const target = custom.trim();
-    setCustomToken(null);
-    if (!isAddress(target) || !publicClient) return;
-    if ((pools ?? []).some((p) => p.address.toLowerCase() === target.toLowerCase())) return;
+    const target = wanted;
+    if (!isAddress(target) || !publicClient) {
+      setCustomToken(null);
+      return;
+    }
+    // Already a known pool token, so the dropdown can show it without help.
+    if ((pools ?? []).some((p) => p.address.toLowerCase() === target.toLowerCase())) {
+      setCustomToken(null);
+      return;
+    }
+    // Already resolved. Re-fetching would loop.
+    if (customToken && customToken.address.toLowerCase() === target.toLowerCase()) return;
 
     let alive = true;
     setLookingUp(true);
@@ -161,7 +187,7 @@ function DefiInner() {
       alive = false;
       clearTimeout(timer);
     };
-  }, [custom, publicClient, pools]);
+  }, [wanted, publicClient, pools, customToken, addresses.swapFactory, addresses.wcoti]);
 
   useEffect(() => {
     fetch("/api/tokens?limit=50")
@@ -381,7 +407,13 @@ function DefiInner() {
               <label className="mt-3 block text-[11px] font-semibold text-white/60">Token</label>
               <select
                 value={selected}
-                onChange={(e) => setSelected(e.target.value)}
+                onChange={(e) => {
+                  // Clearing the paste box matters: it is the higher-priority
+                  // source, so leaving a stale address there would pull the
+                  // selection straight back.
+                  setCustom("");
+                  setSelected(e.target.value);
+                }}
                 className="mt-1 w-full rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-[13px] outline-none transition focus:border-veil-400/50"
               >
                 {all.length === 0 && <option value="">No pooled tokens yet</option>}
