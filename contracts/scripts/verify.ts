@@ -14,6 +14,8 @@ import * as path from "node:path";
  *   npx hardhat run scripts/verify.ts --network cotiTestnet
  *   VEIL_VERIFY=0x...            verify one address
  *   VEIL_CONTRACT=VeilToken      name it when autodetection cannot
+ *   VEIL_ARGS=0x...              ABI-encoded constructor args, when a factory
+ *                                deployed it and autodetection cannot find them
  */
 
 const EXPLORER =
@@ -65,7 +67,17 @@ async function verify(address: string, contractName: string): Promise<string> {
   form.append("compiler_version", "v" + info.solcLongVersion);
   form.append("license_type", LICENSE);
   form.append("contract_name", sourcePath + ":" + contractName);
-  form.append("autodetect_constructor_args", "true");
+  // Blockscout can usually work the constructor arguments out from the tail of
+  // the creation bytecode, but it fails on contracts deployed through a factory
+  // with a struct argument - VeilNFTDrop being exactly that. Passing them
+  // explicitly is the fix, and VEIL_ARGS carries the ABI-encoded bytes.
+  const explicitArgs = process.env.VEIL_ARGS?.replace(/^0x/, "");
+  if (explicitArgs) {
+    form.append("autodetect_constructor_args", "false");
+    form.append("constructor_args", explicitArgs);
+  } else {
+    form.append("autodetect_constructor_args", "true");
+  }
   form.append(
     "files[0]",
     new Blob([JSON.stringify(info.input)], { type: "application/json" }),

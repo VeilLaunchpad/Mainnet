@@ -81,12 +81,17 @@ async function main() {
     deployer.address,
     LAUNCH_FEE,
   ]);
-  const { address: marketAddr, contract: market } = await deploy("VeilNFTMarket", [
+  const { address: marketAddr } = await deploy("VeilNFTMarket", [
     deployer.address,
     deployer.address,
     MARKET_FEE_BPS,
   ]);
-  const { address: stakingAddr, contract: staking } = await deploy("VeilNFTStaking", [deployer.address]);
+  const { address: stakingAddr } = await deploy("VeilNFTStaking", [deployer.address]);
+
+  // Re-attached through getContractAt so the calls below are typed. The factory
+  // handle from `deploy` is a bare BaseContract and knows none of these methods.
+  const market = await ethers.getContractAt("VeilNFTMarket", marketAddr);
+  const staking = await ethers.getContractAt("VeilNFTStaking", stakingAddr);
 
   // ── the official collection, at a mined address ─────────────────────────
   const params = {
