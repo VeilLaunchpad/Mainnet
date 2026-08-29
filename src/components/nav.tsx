@@ -20,6 +20,7 @@ const LINKS = [
   { href: "/explore", label: "Explore" },
   { href: "/desk", label: "Desk" },
   { href: "/stake", label: "Stake" },
+  { href: "/nft", label: "NFT" },
   { href: "/treasury", label: "Treasury" },
   { href: "/lock", label: "Lock" },
   { href: "/portal", label: "Portal" },

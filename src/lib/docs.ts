@@ -1,4 +1,5 @@
 import type { DocGroup, DocPage } from "./docs-types";
+import { nftPage } from "./docs-nft";
 import { sdkPage, indexerPage } from "./docs-dev";
 import { siteUrl } from "./app-url";
 
@@ -1226,6 +1227,7 @@ export const DOC_GROUPS: DocGroup[] = [
   { title: "Introduction", pages: [overview, quickstart, networks] },
   { title: "Launchpad", pages: [launching, curve] },
   { title: "Trading", pages: [veilswap, bridge] },
+  { title: "NFTs", pages: [nftPage] },
   { title: "Build on it", pages: [sdkPage, indexerPage] },
   { title: "Agents", pages: [agents, messaging, telegram] },
   { title: "Developers", pages: [sdkPage, api, indexerPage] },

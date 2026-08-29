@@ -28,8 +28,14 @@ import {
   canView,
 } from "@/lib/agent-runtime";
 import { db, rows } from "@/lib/db";
-import { nativeBalance, readCurve } from "@/lib/rpc";
-import { isDeployed } from "@/lib/addresses";
+import {
+  collections as nftCollections,
+  collection as nftCollection,
+  pools as nftPools,
+} from "@/lib/nft";
+import { veilNFTDropAbi, veilNFTStakingAbi } from "@/lib/nft-abis";
+import { nativeBalance, readCurve, publicClient } from "@/lib/rpc";
+import { isDeployed, addressesFor } from "@/lib/addresses";
 import {
   NETWORK_LABEL,
   chainByNetwork,
@@ -161,6 +167,12 @@ Nothing of yours is stored against this chat any more.
       return token(chatId, args, link?.address);
     case "/bridge":
       return bridge(chatId);
+    case "/nft":
+      return nftCommand(chatId, args, net);
+    case "/mynft":
+      return myNft(chatId, net, link?.address);
+    case "/nftstake":
+      return nftStake(chatId, net, link?.address);
     case "/agent":
       return agentCommand(chatId, args, link);
     case "/history":
@@ -206,6 +218,8 @@ ${net === "mainnet" ? "💰 Real COTI. Launches and trades settle for value." : 
 🌉 /bridge  what the bridge can carry right now
 💰 /balance  your COTI balance
 📜 /history  everything you have done
+🖼 /nft  the NFT marketplace and candy machine
+💼 /mynft  what you hold, and what it earns
 🤖 /agent  pick who you are talking to
 🔄 /switch  mainnet or testnet
 
@@ -306,6 +320,12 @@ function help(chatId: string) {
 🚀 /launches  what is live on the launchpad
 🔎 /token &lt;address&gt;  price, curve and venue
 🌉 /bridge  what the bridge can carry
+
+<b>🖼 NFTs</b>
+🎨 /nft  the marketplace, official first
+🔎 /nft &lt;address&gt;  one collection in detail
+💼 /mynft  what you hold, and what it earns
+🌱 /nftstake  every pool, its rate and its runway
 
 <b>🤖 Agents</b>
 /agent &lt;name&gt;  veil · shade · forge · relay · ledger · oracle
@@ -825,4 +845,235 @@ export async function GET() {
     configured: botConfigured(),
     note: "Telegram posts updates here. The bot reads and reasons; it never holds a key and never signs.",
   });
+}
+
+/* ── NFTs ───────────────────────────────────────────────────────────────── */
+
+/**
+ * The NFT commands.
+ *
+ * One wallet link covers everything: the address connected with /link is the
+ * same one the website knows, so /mynft answers without asking again.
+ *
+ * What the bot deliberately cannot do is unlock. Decrypting sealed metadata
+ * needs the holder's COTI AES key, and moving that key anywhere near a server
+ * would undo the reason the metadata was sealed. So these commands report what
+ * you own and hand you a link to the browser, where the key stays.
+ */
+async function nftCommand(chatId: string, args: string, net: CotiNetworkName) {
+  const arg = args.trim();
+
+  if (arg && /^0x[a-fA-F0-9]{40}$/.test(arg)) {
+    const c = await nftCollection(arg as Address, net).catch(() => null);
+    if (!c) {
+      return sendMessage(
+        chatId,
+        h`🤷 No VEILPAD collection at that address on ${net}.
+
+It might live on the other network — /switch — or be a plain NFT contract.`,
+      );
+    }
+
+    const supply = c.kind === "drop" && c.maxSupply !== "0" ? Number(c.maxSupply).toLocaleString() : "open";
+    const price = c.mintPrice === "0" ? "free" : fmtUnits(c.mintPrice, 18, 4) + " COTI";
+    const earning = c.paired
+      ? c.paired.apyBps > 0
+        ? (c.paired.apyBps / 100).toFixed(1) + "% APY"
+        : fmtUnits(c.paired.rewardPerYear, 18, 0) + " per NFT / yr"
+      : "solo — no rewards";
+
+    return sendMessage(
+      chatId,
+      h`🖼 <b>${c.name}</b> ${c.official ? "✅" : ""}
+<i>${c.kind === "drop" ? "Scheduled drop" : "Open collection"} · ${c.symbol}</i>
+
+🎟 minted  ${Number(c.minted).toLocaleString()} / ${supply}
+💰 mint  ${price}
+🌱 staking  ${earning}
+👤 by ${c.creator.slice(0, 10)}…
+
+🔐 <i>The preview is public. The metadata is sealed to whoever holds the token — unlock it in the browser, where your key never leaves.</i>
+
+🔗 ${APP}/nft/collection/${c.address}`,
+    );
+  }
+
+  const list = await nftCollections(net, 40).catch(() => []);
+  if (!list.length) {
+    return sendMessage(
+      chatId,
+      h`🌱 No collections on ${net} yet. Be the first.
+
+🎨 ${APP}/nft/studio`,
+    );
+  }
+
+  list.sort((a, b) => Number(b.official) - Number(a.official) || b.createdAt - a.createdAt);
+  const lines = list.slice(0, 8).map((c) => {
+    const badge = c.official ? " ✅" : "";
+    const stake = c.paired
+      ? c.paired.apyBps > 0
+        ? " · " + (c.paired.apyBps / 100).toFixed(0) + "% APY"
+        : " · paired"
+      : "";
+    return h`<b>${c.symbol}</b>${raw(badge)} ${c.name}
+  ${c.kind === "drop" ? "🎟" : "📚"} ${Number(c.minted).toLocaleString()} minted${raw(stake)}
+  🔗 ${APP}/nft/collection/${c.address}`;
+  });
+
+  return sendMessage(
+    chatId,
+    h`🖼 <b>VEILPAD NFT · ${net}</b>
+
+${raw(lines.join("\n\n"))}
+
+🎨 Launch your own — ${APP}/nft/studio`,
+  );
+}
+
+async function myNft(chatId: string, net: CotiNetworkName, address?: string) {
+  if (!address) {
+    return sendMessage(
+      chatId,
+      h`🔗 Link a wallet first with /link, and I will know what you hold everywhere — here and on the site.`,
+    );
+  }
+
+  const list = await nftCollections(net, 60).catch(() => []);
+  if (!list.length) return sendMessage(chatId, h`🌱 Nothing has launched on ${net} yet.`);
+
+  const held = await heldByAcross(list, address as Address, net);
+  if (!held.length) {
+    return sendMessage(
+      chatId,
+      h`🖼 <b>Nothing yet</b>
+
+You do not hold any VEILPAD NFTs on ${net}.
+
+🎟 The official Genesis drop is a free mint — ${APP}/nft`,
+    );
+  }
+
+  const lines = held.map(
+    (hh) => h`<b>${hh.name}</b>${raw(hh.official ? " ✅" : "")}
+  🎟 ${hh.count} held${raw(hh.staked ? " · " + hh.staked + " staked" : "")}${raw(
+    hh.pending ? " · " + hh.pending + " pending" : "",
+  )}
+  🔗 ${APP}/nft/collection/${hh.address}`,
+  );
+
+  return sendMessage(
+    chatId,
+    h`🖼 <b>Your NFTs · ${net}</b>
+
+${raw(lines.join("\n\n"))}
+
+🔓 <i>To read the sealed metadata, open it in the browser. Your key is derived there and never reaches me.</i>`,
+  );
+}
+
+async function nftStake(chatId: string, net: CotiNetworkName, address?: string) {
+  const list = await nftPools(net).catch(() => []);
+  if (!list.length) {
+    return sendMessage(
+      chatId,
+      h`🌱 <b>No pools yet</b>
+
+A pool opens when somebody launches a collection paired with a token. The Studio does both in one flow.
+
+🎨 ${APP}/nft/studio`,
+    );
+  }
+
+  const names = await Promise.all(
+    list.map((p) => nftCollection(p.collection, net).catch(() => null)),
+  );
+
+  const lines = list.map((p, i) => {
+    const rate =
+      p.apyBps > 0
+        ? (p.apyBps / 100).toFixed(1) + "% APY"
+        : fmtUnits(p.rewardPerNftPerYear, 18, 0) + " per NFT / yr";
+    const runway = BigInt(p.runwaySeconds || "0");
+    // A pool with nothing staked burns nothing, so the contract reports an
+    // unbounded runway. Printing that number would be absurd.
+    const left =
+      runway > 2n ** 255n
+        ? "funded, nothing staked yet"
+        : (Number(runway) / 86400).toFixed(0) + "d of runway";
+    return h`<b>${names[i]?.name ?? p.collection.slice(0, 10) + "…"}</b>
+  🌱 ${rate}
+  ⏳ ${left} · ${Number(p.staked).toLocaleString()} staked`;
+  });
+
+  return sendMessage(
+    chatId,
+    h`🌱 <b>NFT staking · ${net}</b>
+
+${raw(lines.join("\n\n"))}
+
+<i>Every pool was funded before it opened — the rewards are paid from tokens already escrowed.</i>
+
+🔗 ${APP}/nft/stake`,
+  );
+}
+
+/** How many tokens of each collection an address holds, plus its stake. */
+async function heldByAcross(
+  list: Awaited<ReturnType<typeof nftCollections>>,
+  who: Address,
+  net: CotiNetworkName,
+) {
+  const client = publicClient(net);
+  const a = addressesFor(net);
+  const out: {
+    address: string;
+    name: string;
+    official: boolean;
+    count: number;
+    staked: number;
+    pending: string;
+  }[] = [];
+
+  for (const c of list) {
+    if (c.kind !== "drop") continue;
+    if (Number(c.minted || 0) === 0) continue;
+
+    const count = Number(
+      await client
+        .readContract({ address: c.address, abi: veilNFTDropAbi, functionName: "balanceOf", args: [who] })
+        .catch(() => 0n),
+    );
+
+    let staked = 0;
+    let pending = "";
+    if (c.paired && isDeployed(a.nftStaking)) {
+      const s = await client
+        .readContract({
+          address: a.nftStaking,
+          abi: veilNFTStakingAbi,
+          functionName: "stakeOf",
+          args: [BigInt(c.paired.poolId), who],
+        })
+        .catch(() => null);
+      staked = s ? Number((s as unknown as { count: bigint }).count ?? 0n) : 0;
+
+      if (staked > 0) {
+        const owed = (await client
+          .readContract({
+            address: a.nftStaking,
+            abi: veilNFTStakingAbi,
+            functionName: "pendingReward",
+            args: [BigInt(c.paired.poolId), who],
+          })
+          .catch(() => 0n)) as bigint;
+        if (owed > 0n) pending = fmtUnits(owed.toString(), 18, 4);
+      }
+    }
+
+    if (count > 0 || staked > 0) {
+      out.push({ address: c.address, name: c.name, official: c.official, count, staked, pending });
+    }
+  }
+  return out;
 }

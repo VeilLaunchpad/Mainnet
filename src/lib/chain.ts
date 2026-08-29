@@ -6,6 +6,18 @@ import { mainnet, sepolia } from "viem/chains";
  * garbled circuits executed by an MPC network, not from ZK proofs.
  * Balances/messages live on-chain as ciphertext; only key-holders can read them.
  */
+/**
+ * Multicall3, at the address it has on nearly every EVM chain.
+ *
+ * COTI does have it deployed; viem simply refuses to batch unless a chain
+ * declares it, so without this every page fans out into one RPC round trip per
+ * read. Verified with eth_getCode on both networks rather than assumed from the
+ * address being canonical.
+ */
+const MULTICALL3 = {
+  multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" as const },
+};
+
 export const cotiMainnet = defineChain({
   id: 2632500,
   name: "COTI",
@@ -19,6 +31,7 @@ export const cotiMainnet = defineChain({
   blockExplorers: {
     default: { name: "CotiScan", url: "https://mainnet.cotiscan.io" },
   },
+  contracts: MULTICALL3,
   testnet: false,
 });
 
@@ -35,6 +48,7 @@ export const cotiTestnet = defineChain({
   blockExplorers: {
     default: { name: "CotiScan", url: "https://testnet.cotiscan.io" },
   },
+  contracts: MULTICALL3,
   testnet: true,
 });
 

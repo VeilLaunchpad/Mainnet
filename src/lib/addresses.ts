@@ -36,6 +36,12 @@ export interface VeilAddresses {
   veilTreasury: Address;
   veilStaking: Address;
   veilTokenTwin: Address;
+  /** The NFT side: two factories, one marketplace, one staking, one flagship. */
+  nftFactory: Address;
+  nftEditionsFactory: Address;
+  nftMarket: Address;
+  nftStaking: Address;
+  nftGenesis: Address;
 }
 
 /**
@@ -135,6 +141,31 @@ function build(net: CotiNetworkName): VeilAddresses {
       net,
       process.env.NEXT_PUBLIC_VEIL_TOKEN_TWIN_TESTNET,
       process.env.NEXT_PUBLIC_VEIL_TOKEN_TWIN_MAINNET,
+    ),
+    nftFactory: pick(
+      net,
+      process.env.NEXT_PUBLIC_NFT_FACTORY_TESTNET,
+      process.env.NEXT_PUBLIC_NFT_FACTORY_MAINNET,
+    ),
+    nftEditionsFactory: pick(
+      net,
+      process.env.NEXT_PUBLIC_NFT_EDITIONS_FACTORY_TESTNET,
+      process.env.NEXT_PUBLIC_NFT_EDITIONS_FACTORY_MAINNET,
+    ),
+    nftMarket: pick(
+      net,
+      process.env.NEXT_PUBLIC_NFT_MARKET_TESTNET,
+      process.env.NEXT_PUBLIC_NFT_MARKET_MAINNET,
+    ),
+    nftStaking: pick(
+      net,
+      process.env.NEXT_PUBLIC_NFT_STAKING_TESTNET,
+      process.env.NEXT_PUBLIC_NFT_STAKING_MAINNET,
+    ),
+    nftGenesis: pick(
+      net,
+      process.env.NEXT_PUBLIC_NFT_GENESIS_TESTNET,
+      process.env.NEXT_PUBLIC_NFT_GENESIS_MAINNET,
     ),
   };
 }

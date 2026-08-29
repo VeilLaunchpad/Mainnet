@@ -1233,5 +1233,27 @@
     "vanitySuffix": "8888",
     "privateTwin": "0x9f8e53aeCCE42Db8225bAEBd0Fb0F28EFfCA782e",
     "treasuryAllocation": "200000000"
+  },
+  "nft": {
+    "_comment": "The NFT stack. Drops are COTI PrivateERC721: the preview is public so a marketplace can render it, and the metadata is a ciphertext re-sealed to whoever holds the token.",
+    "factory": "0xB0D9F6949e5B1868947DF491a8B8cf0B21f6b46B",
+    "market": "0xCcD38429D22B8c31B9b41cE056cbf193996737c8",
+    "staking": "0xE9E78B3aDA3D6B9e282Db334725a377844031B98",
+    "marketFeeBps": 250,
+    "launchFeeCoti": "0.05",
+    "official": {
+      "genesis": {
+        "address": "0x748e01ac22eEE5B21165F5a381Fcc2ABcf168888",
+        "name": "VEILPAD Genesis",
+        "symbol": "VEILG",
+        "supply": "10000",
+        "mintPrice": "0",
+        "maxPerWallet": "10",
+        "pairedWith": "VEIL",
+        "rewardPerNftPerYear": "500.0",
+        "budget": "5000000.0"
+      }
+    },
+    "editionsFactory": "0x81C8816AcbdBf381C0d22ECbd3d2afa66bC39A73"
   }
 }
