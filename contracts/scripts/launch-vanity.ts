@@ -7,7 +7,7 @@ import * as path from "node:path";
  * Launches a token end to end with the full flow: a mined 8888 address, a dev
  * buy, and whatever the creator chose to do with that allocation.
  *
- *   VEIL_SYMBOL=GG VEIL_DEVBUY=0.3 VEIL_ALLOC=burn VEIL_BURN=50 \
+ *   DEVOX_SYMBOL=GG DEVOX_DEVBUY=0.3 DEVOX_ALLOC=burn DEVOX_BURN=50 \
  *     npx hardhat run scripts/launch-vanity.ts --network cotiTestnet
  */
 
@@ -16,7 +16,7 @@ const SUFFIX = "8888";
 
 function table() {
   return JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, "../../config/veilpad.testnet.json"), "utf8"),
+    fs.readFileSync(path.resolve(__dirname, "../../config/devoxpad.testnet.json"), "utf8"),
   );
 }
 
@@ -29,17 +29,17 @@ function create2(deployer: string, salt: string, initCodeHash: string) {
 
 async function main() {
   const [signer] = await ethers.getSigners();
-  const factoryAddress = table().contracts.veilpad.factory.address;
-  const factory = await ethers.getContractAt("VeilPadFactory", factoryAddress);
+  const factoryAddress = table().contracts.devoxpad.factory.address;
+  const factory = await ethers.getContractAt("DevoxPadFactory", factoryAddress);
 
-  const name = process.env.VEIL_NAME || "Good Game";
-  const symbol = process.env.VEIL_SYMBOL || "GG";
-  const description = process.env.VEIL_DESC || "One confirm, mined address, dev buy, burn.";
-  const devBuy = ethers.parseEther(process.env.VEIL_DEVBUY || "0.3");
-  const allocation = (process.env.VEIL_ALLOC || "burn") as "keep" | "burn" | "lock";
-  const burnPercent = Number(process.env.VEIL_BURN || 50);
-  const lockDays = Number(process.env.VEIL_LOCK || 30);
-  const isPrivate = process.env.VEIL_PUBLIC !== "1";
+  const name = process.env.DEVOX_NAME || "Good Game";
+  const symbol = process.env.DEVOX_SYMBOL || "GG";
+  const description = process.env.DEVOX_DESC || "One confirm, mined address, dev buy, burn.";
+  const devBuy = ethers.parseEther(process.env.DEVOX_DEVBUY || "0.3");
+  const allocation = (process.env.DEVOX_ALLOC || "burn") as "keep" | "burn" | "lock";
+  const burnPercent = Number(process.env.DEVOX_BURN || 50);
+  const lockDays = Number(process.env.DEVOX_LOCK || 30);
+  const isPrivate = process.env.DEVOX_PUBLIC !== "1";
 
   const metadataURI = JSON.stringify({
     description,
@@ -167,8 +167,8 @@ async function main() {
   if (lockedUntil > 0n)
     console.log("    locked to ", new Date(Number(lockedUntil) * 1000).toISOString());
 
-  const c = await ethers.getContractAt("VeilCurve", curve);
-  const erc = await ethers.getContractAt("VeilToken", token);
+  const c = await ethers.getContractAt("DevoxCurve", curve);
+  const erc = await ethers.getContractAt("DevoxToken", token);
   console.log("");
   console.log("    supply cap", fmt(await factory.totalSupplyPerLaunch()), "(fixed)");
   console.log("    totalSupply", (await erc.totalSupply()).toString(), " <- 0: private by design");

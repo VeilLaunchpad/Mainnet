@@ -7,7 +7,7 @@ import { serverNetwork } from "@/lib/server-network";
 
 export const metadata: Metadata = {
   title: "Fees",
-  description: "Every fee VEILPAD charges, read from the deployed contracts.",
+  description: "Every fee DEVOXPAD charges, read from the deployed contracts.",
 };
 
 export const dynamic = "force-dynamic";
@@ -54,7 +54,7 @@ export default async function FeesPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-veil-400">
+      <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-devox-400">
         Legal
       </div>
       <h1 className="text-3xl font-bold tracking-tight">Fees</h1>
@@ -93,7 +93,7 @@ export default async function FeesPage() {
                 when={fees.curveTrade.when}
               />
               <FeeRow
-                action="Swap on VeilSwap"
+                action="Swap on DevoxSwap"
                 fee={fees.swap.percent + "%"}
                 paidTo={fees.swap.paidTo}
                 when={fees.swap.when}
@@ -140,7 +140,7 @@ export default async function FeesPage() {
           <Detail
             title="1% on the bonding curve"
             badge="to the creator"
-            tone="veil"
+            tone="devox"
             body={fees.curveTrade.note}
             extra="Charged on the way in and on the way out. A creator can sweep what has accrued at any time, and graduation pays out whatever is outstanding before it seeds the pair."
           />
@@ -205,7 +205,7 @@ export default async function FeesPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/docs/contracts"
-            className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold transition hover:border-veil-400/50"
+            className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold transition hover:border-devox-400/50"
           >
             Contracts
           </Link>
@@ -260,7 +260,7 @@ function Detail({
 }: {
   title: string;
   badge: string;
-  tone: "veil" | "cy" | "mint";
+  tone: "devox" | "cy" | "mint";
   body: string;
   extra: string;
 }) {

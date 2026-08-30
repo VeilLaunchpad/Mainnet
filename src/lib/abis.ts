@@ -266,14 +266,14 @@ export const privateMessagingAbi = [
 ] as const;
 
 /**
- * VEILPAD launchpad.
+ * DEVOXPAD launchpad.
  *
  * One call does everything: deploys the curve and the token with CREATE2 at
  * addresses mined in advance, optionally buys on the creator's behalf, and then
  * keeps, burns or locks that allocation. The salts come from the client, which
  * is what makes an address ending in 8888 possible.
  */
-export const veilFactoryAbi = [
+export const devoxFactoryAbi = [
   {
     type: "function",
     name: "launch",
@@ -425,7 +425,7 @@ export const veilFactoryAbi = [
   },
 ] as const;
 
-export const veilLockerAbi = [
+export const devoxLockerAbi = [
   {
     type: "function",
     name: "lockAt",
@@ -476,7 +476,7 @@ export const veilLockerAbi = [
   },
 ] as const;
 
-export const veilCurveAbi = [
+export const devoxCurveAbi = [
   { type: "function", name: "token", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "creator", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "reserve", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
@@ -742,7 +742,7 @@ export const wcotiAbi = [
   ...erc20Abi,
 ] as const;
 
-/** VEILPAD agent registry - tokenized agents with on-chain identity. */
+/** DEVOXPAD agent registry - tokenized agents with on-chain identity. */
 export const agentRegistryAbi = [
   {
     type: "function",
@@ -797,7 +797,7 @@ export const agentRegistryAbi = [
   },
 ] as const;
 
-/** VEILPAD profiles - username -> address, resolved at /profile/{username}. */
+/** DEVOXPAD profiles - username -> address, resolved at /profile/{username}. */
 export const profileRegistryAbi = [
   {
     type: "function",
@@ -870,7 +870,7 @@ export const accountOnboardAbi = [
 ] as const;
 
 /**
- * VeilSwap - the DEX graduated launches land in.
+ * DevoxSwap - the DEX graduated launches land in.
  *
  * A pair keeps its reserves in its own storage instead of deriving them from
  * `balanceOf`, because on a COTI PrivateERC20 `balanceOf` returns a ciphertext
@@ -878,7 +878,7 @@ export const accountOnboardAbi = [
  * the pair's own books, which is the only thing that can be true for a token
  * whose balances are encrypted.
  */
-export const veilSwapFactoryAbi = [
+export const devoxSwapFactoryAbi = [
   {
     type: "function",
     name: "getPair",
@@ -919,7 +919,7 @@ export const veilSwapFactoryAbi = [
   },
 ] as const;
 
-export const veilSwapPairAbi = [
+export const devoxSwapPairAbi = [
   { type: "function", name: "token0", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "token1", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "reserve0", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
@@ -966,7 +966,7 @@ export const veilSwapPairAbi = [
   },
 ] as const;
 
-export const veilSwapRouterAbi = [
+export const devoxSwapRouterAbi = [
   {
     type: "function",
     name: "getAmountOut",
@@ -1055,14 +1055,14 @@ export const veilSwapRouterAbi = [
 ] as const;
 
 /**
- * VeilPortal - the crossing between the public and the private side.
+ * DevoxPortal - the crossing between the public and the private side.
  *
  * Wrapping locks a public token and mints its private twin one to one. The twin
  * is a COTI PrivateERC20, so its balances are ciphertext from the moment they
  * exist. `locked` is the public escrow figure, which is deliberately readable:
  * anyone can verify the twin is fully backed.
  */
-export const veilPortalAbi = [
+export const devoxPortalAbi = [
   {
     type: "function",
     name: "wrap",
@@ -1151,7 +1151,7 @@ export const veilPortalAbi = [
   },
 ] as const;
 
-export const veilPortalTokenAbi = [
+export const devoxPortalTokenAbi = [
   { type: "function", name: "name", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
   { type: "function", name: "symbol", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
   { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },
@@ -1160,13 +1160,13 @@ export const veilPortalTokenAbi = [
 ] as const;
 
 /**
- * VeilStaking, and the parts of the treasury a page needs to read.
+ * DevoxStaking, and the parts of the treasury a page needs to read.
  *
  * `poolView` exists so one call answers everything a pool card shows; without
  * it the same render would be six round trips per pool. `stakeOf` and
  * `pendingReward` are the per-user half.
  */
-export const veilStakingAbi = [
+export const devoxStakingAbi = [
   {
     type: "function",
     name: "poolCount",
@@ -1258,13 +1258,13 @@ export const veilStakingAbi = [
   { type: "function", name: "depositsPaused", stateMutability: "view", inputs: [], outputs: [{ type: "bool" }] },
 ] as const;
 
-export const veilTreasuryAbi = [
+export const devoxTreasuryAbi = [
   { type: "function", name: "balance", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "paidOut", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "rewardToken", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
 ] as const;
 
-export const veilpadTokenAbi = [
+export const devoxpadTokenAbi = [
   { type: "function", name: "name", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
   { type: "function", name: "symbol", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
   { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },

@@ -1,36 +1,40 @@
 {
-  "$schema": "./veilpad.schema.json",
+  "$schema": "./devoxpad.schema.json",
   "app": {
-    "name": "VEILPAD",
+    "name": "DEVOXPAD",
     "tagline": "The agentic privacy superapp on COTI",
     "version": "0.1.0",
-    "network": "mainnet"
+    "network": "testnet"
   },
-  "_comment": "MASTER TABLE - single source of truth for the COTI testnet deployment. Addresses and public config only; every secret stays in .env.local and is never committed. `npm run deploy:testnet` rewrites the `contracts.veilpad` block and flips each `status` to `deployed`.",
+  "_comment": "MASTER TABLE - single source of truth for the COTI testnet deployment. Addresses and public config only; every secret stays in .env.local and is never committed. `npm run deploy:testnet` rewrites the `contracts.devoxpad` block and flips each `status` to `deployed`.",
   "chain": {
-    "id": 2632500,
-    "name": "COTI",
-    "shortName": "coti",
-    "networkId": 2632500,
+    "id": 7082400,
+    "name": "COTI Testnet",
+    "shortName": "coti-testnet",
+    "networkId": 7082400,
     "nativeCurrency": {
       "name": "COTI",
       "symbol": "COTI",
       "decimals": 18
     },
     "rpc": [
-      "https://mainnet.coti.io/rpc"
+      "https://testnet.coti.io/rpc"
     ],
     "ws": [
-      "wss://mainnet.coti.io/ws"
+      "wss://testnet.coti.io/ws"
     ],
     "explorer": {
       "name": "CotiScan",
-      "url": "https://mainnet.cotiscan.io",
-      "tx": "https://mainnet.cotiscan.io/tx/{hash}",
-      "address": "https://mainnet.cotiscan.io/address/{address}",
-      "token": "https://mainnet.cotiscan.io/token/{address}"
+      "url": "https://testnet.cotiscan.io",
+      "tx": "https://testnet.cotiscan.io/tx/{hash}",
+      "address": "https://testnet.cotiscan.io/address/{address}",
+      "token": "https://testnet.cotiscan.io/token/{address}"
     },
-    "faucet": null,
+    "faucet": {
+      "kind": "discord",
+      "url": "https://discord.com/invite/Z4r8D6ez49",
+      "note": "Ask in the COTI Discord faucet channel. Testnet COTI only."
+    },
     "bridge": {
       "url": "https://bridge.coti.io",
       "etaMinutes": [
@@ -51,14 +55,14 @@
           "chainId": 11155111
         }
       ],
-      "mechanism": "COTI's deposit address on Ethereum is an externally owned account watched by COTI's relayer, not a contract. No dApp can execute the transfer, and no major aggregator lists COTI, so the crossing is prepared and tracked in VEILPAD but signed against COTI's own interface."
+      "mechanism": "COTI's deposit address on Ethereum is an externally owned account watched by COTI's relayer, not a contract. No dApp can execute the transfer, and no major aggregator lists COTI, so the crossing is prepared and tracked in DEVOXPAD but signed against COTI's own interface."
     }
   },
   "deployer": {
     "address": "0xC6E17B753a03cf9245E25D4939F6efd2791F9f2b",
     "funded": true,
     "envKey": "DEPLOYER_PRIVATE_KEY",
-    "note": "Funded with real COTI. Deploy with `cd contracts && npm run deploy:mainnet`."
+    "note": "Fund from the faucet above, then run `cd contracts && npm run deploy:testnet`."
   },
   "contracts": {
     "_comment": "status: 'deployed' means the address is live on chain 7082400 and the app will use it. 'pending' means the UI degrades to a clear 'not deployed yet' state instead of reverting.",
@@ -68,15 +72,16 @@
         "address": "0x536A67f0cc46513E7d27a370ed1aF9FDcC7A5095",
         "status": "deployed",
         "role": "Derives the AES key that decrypts your own encrypted state. Wallet signs an RSA public key; the contract returns the AES key sealed to it; the SDK unwraps it in the browser.",
-        "envKey": "NEXT_PUBLIC_ACCOUNT_ONBOARD_MAINNET",
+        "envKey": "NEXT_PUBLIC_ACCOUNT_ONBOARD_TESTNET",
         "abi": "accountOnboardAbi"
       },
       "privateMessaging": {
-        "address": "0xe461F448cB935a14585F6f1a30F5b4C73ffF8c05",
+        "address": "0xa4C514225Db5B8AE6eF1548d4CE912234A7CD954",
         "status": "deployed",
         "role": "End-to-end encrypted agent-to-agent messages. Routing metadata public and queryable; message bodies sealed to sender and recipient.",
-        "envKey": "NEXT_PUBLIC_PRIVATE_MESSAGING_MAINNET",
+        "envKey": "NEXT_PUBLIC_PRIVATE_MESSAGING_TESTNET",
         "abi": "privateMessagingAbi",
+        "mainnet": "0xe461F448cB935a14585F6f1a30F5b4C73ffF8c05",
         "limits": {
           "maxChunkCells": 3,
           "maxChunksPerMessage": 64,
@@ -84,53 +89,53 @@
         }
       }
     },
-    "veilpad": {
+    "devoxpad": {
       "_comment": "Written by contracts/scripts/deploy.ts. Deploy order matters: WCOTI, then the two token deployers, then the factory (which takes both deployer addresses), then the registries.",
       "wcoti": {
-        "address": "0xA406b1569eabEDCF503645e9C25cbcdBF03200Ab",
+        "address": "0x9569C225F4EBa6efcd73f5421F5A5126b566ed03",
         "status": "deployed",
         "deployOrder": 1,
         "role": "WETH9-shaped wrapper. Uniswap V3 only speaks ERC-20, so native COTI needs one. No admin, no upgrade path.",
-        "envKey": "NEXT_PUBLIC_WCOTI_MAINNET",
+        "envKey": "NEXT_PUBLIC_WCOTI_TESTNET",
         "abi": "wcotiAbi"
       },
       "swapFactory": {
-        "address": "0x9B6b892d89F1AC96A06a768f6D4dDb9A50Cd689c",
+        "address": "0x401D96dB62E04d2bb31C748e5E3Da16F99Ed317e",
         "status": "deployed",
         "deployOrder": 2,
-        "role": "VeilSwap pair factory. One pair per token pair, CREATE2 so the address is derivable before it exists.",
-        "envKey": "NEXT_PUBLIC_SWAP_FACTORY_MAINNET",
-        "abi": "veilSwapFactoryAbi"
+        "role": "DevoxSwap pair factory. One pair per token pair, CREATE2 so the address is derivable before it exists.",
+        "envKey": "NEXT_PUBLIC_SWAP_FACTORY_TESTNET",
+        "abi": "devoxSwapFactoryAbi"
       },
       "swapRouter": {
-        "address": "0x8C464A9Ad2E08209f4e92D8c912d9B9467a2d74a",
+        "address": "0x6b02aF47D37a7ce3d472D00598244D803A33Be41",
         "status": "deployed",
         "deployOrder": 3,
         "role": "Wraps and unwraps native COTI around a swap, applies deadlines, exposes quotes. Holds no funds, has no admin.",
-        "envKey": "NEXT_PUBLIC_SWAP_ROUTER_MAINNET",
-        "abi": "veilSwapRouterAbi"
+        "envKey": "NEXT_PUBLIC_SWAP_ROUTER_TESTNET",
+        "abi": "devoxSwapRouterAbi"
       },
       "privateTokenDeployer": {
-        "address": "0x0bcdF5f2120709610e1f4B66c52cC0a0543899cD",
+        "address": "0x335e9AAEdf8f1f920Eb88FBba5ccd9af579D5205",
         "status": "deployed",
         "deployOrder": 4,
-        "role": "Holds VeilToken creation code so the factory stays under the 24KB limit. Renounces its own admin role in the same transaction.",
+        "role": "Holds DevoxToken creation code so the factory stays under the 24KB limit. Renounces its own admin role in the same transaction.",
         "envKey": null
       },
       "publicTokenDeployer": {
-        "address": "0x04cf3572Ea8CFeF5a8B8f0Ffbf4c688A82EC2741",
+        "address": "0xF3f947f1b3FB103Ab2164004C4a3E247FAeD8FF0",
         "status": "deployed",
         "deployOrder": 5,
         "role": "Same, for the transparent ERC-20 variant.",
         "envKey": null
       },
       "factory": {
-        "address": "0xc0D9E704071341896b3B0BBCedF242A16B363773",
+        "address": "0xEaE25c294E12be6E458A881013C92c30dcda1614",
         "status": "deployed",
         "deployOrder": 6,
         "role": "One transaction deploys a token and its bonding curve. Curve first, so the token can name it sole minter in its own constructor - no role handoff window.",
-        "envKey": "NEXT_PUBLIC_VEIL_FACTORY_MAINNET",
-        "abi": "veilFactoryAbi",
+        "envKey": "NEXT_PUBLIC_DEVOX_FACTORY_TESTNET",
+        "abi": "devoxFactoryAbi",
         "constructorArgs": [
           "treasury",
           "privateTokenDeployer",
@@ -138,45 +143,45 @@
         ]
       },
       "profileRegistry": {
-        "address": "0xA9CE252fdCc8f96325627F985B578dbb7515B0dc",
+        "address": "0x837d1d1331a0a0598b3DCffA484B78bC6eCd6c0D",
         "status": "deployed",
         "deployOrder": 7,
         "role": "Usernames that resolve on-chain. One handle per address, first come first served. Backs /profile/{username}.",
-        "envKey": "NEXT_PUBLIC_PROFILE_REGISTRY_MAINNET",
+        "envKey": "NEXT_PUBLIC_PROFILE_REGISTRY_TESTNET",
         "abi": "profileRegistryAbi"
       },
       "agentRegistry": {
-        "address": "0x4Bcb7a7B9F0EED49db398D8CA154d9C34d0ffc30",
+        "address": "0x4472a6A2175CA298028994eE458391614Ac92722",
         "status": "deployed",
         "deployOrder": 8,
         "role": "Owner, agent wallet and token for a tokenized agent - the triple that lets one agent verify another before transacting.",
-        "envKey": "NEXT_PUBLIC_AGENT_REGISTRY_MAINNET",
+        "envKey": "NEXT_PUBLIC_AGENT_REGISTRY_TESTNET",
         "abi": "agentRegistryAbi"
       },
-      "veilCurve": {
+      "devoxCurve": {
         "address": "0x0000000000000000000000000000000000000000",
         "status": "per-token",
         "role": "Not a singleton. One curve is deployed per launch by the factory; read its address from `curveOf(token)` or from the Launched event.",
-        "envKey": "NEXT_PUBLIC_VEIL_CURVE_TESTNET",
-        "abi": "veilCurveAbi"
+        "envKey": "NEXT_PUBLIC_DEVOX_CURVE_TESTNET",
+        "abi": "devoxCurveAbi"
       },
       "swapPair": {
         "address": "0x0000000000000000000000000000000000000000",
         "status": "per-token",
         "role": "Not a singleton. One pair per graduated launch; read it from swapFactory.getPair(token, wcoti) or from the curve's Graduated event.",
         "envKey": null,
-        "abi": "veilSwapPairAbi"
+        "abi": "devoxSwapPairAbi"
       },
       "portal": {
-        "address": "0xf418A5cFa6f67c4A635A8F9814C98d7AbB72ED8a",
+        "address": "0x6b7a866CA3E7F0A001b0B2e2e3D462Ad1963A466",
         "status": "deployed",
         "role": "Privacy portal. Locks a public token and mints its private twin one to one; burns the twin to release the escrow.",
-        "envKey": "NEXT_PUBLIC_PORTAL_MAINNET"
+        "envKey": "NEXT_PUBLIC_PORTAL_TESTNET"
       },
       "portalTokenDeployer": {
-        "address": "0xBdD18894D4c1697cD38adD26Bb6C82fF90f015F3",
+        "address": "0x10a9dBE820c450A6e16fDCCfCe98F657d5983243",
         "status": "deployed",
-        "role": "Holds VeilPortalToken creation code so the portal stays under the 24KB limit. Renounces its own admin on every twin it makes."
+        "role": "Holds DevoxPortalToken creation code so the portal stays under the 24KB limit. Renounces its own admin on every twin it makes."
       },
       "portalTwin": {
         "address": "0x0000000000000000000000000000000000000000",
@@ -185,61 +190,61 @@
         "envKey": null
       },
       "locker": {
-        "address": "0xB739F0B5506e8f9a29e41aaEb11B458BF9b0B5Df",
+        "address": "0x1e8b8188F0F6e6f2c83Ca9b2bf93ba41C8eF6f4a",
         "status": "deployed"
       },
-      "veilpadToken": {
-        "address": "0x11728cBe1734b437723D06Dd137549e05f358888",
+      "devoxpadToken": {
+        "address": "0x106FF8D833E12786370306D4b25d6b4010E18888",
         "status": "deployed",
         "role": "The protocol token. One billion, minted once in the constructor, with no mint function afterwards.",
-        "envKey": "NEXT_PUBLIC_VEIL_TOKEN_MAINNET"
+        "envKey": "NEXT_PUBLIC_DEVOX_TOKEN_TESTNET"
       },
-      "veilpadTokenDeployer": {
-        "address": "0x8e9540a79494c7bc2182AB2F8DDEd480259389e3",
+      "devoxpadTokenDeployer": {
+        "address": "0x26b6cb3ac69e0c921a93C7198FE04465dd0DDDB6",
         "status": "deployed",
         "role": "CREATE2 deployer that gave the protocol token its 8888 address. Holds no role over what it made.",
-        "envKey": "NEXT_PUBLIC_VEIL_TOKEN_DEPLOYER_MAINNET"
+        "envKey": "NEXT_PUBLIC_DEVOX_TOKEN_DEPLOYER_TESTNET"
       },
-      "veilTreasury": {
-        "address": "0x5f2c94a4a1b7321F73a245Cc1C95e9B4107E2990",
+      "devoxTreasury": {
+        "address": "0x8Efb1B9772AC1D8407733e51D529C4918FC599Ac",
         "status": "deployed",
         "role": "Reward reserve for staking. Only the staking contract may spend it, and no staked principal is ever held here.",
-        "envKey": "NEXT_PUBLIC_VEIL_TREASURY_MAINNET"
+        "envKey": "NEXT_PUBLIC_DEVOX_TREASURY_TESTNET"
       },
-      "veilStaking": {
-        "address": "0xEfACd7A94FDf34B5b35965D23d25c1509fa57546",
+      "devoxStaking": {
+        "address": "0xC035b35996daDc946e4E7C6f100f761D0965bA64",
         "status": "deployed",
-        "role": "Fixed-APY staking. Rewards are paid in VEILPAD from the treasury; principal never pays another user's reward.",
-        "envKey": "NEXT_PUBLIC_VEIL_STAKING_MAINNET"
+        "role": "Fixed-APY staking. Rewards are paid in DEVOXPAD from the treasury; principal never pays another user's reward.",
+        "envKey": "NEXT_PUBLIC_DEVOX_STAKING_TESTNET"
       },
-      "veilpadTokenTwin": {
-        "address": "0xDd5BCc9a17eF61141eaC0a22053A52A9aDFbD434",
+      "devoxpadTokenTwin": {
+        "address": "0xD7Ff77358a0fADeB619830694D2D4De565eb06d2",
         "status": "deployed",
-        "role": "p.VEILPAD, the private twin. Minted one to one against VEILPAD locked in VeilPortal.",
-        "envKey": "NEXT_PUBLIC_VEIL_TOKEN_TWIN_MAINNET"
+        "role": "p.DEVOXPAD, the private twin. Minted one to one against DEVOXPAD locked in DevoxPortal.",
+        "envKey": "NEXT_PUBLIC_DEVOX_TOKEN_TWIN_TESTNET"
       }
     },
     "uniswapV3": {
-      "_comment": "Not used. Kept so an external V3 deployment can be pointed at later. COTI has no Uniswap deployment, and a stock V2/V3 pair cannot price a PrivateERC20 at all: it derives reserves from balanceOf, which returns a ctUint256 ciphertext rather than a number. VeilSwap exists because of that, not for lack of trying.",
+      "_comment": "Not used. Kept so an external V3 deployment can be pointed at later. COTI has no Uniswap deployment, and a stock V2/V3 pair cannot price a PrivateERC20 at all: it derives reserves from balanceOf, which returns a ctUint256 ciphertext rather than a number. DevoxSwap exists because of that, not for lack of trying.",
       "status": "unused",
       "factory": {
         "address": "0x0000000000000000000000000000000000000000",
-        "envKey": "NEXT_PUBLIC_UNIV3_FACTORY_MAINNET",
+        "envKey": "NEXT_PUBLIC_UNIV3_FACTORY_TESTNET",
         "abi": "univ3FactoryAbi"
       },
       "router": {
         "address": "0x0000000000000000000000000000000000000000",
-        "envKey": "NEXT_PUBLIC_UNIV3_ROUTER_MAINNET",
+        "envKey": "NEXT_PUBLIC_UNIV3_ROUTER_TESTNET",
         "abi": "univ3RouterAbi"
       },
       "quoter": {
         "address": "0x0000000000000000000000000000000000000000",
-        "envKey": "NEXT_PUBLIC_UNIV3_QUOTER_MAINNET",
+        "envKey": "NEXT_PUBLIC_UNIV3_QUOTER_TESTNET",
         "abi": "univ3QuoterAbi"
       },
       "positionManager": {
         "address": "0x0000000000000000000000000000000000000000",
-        "envKey": "NEXT_PUBLIC_UNIV3_POSITION_MANAGER_MAINNET",
+        "envKey": "NEXT_PUBLIC_UNIV3_POSITION_MANAGER_TESTNET",
         "abi": "univ3PositionManagerAbi"
       },
       "pool": {
@@ -265,42 +270,42 @@
         }
       ],
       "defaultFeeTier": 10000,
-      "wcotiForPools": "0xA406b1569eabEDCF503645e9C25cbcdBF03200Ab"
+      "wcotiForPools": "0x9569C225F4EBa6efcd73f5421F5A5126b566ed03"
     }
   },
   "launch": {
-    "_comment": "Curve parameters as deployed by the factory on COTI mainnet, verified by reading the live contract. Owner-tunable via setParams.",
+    "_comment": "Curve parameters as deployed by the factory. Owner-tunable via setParams - what makes sense on testnet (a 100 COTI graduation) is not what makes sense on mainnet.",
     "launchFeeCoti": "0.01",
     "tokenDecimals": 18,
     "curve": {
       "kind": "constant-product over virtual reserves",
       "formula": "tokensOut = tokenReserve - (virtualCoti * curveSupply) / (virtualCoti + reserve + cotiIn)",
-      "virtualCotiWei": "25000000000000000000",
-      "virtualCoti": "25",
+      "virtualCotiWei": "2000000000000000000",
+      "virtualCoti": "2",
       "curveSupply": "800000000",
       "poolSupply": "200000000",
       "totalSupplyAtGraduation": "1000000000",
-      "graduationTargetCoti": "100",
+      "graduationTargetCoti": "2",
       "tradeFeeBps": 100,
       "tradeFeeRecipient": "token creator",
       "note": "The curve mints on buy and burns on sell, so it never holds a token balance. On a private token its own balance would be ciphertext it cannot read.",
-      "_mainnetNote": "Factory defaults, read back from the deployed contract. The deploy script only tunes the curve down on testnet, so mainnet keeps the real economics: 25 COTI of virtual reserve and a 100 COTI graduation."
+      "_testnetNote": "Tuned down from the 100 COTI mainnet default by the deploy script. The faucet hands out ten, so a hundred-COTI graduation could never be demonstrated; factory.setParams carries the real value."
     },
     "graduation": {
       "trigger": "reserve >= graduationTargetCoti",
       "permissionless": true,
-      "action": "Trading on the curve freezes. The whole reserve is wrapped to WCOTI, the pool allocation is minted, and both sides go into a VeilSwap pair. LP shares are minted to the curve, which has no function that can move them.",
+      "action": "Trading on the curve freezes. The whole reserve is wrapped to WCOTI, the pool allocation is minted, and both sides go into a DevoxSwap pair. LP shares are minted to the curve, which has no function that can move them.",
       "lpRecipient": "the curve contract",
       "lpLocked": true,
       "lpLockNote": "LP shares are minted to the curve, which has no function that can transfer or burn them. Locked, not \"locked\".",
       "fallback": "If no position manager is configured, the curve still freezes and holds the reserve so factory.seedPool can finish the job later, rather than trapping the raise.",
-      "venue": "VeilSwap (constant product, 0.3% fee, internal reserve accounting)"
+      "venue": "DevoxSwap (constant product, 0.3% fee, internal reserve accounting)"
     },
     "vanity": {
       "suffix": "8888",
       "mechanism": "CREATE2 with a salt mined in the browser before the transaction is sent",
       "averageAttempts": 65536,
-      "note": "A mark a lookalike cannot cheaply fake. A VEILPAD launch that does not end in 8888 did not come from this factory."
+      "note": "A mark a lookalike cannot cheaply fake. A DEVOXPAD launch that does not end in 8888 did not come from this factory."
     },
     "fixedSupply": "1000000000",
     "devBuy": {
@@ -547,13 +552,13 @@
     "house": [
       {
         "id": "ag_concierge",
-        "slug": "veil",
-        "name": "VEIL",
+        "slug": "devox",
+        "name": "DEVOX",
         "kind": "research",
         "autonomy": "approval",
         "tagline": "Your way into everything on COTI.",
         "house": true,
-        "url": "/agents/veil"
+        "url": "/agents/devox"
       },
       {
         "id": "ag_shade",
@@ -717,12 +722,12 @@
     "catalog": [
       {
         "name": "get_chain_info",
-        "description": "Current COTI network: chain id, explorer, faucet, launch economics, and which VEILPAD contracts are actually deployed. Call this before promising an action that needs a contract.",
+        "description": "Current COTI network: chain id, explorer, faucet, launch economics, and which DEVOXPAD contracts are actually deployed. Call this before promising an action that needs a contract.",
         "kind": "read"
       },
       {
         "name": "get_coti_market",
-        "description": "Live COTI/USD price, 24h change, market cap and volume. This is the denominator for every price quoted on VEILPAD.",
+        "description": "Live COTI/USD price, 24h change, market cap and volume. This is the denominator for every price quoted on DEVOXPAD.",
         "kind": "read"
       },
       {
@@ -747,27 +752,27 @@
       },
       {
         "name": "list_launches",
-        "description": "List tokens launched on VEILPAD. Sort by 'new', 'progress' (closest to graduating into its VeilSwap pair) or 'graduated'.",
+        "description": "List tokens launched on DEVOXPAD. Sort by 'new', 'progress' (closest to graduating into its DevoxSwap pair) or 'graduated'.",
         "kind": "read"
       },
       {
         "name": "get_token",
-        "description": "Full detail on one VEILPAD token: metadata, bonding-curve state, graduation progress, VeilSwap pair and recent trades.",
+        "description": "Full detail on one DEVOXPAD token: metadata, bonding-curve state, graduation progress, DevoxSwap pair and recent trades.",
         "kind": "read"
       },
       {
         "name": "quote_trade",
-        "description": "Price a buy or sell before proposing it. Uses the bonding curve pre-graduation and the VeilSwap router once the token has a pair.",
+        "description": "Price a buy or sell before proposing it. Uses the bonding curve pre-graduation and the DevoxSwap router once the token has a pair.",
         "kind": "read"
       },
       {
         "name": "get_profile",
-        "description": "Look up a VEILPAD profile by username or address. Returns their launches, agents and public activity.",
+        "description": "Look up a DEVOXPAD profile by username or address. Returns their launches, agents and public activity.",
         "kind": "read"
       },
       {
         "name": "list_agents",
-        "description": "List agents registered on VEILPAD, optionally filtered by kind ('trader', 'social', 'research', 'ops').",
+        "description": "List agents registered on DEVOXPAD, optionally filtered by kind ('trader', 'social', 'research', 'ops').",
         "kind": "read"
       },
       {
@@ -777,7 +782,7 @@
       },
       {
         "name": "propose_launch",
-        "description": "Propose launching a new private token on VEILPAD. The user signs the launch transaction; the token starts on a bonding curve and graduates into a VeilSwap pair.",
+        "description": "Propose launching a new private token on DEVOXPAD. The user signs the launch transaction; the token starts on a bonding curve and graduates into a DevoxSwap pair.",
         "kind": "action"
       },
       {
@@ -905,7 +910,7 @@
   "storage": {
     "_comment": "The chain is the source of truth for balances, ownership and messages. SQLite only holds what a chain cannot cheaply serve. Uses node:sqlite (built into Node 22+) so there is no native build step.",
     "engine": "node:sqlite",
-    "path": "data/veilpad.db",
+    "path": "data/devoxpad.db",
     "tables": {
       "profiles": "username -> address, display name, bio, avatar, banner",
       "tokens": "launch metadata: name, symbol, image, creator, curve, pool, graduated",
@@ -938,16 +943,16 @@
     "boundary": "COTI encrypts amounts, balances, and computation inputs and outputs. It does not encrypt metadata: sender, recipient, timestamp and the fact a transaction occurred stay public. Selective disclosure, not disappearance.",
     "keyModel": "Each user holds their own AES key issued through a precompile. The network key is split across nodes with threshold cryptography, so no single node can reconstruct it and no operator, validator or node ever holds plaintext."
   },
-  "deployedAt": "2026-08-28T00:00:00.000Z",
-  "deployedChainId": 2632500,
+  "deployedAt": "2026-08-26T20:29:16.488Z",
+  "deployedChainId": 7082400,
   "dex": {
-    "_comment": "Why VEILPAD ships its own DEX rather than integrating one.",
-    "name": "VeilSwap",
+    "_comment": "Why DEVOXPAD ships its own DEX rather than integrating one.",
+    "name": "DevoxSwap",
     "model": "Uniswap V2 style constant product, x*y=k",
     "feeBps": 30,
     "minimumLiquidity": 1000,
     "reserveAccounting": "internal",
-    "whyInternal": "Uniswap V2 derives reserves from balanceOf(address(this)). A COTI PrivateERC20 returns a ctUint256 ciphertext from balanceOf, not a number, so a stock V2 pair would compute garbage reserves and be drained immediately. VeilSwap pairs pull tokens themselves with transferFrom and credit their own reserves, so the amount is known because the pair moved it.",
+    "whyInternal": "Uniswap V2 derives reserves from balanceOf(address(this)). A COTI PrivateERC20 returns a ctUint256 ciphertext from balanceOf, not a number, so a stock V2 pair would compute garbage reserves and be drained immediately. DevoxSwap pairs pull tokens themselves with transferFrom and credit their own reserves, so the amount is known because the pair moved it.",
     "tradeOffs": [
       "A raw transfer into a pair is an unclaimable donation, since balances are never read.",
       "Fee-on-transfer tokens are unsupported.",
@@ -976,7 +981,7 @@
       "bps": 30,
       "percent": 0.3,
       "paidTo": "liquidity providers",
-      "when": "every swap against a VeilSwap pair",
+      "when": "every swap against a DevoxSwap pair",
       "note": "Retained in the pair's reserves, which is what makes an LP share appreciate."
     },
     "portal": {
@@ -1020,7 +1025,7 @@
     ]
   },
   "sdk": {
-    "package": "@veilpad/sdk",
+    "package": "@devoxpad/sdk",
     "path": "sdk/",
     "docs": "/docs/sdk",
     "surface": "read only",
@@ -1034,57 +1039,57 @@
     "note": "Submitted after every launch. What is published is exactly what compiled the bytecode."
   },
   "assets": {
-    "_comment": "The real assets COTI carries on mainnet, read off chain rather than copied. An earlier version of this file inherited the testnet stand-ins when it was generated from the testnet table, which offered the portal six addresses that have no code on this network - and advertised a faucet for them.",
-    "testnet": false,
-    "faucet": null,
+    "_comment": "Stand-ins for the assets the COTI privacy portal carries on mainnet. Deployed by contracts/scripts/deploy-assets.ts. They have no value; decimals match the real assets so the portal behaves the way it will on mainnet.",
+    "testnet": true,
+    "faucet": "Every stand-in has an open faucet(). 1000 units per call.",
     "tokens": [
       {
         "symbol": "wETH",
         "name": "Wrapped Ether",
         "decimals": 18,
-        "address": "0x639aCc80569c5FC83c6FBf2319A6Cc38bBfe26d1",
+        "address": "0x32C051a7fF84fA3deb69b189C6884a485A6BcE95",
         "represents": "Ether bridged to COTI"
       },
       {
         "symbol": "wBTC",
         "name": "Wrapped BTC",
         "decimals": 8,
-        "address": "0x8C39B1fD0e6260fdf20652Fc436d25026832bfEA",
+        "address": "0x842e29965DD411446E81E5741D0147e9B80Fa816",
         "represents": "Bitcoin bridged to COTI"
       },
       {
         "symbol": "USDT",
         "name": "Tether USD",
         "decimals": 6,
-        "address": "0xfA6f73446b17A97a56e464256DA54AD43c2Cbc3E",
+        "address": "0x1A225f0e47bD94D35327e22a66ABf31216c532FA",
         "represents": "Tether on COTI"
       },
       {
         "symbol": "USDC.e",
-        "name": "USD Coin",
+        "name": "Bridged USDC",
         "decimals": 6,
-        "address": "0xf1Feebc4376c68B7003450ae66343Ae59AB37D3C",
-        "represents": "USDC bridged to COTI"
+        "address": "0x1B6DD88e113D064c8f28ee80A9eba2EA27224D4a",
+        "represents": "Bridged USD Coin on COTI"
       },
       {
         "symbol": "wADA",
         "name": "Wrapped ADA",
         "decimals": 6,
-        "address": "0xe757Ca19d2c237AA52eBb1d2E8E4368eeA3eb331",
+        "address": "0x81BFE2BCedA11C9012ED525dD887BE7021178214",
         "represents": "Cardano bridged to COTI"
       },
       {
         "symbol": "gCOTI",
-        "name": "gCOTI",
+        "name": "Governance COTI",
         "decimals": 18,
-        "address": "0x7637C7838EC4Ec6b85080F28A678F8E234bB83D1",
-        "represents": "Governance COTI"
+        "address": "0x9cD24f7118Ae75E8dfbC3a36826aAff534F25C4c",
+        "represents": "COTI governance token"
       }
     ]
   },
   "telegram": {
-    "bot": "VeilPadBot",
-    "url": "https://t.me/VeilPadBot",
+    "bot": "DevoxPadBot",
+    "url": "https://t.me/DevoxPadBot",
     "custody": "none",
     "note": "The bot reads and reasons. It never holds a key and never signs; anything that moves value opens on the site for the user's own wallet.",
     "modes": {
@@ -1093,7 +1098,7 @@
     }
   },
   "bridge": {
-    "_comment": "COTI's own bridges. Read off chain, not copied from a docs table. The privacy bridges are verified contracts VEILPAD calls directly; the cross-chain route has no contract on either side and is closed on testnet because COTI does not publish testnet recipient addresses.",
+    "_comment": "COTI's own bridges. Read off chain, not copied from a docs table. The privacy bridges are verified contracts DEVOXPAD calls directly; the cross-chain route has no contract on either side and is closed on testnet because COTI does not publish testnet recipient addresses.",
     "privacyBridges": {
       "COTI": {
         "bridge": "0xb8Bb4fe953eAa53D528FAc95C1d9955B2b60D582",
@@ -1194,10 +1199,10 @@
     }
   },
   "staking": {
-    "_comment": "Fixed APY per pool, paid in VEILPAD from VeilTreasury. Every pool is capped, and the caps are what bound what the treasury can owe.",
-    "rewardToken": "0x11728cBe1734b437723D06Dd137549e05f358888",
-    "treasury": "0x5f2c94a4a1b7321F73a245Cc1C95e9B4107E2990",
-    "staking": "0xEfACd7A94FDf34B5b35965D23d25c1509fa57546",
+    "_comment": "Fixed APY per pool, paid in DEVOXPAD from DevoxTreasury. Every pool is capped, and the caps are what bound what the treasury can owe.",
+    "rewardToken": "0x106FF8D833E12786370306D4b25d6b4010E18888",
+    "treasury": "0x8Efb1B9772AC1D8407733e51D529C4918FC599Ac",
+    "staking": "0xC035b35996daDc946e4E7C6f100f761D0965bA64",
     "pools": [
       {
         "pid": 0,
@@ -1209,24 +1214,8 @@
       },
       {
         "pid": 1,
-        "asset": "gCOTI",
-        "token": "0x7637C7838EC4Ec6b85080F28A678F8E234bB83D1",
-        "native": false,
-        "apyPercent": 12,
-        "capTokens": "2000000.0"
-      },
-      {
-        "pid": 2,
-        "asset": "p.COTI",
-        "token": "0xD2F2692B83C3ecDF2EAa0f7c2632BBd46Ae1cC91",
-        "native": false,
-        "apyPercent": 14,
-        "capTokens": "2000000.0"
-      },
-      {
-        "pid": 3,
-        "asset": "VEIL",
-        "token": "0x11728cBe1734b437723D06Dd137549e05f358888",
+        "asset": "DEVOX",
+        "token": "0x106FF8D833E12786370306D4b25d6b4010E18888",
         "native": false,
         "apyPercent": 18,
         "capTokens": "20000000.0"
@@ -1235,36 +1224,36 @@
   },
   "token": {
     "_comment": "The protocol token, not a launch. Fixed supply and no minter.",
-    "address": "0x11728cBe1734b437723D06Dd137549e05f358888",
-    "symbol": "VEIL",
-    "name": "VEILPAD",
+    "address": "0x106FF8D833E12786370306D4b25d6b4010E18888",
+    "symbol": "DEVOX",
+    "name": "DEVOXPAD",
     "decimals": 18,
     "totalSupply": "1000000000",
     "mintable": false,
     "vanitySuffix": "8888",
-    "privateTwin": "0xDd5BCc9a17eF61141eaC0a22053A52A9aDFbD434",
+    "privateTwin": "0xD7Ff77358a0fADeB619830694D2D4De565eb06d2",
     "treasuryAllocation": "200000000"
   },
   "nft": {
     "_comment": "The NFT stack. Drops are COTI PrivateERC721: the preview is public so a marketplace can render it, and the metadata is a ciphertext re-sealed to whoever holds the token.",
-    "factory": "0xa2a2f45fA83eDD2f6FB8E4Cf59D55B044eb03Bb9",
-    "market": "0x93604ce0a1DD3f3A136a759E52f86b09218E0Fb8",
-    "staking": "0x4CE6e04338bB15334c52290F145A50e1Cdc73546",
+    "factory": "0xB0D9F6949e5B1868947DF491a8B8cf0B21f6b46B",
+    "market": "0xCcD38429D22B8c31B9b41cE056cbf193996737c8",
+    "staking": "0xE9E78B3aDA3D6B9e282Db334725a377844031B98",
     "marketFeeBps": 250,
     "launchFeeCoti": "0.05",
     "official": {
       "genesis": {
-        "address": "0xD1F29a647CF56C0b13c1555794B5C383E0b08888",
-        "name": "VEILPAD Genesis",
-        "symbol": "VEILG",
+        "address": "0x748e01ac22eEE5B21165F5a381Fcc2ABcf168888",
+        "name": "DEVOXPAD Genesis",
+        "symbol": "DEVOXG",
         "supply": "10000",
         "mintPrice": "0",
         "maxPerWallet": "10",
-        "pairedWith": "VEIL",
+        "pairedWith": "DEVOX",
         "rewardPerNftPerYear": "500.0",
         "budget": "5000000.0"
       }
     },
-    "editionsFactory": "0x4550a1DCc8850AED6534168fE21CA0814200F1dD"
+    "editionsFactory": "0x81C8816AcbdBf381C0d22ECbd3d2afa66bC39A73"
   }
 }

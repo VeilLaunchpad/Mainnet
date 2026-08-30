@@ -44,8 +44,8 @@ export function priceLabel(price: string, payToken: Address, symbol = "COTI"): s
 export function OfficialMark() {
   return (
     <span
-      title="Deployed and marked official by VEILPAD"
-      className="inline-flex size-4 items-center justify-center rounded-full bg-gradient-to-br from-veil-400 to-cy-400 text-[9px] font-black text-black"
+      title="Deployed and marked official by DEVOXPAD"
+      className="inline-flex size-4 items-center justify-center rounded-full bg-gradient-to-br from-devox-400 to-cy-400 text-[9px] font-black text-black"
     >
       ✓
     </span>
@@ -57,7 +57,7 @@ export function VanityTag({ address }: { address: string }) {
   const mined = address.toLowerCase().endsWith("8888");
   if (!mined) return null;
   return (
-    <span className="mono text-[10px] text-veil-300/70" title="Address mined with CREATE2">
+    <span className="mono text-[10px] text-devox-300/70" title="Address mined with CREATE2">
       …{address.slice(-4)}
     </span>
   );
@@ -130,7 +130,7 @@ export function CollectionCard({ c }: { c: Collection }) {
         <PreviewArt uri={c.previewURI} name={c.name} className="transition duration-500 group-hover:scale-105" />
         <div className="absolute left-2 top-2 flex gap-1">
           {c.official && (
-            <span className="inline-flex items-center gap-1 rounded-md border border-veil-400/30 bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-veil-300 backdrop-blur">
+            <span className="inline-flex items-center gap-1 rounded-md border border-devox-400/30 bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-devox-300 backdrop-blur">
               <OfficialMark /> Official
             </span>
           )}
@@ -148,7 +148,7 @@ export function CollectionCard({ c }: { c: Collection }) {
           <VanityTag address={c.address} />
         </div>
         <div className="mt-1 flex items-center gap-1.5">
-          <Badge tone={c.kind === "drop" ? "veil" : "cy"}>
+          <Badge tone={c.kind === "drop" ? "devox" : "cy"}>
             {c.kind === "drop" ? "Drop" : "Open"}
           </Badge>
           {c.paired ? <Badge tone="mint">Paired</Badge> : <Badge tone="muted">Solo</Badge>}
@@ -167,7 +167,7 @@ export function CollectionCard({ c }: { c: Collection }) {
         {pct !== null && (
           <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.07]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-veil-500 to-cy-400"
+              className="h-full rounded-full bg-gradient-to-r from-devox-500 to-cy-400"
               style={{ width: Math.min(100, pct) + "%" }}
             />
           </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { isAddress, shortAddr } from "@/lib/format";
 
 /**
- * A recipient box that takes a VEILPAD handle or a raw address.
+ * A recipient box that takes a DEVOXPAD handle or a raw address.
  *
  * Handles are how people actually refer to each other, but they are also a
  * layer of indirection in front of something unforgiving: a message encrypted
@@ -119,7 +119,7 @@ export function RecipientField({
             ? "border-rose-400/40 focus:border-rose-400/60"
             : resolved
               ? "border-mint-400/35 focus:border-mint-400/55"
-              : "border-white/10 focus:border-veil-400/50")
+              : "border-white/10 focus:border-devox-400/50")
         }
       />
 
@@ -145,7 +145,7 @@ export function RecipientField({
 
       {unknownHandle && (
         <p className="mt-1.5 text-[11px] text-rose-300">
-          No VEILPAD handle by that name. Check the spelling or paste an address.
+          No DEVOXPAD handle by that name. Check the spelling or paste an address.
         </p>
       )}
 
@@ -166,7 +166,7 @@ export function RecipientField({
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[12px] font-medium text-white/85">
                   @{s.username}
-                  {s.isAgent && <span className="ml-1.5 text-[10px] text-veil-400">agent</span>}
+                  {s.isAgent && <span className="ml-1.5 text-[10px] text-devox-400">agent</span>}
                 </span>
                 <span className="mono block truncate text-[10px] text-white/35">
                   {shortAddr(s.address)}
@@ -186,7 +186,7 @@ function Avatar({ r }: { r: Resolved }) {
     return <img src={r.avatar} alt="" className="size-5 shrink-0 rounded-full object-cover" />;
   }
   return (
-    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-veil-500/20 text-[9px] font-bold text-veil-300">
+    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-devox-500/20 text-[9px] font-bold text-devox-300">
       {(r.username || r.address).slice(0, 2).toUpperCase()}
     </span>
   );

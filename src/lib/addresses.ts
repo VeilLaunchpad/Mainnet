@@ -15,9 +15,9 @@ function pick(net: CotiNetworkName, testnet?: string, mainnet?: string): Address
  */
 const ACCOUNT_ONBOARD = "0x536A67f0cc46513E7d27a370ed1aF9FDcC7A5095";
 
-export interface VeilAddresses {
-  veilFactory: Address;
-  veilCurve: Address;
+export interface DevoxAddresses {
+  devoxFactory: Address;
+  devoxCurve: Address;
   agentRegistry: Address;
   profileRegistry: Address;
   locker: Address;
@@ -32,10 +32,10 @@ export interface VeilAddresses {
   privateMessaging: Address;
   accountOnboard: Address;
   /** The protocol token, its reward reserve, its staking, and its private twin. */
-  veilToken: Address;
-  veilTreasury: Address;
-  veilStaking: Address;
-  veilTokenTwin: Address;
+  devoxToken: Address;
+  devoxTreasury: Address;
+  devoxStaking: Address;
+  devoxTokenTwin: Address;
   /** The NFT side: two factories, one marketplace, one staking, one flagship. */
   nftFactory: Address;
   nftEditionsFactory: Address;
@@ -55,17 +55,17 @@ export interface VeilAddresses {
  * out literally here: a computed `process.env[key]` would survive typechecking
  * and then be `undefined` in the browser.
  */
-function build(net: CotiNetworkName): VeilAddresses {
+function build(net: CotiNetworkName): DevoxAddresses {
   return {
-    veilFactory: pick(
+    devoxFactory: pick(
       net,
-      process.env.NEXT_PUBLIC_VEIL_FACTORY_TESTNET,
-      process.env.NEXT_PUBLIC_VEIL_FACTORY_MAINNET,
+      process.env.NEXT_PUBLIC_DEVOX_FACTORY_TESTNET,
+      process.env.NEXT_PUBLIC_DEVOX_FACTORY_MAINNET,
     ),
-    veilCurve: pick(
+    devoxCurve: pick(
       net,
-      process.env.NEXT_PUBLIC_VEIL_CURVE_TESTNET,
-      process.env.NEXT_PUBLIC_VEIL_CURVE_MAINNET,
+      process.env.NEXT_PUBLIC_DEVOX_CURVE_TESTNET,
+      process.env.NEXT_PUBLIC_DEVOX_CURVE_MAINNET,
     ),
     agentRegistry: pick(
       net,
@@ -122,25 +122,25 @@ function build(net: CotiNetworkName): VeilAddresses {
       process.env.NEXT_PUBLIC_ACCOUNT_ONBOARD_TESTNET || ACCOUNT_ONBOARD,
       process.env.NEXT_PUBLIC_ACCOUNT_ONBOARD_MAINNET || ACCOUNT_ONBOARD,
     ),
-    veilToken: pick(
+    devoxToken: pick(
       net,
-      process.env.NEXT_PUBLIC_VEIL_TOKEN_TESTNET,
-      process.env.NEXT_PUBLIC_VEIL_TOKEN_MAINNET,
+      process.env.NEXT_PUBLIC_DEVOX_TOKEN_TESTNET,
+      process.env.NEXT_PUBLIC_DEVOX_TOKEN_MAINNET,
     ),
-    veilTreasury: pick(
+    devoxTreasury: pick(
       net,
-      process.env.NEXT_PUBLIC_VEIL_TREASURY_TESTNET,
-      process.env.NEXT_PUBLIC_VEIL_TREASURY_MAINNET,
+      process.env.NEXT_PUBLIC_DEVOX_TREASURY_TESTNET,
+      process.env.NEXT_PUBLIC_DEVOX_TREASURY_MAINNET,
     ),
-    veilStaking: pick(
+    devoxStaking: pick(
       net,
-      process.env.NEXT_PUBLIC_VEIL_STAKING_TESTNET,
-      process.env.NEXT_PUBLIC_VEIL_STAKING_MAINNET,
+      process.env.NEXT_PUBLIC_DEVOX_STAKING_TESTNET,
+      process.env.NEXT_PUBLIC_DEVOX_STAKING_MAINNET,
     ),
-    veilTokenTwin: pick(
+    devoxTokenTwin: pick(
       net,
-      process.env.NEXT_PUBLIC_VEIL_TOKEN_TWIN_TESTNET,
-      process.env.NEXT_PUBLIC_VEIL_TOKEN_TWIN_MAINNET,
+      process.env.NEXT_PUBLIC_DEVOX_TOKEN_TWIN_TESTNET,
+      process.env.NEXT_PUBLIC_DEVOX_TOKEN_TWIN_MAINNET,
     ),
     nftFactory: pick(
       net,
@@ -170,10 +170,10 @@ function build(net: CotiNetworkName): VeilAddresses {
   };
 }
 
-const CACHE: Partial<Record<CotiNetworkName, VeilAddresses>> = {};
+const CACHE: Partial<Record<CotiNetworkName, DevoxAddresses>> = {};
 
 /** The contract set for one network. Resolved once per network, then reused. */
-export function addressesFor(net: CotiNetworkName): VeilAddresses {
+export function addressesFor(net: CotiNetworkName): DevoxAddresses {
   return (CACHE[net] ??= build(net));
 }
 
@@ -182,14 +182,14 @@ export function addressesFor(net: CotiNetworkName): VeilAddresses {
  * import: background sweeps, seeds, and anything with no request to read a
  * preference from. Anything a person can switch calls `addressesFor(net)`.
  */
-export const addresses: VeilAddresses = addressesFor(DEFAULT_NETWORK);
+export const addresses: DevoxAddresses = addressesFor(DEFAULT_NETWORK);
 
 export function isDeployed(a: Address | string | undefined): boolean {
   return !!a && a !== ZERO && /^0x[0-9a-fA-F]{40}$/.test(a);
 }
 
 /**
- * VeilSwap charges one flat 0.3% fee, the Uniswap V2 default. The tier list
+ * DevoxSwap charges one flat 0.3% fee, the Uniswap V2 default. The tier list
  * survives only so an external V3 deployment could be pointed at later.
  */
 export const SWAP_FEE_BPS = 30;

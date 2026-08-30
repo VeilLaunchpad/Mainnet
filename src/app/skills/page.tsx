@@ -5,8 +5,8 @@ import { toolSpecs } from "@/lib/agent-tools";
 import { AGENT_KINDS } from "@/lib/agent-runtime";
 
 export const metadata: Metadata = {
-  title: "VEIL Skills",
-  description: "Every capability a VEILPAD agent can reach for, and which kind of agent gets it.",
+  title: "DEVOX Skills",
+  description: "Every capability a DEVOXPAD agent can reach for, and which kind of agent gets it.",
 };
 
 export const dynamic = "force-dynamic";
@@ -71,7 +71,7 @@ export default function SkillsPage() {
   return (
     <div className="py-10">
       <Section
-        kicker="VEIL Skills"
+        kicker="DEVOX Skills"
         title="What an agent here can actually do"
         sub="Generated from the tool registry, so this page cannot drift from what the agents can reach for."
       >
@@ -106,7 +106,7 @@ export default function SkillsPage() {
                     return (
                       <div key={name} className="py-2.5">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="mono text-[12px] font-semibold text-veil-300">{name}</span>
+                          <span className="mono text-[12px] font-semibold text-devox-300">{name}</span>
                           {isAction(name) ? (
                             <Badge tone="amber">action</Badge>
                           ) : (
@@ -166,13 +166,13 @@ export default function SkillsPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href="/docs/sdk"
-              className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+              className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
             >
               SDK docs
             </Link>
             <Link
               href="/agents/new"
-              className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold transition hover:border-veil-400/50"
+              className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold transition hover:border-devox-400/50"
             >
               Create an agent
             </Link>

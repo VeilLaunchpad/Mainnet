@@ -90,7 +90,7 @@ export function SelectMenu({
           (isDisabled
             ? "cursor-not-allowed border-white/[0.06] bg-white/[0.02] opacity-50"
             : open
-              ? "border-veil-400/50 bg-white/[0.04]"
+              ? "border-devox-400/50 bg-white/[0.04]"
               : "border-white/10 bg-white/[0.03] hover:border-white/20")
         }
       >
@@ -145,7 +145,7 @@ export function SelectMenu({
                     (o.disabled
                       ? "cursor-not-allowed opacity-35"
                       : o.value === value
-                        ? "bg-veil-500/12"
+                        ? "bg-devox-500/12"
                         : "hover:bg-white/[0.05]")
                   }
                 >
@@ -187,7 +187,7 @@ function Chevron({ open }: { open: boolean }) {
 
 function Check() {
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0 text-veil-300">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0 text-devox-300">
       <path d="m3.5 8.5 3 3 6-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

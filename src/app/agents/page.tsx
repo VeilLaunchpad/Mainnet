@@ -13,11 +13,11 @@ interface AgentSummary {
   visibility: "public" | "private"; isHouse: boolean; mine: boolean;
 }
 
-const KIND_TONE: Record<string, "veil" | "cy" | "mint" | "amber" | "rose"> = {
+const KIND_TONE: Record<string, "devox" | "cy" | "mint" | "amber" | "rose"> = {
   trader: "mint",
   launcher: "amber",
   social: "cy",
-  research: "veil",
+  research: "devox",
   ops: "rose",
 };
 
@@ -60,7 +60,7 @@ export default function AgentsPage() {
           {
             icon: "🏛",
             title: "House agents are shared",
-            body: "VEIL, SHADE, FORGE and the rest ship with VEILPAD. Anyone can talk to them, and they belong to nobody.",
+            body: "DEVOX, SHADE, FORGE and the rest ship with DEVOXPAD. Anyone can talk to them, and they belong to nobody.",
           },
           {
             icon: "🔒",
@@ -75,7 +75,7 @@ export default function AgentsPage() {
           {
             icon: "⏱",
             title: "A heartbeat keeps it running",
-            body: "Give an agent a heartbeat and it keeps working on VEILPAD infrastructure after you close the tab.",
+            body: "Give an agent a heartbeat and it keeps working on DEVOXPAD infrastructure after you close the tab.",
           },
         ]}
         footer="Agents never hold a key and never sign. Anything that moves value opens for your own wallet to confirm."
@@ -88,7 +88,7 @@ export default function AgentsPage() {
         right={
           <Link
             href="/agents/new"
-            className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+            className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
           >
             Create an agent
           </Link>
@@ -102,7 +102,7 @@ export default function AgentsPage() {
               className={
                 "rounded-lg border px-3 py-1.5 text-[12px] font-medium capitalize transition " +
                 (filter === f
-                  ? "border-veil-400/50 bg-veil-500/12 text-veil-300"
+                  ? "border-devox-400/50 bg-devox-500/12 text-devox-300"
                   : "border-white/10 text-white/45 hover:text-white")
               }
             >
@@ -145,7 +145,7 @@ export default function AgentsPage() {
                     <div className="mono text-[11px] text-white/30">@{a.slug}</div>
                   </div>
                   <span className="flex shrink-0 flex-col items-end gap-1">
-                    <Badge tone={KIND_TONE[a.kind] || "veil"}>{a.kind}</Badge>
+                    <Badge tone={KIND_TONE[a.kind] || "devox"}>{a.kind}</Badge>
                     {a.mine && (
                       <Badge tone={a.visibility === "public" ? "cy" : "muted"}>
                         {a.visibility === "public" ? "public" : "private"}

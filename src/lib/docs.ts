@@ -10,7 +10,7 @@ export type { DocBlock, DocSection, DocPage, DocGroup } from "./docs-types";
 
 const overview: DocPage = {
   slug: "overview",
-  title: "What VEILPAD is",
+  title: "What DEVOXPAD is",
   description: "An agentic privacy superapp on COTI: launch, trade, message and bridge.",
   sections: [
     {
@@ -19,7 +19,7 @@ const overview: DocPage = {
       blocks: [
         {
           type: "p",
-          text: "VEILPAD is a launchpad, a trading venue, an agent network and an encrypted inbox, all running on COTI. The thread connecting them is that your balances stay yours: token balances live on chain as ciphertext, and only the holder's key turns one back into a number.",
+          text: "DEVOXPAD is a launchpad, a trading venue, an agent network and an encrypted inbox, all running on COTI. The thread connecting them is that your balances stay yours: token balances live on chain as ciphertext, and only the holder's key turns one back into a number.",
         },
         {
           type: "p",
@@ -34,10 +34,10 @@ const overview: DocPage = {
             ["Desk", "/desk", "SHADE, the private trading agent"],
             ["Agents", "/agents", "Six house agents plus your own"],
             ["Messages", "/messages", "Encrypted inbox, decrypted in your browser"],
-            ["Swap", "/swap", "VeilSwap, where graduated launches trade"],
+            ["Swap", "/swap", "DevoxSwap, where graduated launches trade"],
             ["Privacy portal", "/portal", "Move a token into privacy, and back"],
             ["Bridge", "/bridge", "COTI's privacy bridges, called from here"],
-            ["Contracts", "/veil-contracts", "Every address, live from chain"],
+            ["Contracts", "/devox-contracts", "Every address, live from chain"],
             ["Faucet", "/faucet", "Testnet COTI without leaving the tab. Testnet only"],
             ["Dashboard", "/dashboard", "Overview, wallet, full history, agents"],
             ["Skills", "/skills", "Every capability an agent can reach for"],
@@ -108,7 +108,7 @@ const overview: DocPage = {
         },
         {
           type: "p",
-          text: "VEILPAD caches that key in your browser so you sign once rather than once per read. It never reaches our server. Every decrypt on this site happens on your machine, which means we could not read your messages if you asked us to.",
+          text: "DEVOXPAD caches that key in your browser so you sign once rather than once per read. It never reaches our server. Every decrypt on this site happens on your machine, which means we could not read your messages if you asked us to.",
         },
       ],
     },
@@ -129,15 +129,15 @@ const quickstart: DocPage = {
           items: [
             {
               title: "Connect an injected wallet",
-              text: "MetaMask or anything that injects an EIP-1193 provider. If you are on another chain, VEILPAD blocks the app and offers one button that adds COTI with our RPC and switches to it.",
+              text: "MetaMask or anything that injects an EIP-1193 provider. If you are on another chain, DEVOXPAD blocks the app and offers one button that adds COTI with our RPC and switches to it.",
             },
             {
               title: "Pick a network",
-              text: "The switch in the header moves between VEILPAD Mainnet and VEILPAD Testnet. Mainnet is the default. Each has its own contracts, launches and balances, and nothing crosses between them.",
+              text: "The switch in the header moves between DEVOXPAD Mainnet and DEVOXPAD Testnet. Mainnet is the default. Each has its own contracts, launches and balances, and nothing crosses between them.",
             },
             {
               title: "Get COTI for gas",
-              text: "On testnet, /faucet sends you a small amount from the VEILPAD treasury, once a day. On mainnet there is no faucet: real COTI is bought or bridged in, which is what the Bridge page is for. Every action needs gas, and MPC operations cost more than ordinary storage writes.",
+              text: "On testnet, /faucet sends you a small amount from the DEVOXPAD treasury, once a day. On mainnet there is no faucet: real COTI is bought or bridged in, which is what the Bridge page is for. Every action needs gas, and MPC operations cost more than ordinary storage writes.",
             },
             {
               title: "Claim a handle",
@@ -149,7 +149,7 @@ const quickstart: DocPage = {
             },
             {
               title: "Buy something",
-              text: "Open any token from /launchpad. Pre-graduation you trade against its bonding curve; after graduation, against its VeilSwap pair. The panel switches venue for you.",
+              text: "Open any token from /launchpad. Pre-graduation you trade against its bonding curve; after graduation, against its DevoxSwap pair. The panel switches venue for you.",
             },
           ],
         },
@@ -401,14 +401,14 @@ const curve: DocPage = {
   ],
 };
 
-const veilswap: DocPage = {
-  slug: "veilswap",
-  title: "VeilSwap",
+const devoxswap: DocPage = {
+  slug: "devoxswap",
+  title: "DevoxSwap",
   description: "A constant-product AMM built to price a token whose balances are encrypted.",
   sections: [
     {
       id: "why",
-      title: "Why VEILPAD ships its own DEX",
+      title: "Why DEVOXPAD ships its own DEX",
       blocks: [
         {
           type: "p",
@@ -432,7 +432,7 @@ const veilswap: DocPage = {
       blocks: [
         {
           type: "p",
-          text: "A VeilSwapPair never reads a balance. It pulls tokens itself with transferFrom and credits its own reserve0 and reserve1, so the amount is known because the pair moved it. Everything else is the V2 design: x times y equals k, 0.3% to liquidity providers, and a minimum liquidity burned forever so a pool can never be fully emptied.",
+          text: "A DevoxSwapPair never reads a balance. It pulls tokens itself with transferFrom and credits its own reserve0 and reserve1, so the amount is known because the pair moved it. Everything else is the V2 design: x times y equals k, 0.3% to liquidity providers, and a minimum liquidity burned forever so a pool can never be fully emptied.",
         },
         {
           type: "note",
@@ -458,17 +458,17 @@ const veilswap: DocPage = {
     },
     {
       id: "routing",
-      title: "Swapping tokens VeilSwap has no pool for",
+      title: "Swapping tokens DevoxSwap has no pool for",
       blocks: [
         {
           type: "p",
-          text: "VeilSwap only has pools for tokens launched here. That used to mean every other token on COTI - gCOTI, WETH, wADA, the stablecoins, anything bridged - simply could not be traded in this app, even though the chain has depth for all of them. The swap page now routes to whichever venue can actually fill the trade.",
+          text: "DevoxSwap only has pools for tokens launched here. That used to mean every other token on COTI - gCOTI, WETH, wADA, the stablecoins, anything bridged - simply could not be traded in this app, even though the chain has depth for all of them. The swap page now routes to whichever venue can actually fill the trade.",
         },
         {
           type: "steps",
           items: [
             {
-              title: "VeilSwap first",
+              title: "DevoxSwap first",
               text: "If a pool exists, it wins. A constant-product pool prices continuously, fills in one hop, and cannot run out partway through a trade.",
             },
             {
@@ -490,7 +490,7 @@ const veilswap: DocPage = {
         },
         {
           type: "p",
-          text: "An order-book trade is not a path through pools. The contract takes a list of specific orders and how much of the input each one receives, and fills exactly what it is told - so the matching a DEX router would do on chain has to happen before the transaction is sent. VEILPAD reads every order on the pair, works out each one's price and how much it can absorb, and fills the cheapest first.",
+          text: "An order-book trade is not a path through pools. The contract takes a list of specific orders and how much of the input each one receives, and fills exactly what it is told - so the matching a DEX router would do on chain has to happen before the transaction is sent. DEVOXPAD reads every order on the pair, works out each one's price and how much it can absorb, and fills the cheapest first.",
         },
         {
           type: "code",
@@ -525,7 +525,7 @@ capacity         y·z·2^96 / ((A·y + B·z)·B)       source needed to drain it
           type: "note",
           tone: "info",
           title: "Two signatures to sell",
-          text: "Selling needs an approval and then the swap. That is the ERC-20 dance, not something VEILPAD adds. COTI's PrivateERC20 additionally refuses to overwrite a non-zero allowance with another non-zero value, so the interface resets the allowance to zero first.",
+          text: "Selling needs an approval and then the swap. That is the ERC-20 dance, not something DEVOXPAD adds. COTI's PrivateERC20 additionally refuses to overwrite a non-zero allowance with another non-zero value, so the interface resets the allowance to zero first.",
         },
       ],
     },
@@ -564,7 +564,7 @@ const agents: DocPage = {
           type: "table",
           head: ["Agent", "Kind", "What it does"],
           rows: [
-            ["VEIL", "research", "Concierge. The front door to everything else."],
+            ["DEVOX", "research", "Concierge. The front door to everything else."],
             ["SHADE", "trader", "Private trading. Its book is encrypted, so its strategy cannot be copied."],
             ["FORGE", "launcher", "Turns a half-formed idea into a shipped token."],
             ["RELAY", "social", "Agent-to-agent comms over encrypted on-chain messages."],
@@ -772,18 +772,18 @@ const contracts: DocPage = {
           type: "table",
           head: ["Contract", "Responsibility"],
           rows: [
-            ["VeilPadFactory", "Deploys a token and its curve in one transaction, then drops every role"],
-            ["VeilCurve", "Bonding curve. Mints on buy, burns on sell, graduates into a pair"],
-            ["VeilToken", "COTI PrivateERC20 with encrypted holder balances"],
-            ["VeilPublicToken", "Plain ERC-20, for launchers who want transparency"],
-            ["VeilSwapFactory", "One pair per token pair, CREATE2 addressed"],
-            ["VeilSwapPair", "Constant-product AMM with internal reserve accounting"],
-            ["VeilSwapRouter", "Wraps and unwraps native COTI around a swap"],
+            ["DevoxPadFactory", "Deploys a token and its curve in one transaction, then drops every role"],
+            ["DevoxCurve", "Bonding curve. Mints on buy, burns on sell, graduates into a pair"],
+            ["DevoxToken", "COTI PrivateERC20 with encrypted holder balances"],
+            ["DevoxPublicToken", "Plain ERC-20, for launchers who want transparency"],
+            ["DevoxSwapFactory", "One pair per token pair, CREATE2 addressed"],
+            ["DevoxSwapPair", "Constant-product AMM with internal reserve accounting"],
+            ["DevoxSwapRouter", "Wraps and unwraps native COTI around a swap"],
             ["WCOTI", "WETH9-shaped wrapper, because an AMM only speaks ERC-20"],
             ["ProfileRegistry", "Usernames resolving on chain, one per address"],
             ["AgentRegistry", "Owner, agent wallet and token for a tokenized agent"],
-            ["VeilLocker", "Timelock for a creator's own allocation. No owner, no early release"],
-            ["VeilPortal", "Locks a public token and mints its private twin one to one"],
+            ["DevoxLocker", "Timelock for a creator's own allocation. No owner, no early release"],
+            ["DevoxPortal", "Locks a public token and mints its private twin one to one"],
           ],
         },
         {
@@ -824,7 +824,7 @@ const faq: DocPage = {
           type: "p",
           text: "No. Your balance is a ciphertext in contract storage and only your AES key turns it into a number. What is visible is that a transfer or a swap occurred, and its size when it went through a public pool.",
         },
-        { type: "h3", text: "Is trading on VeilSwap private?", id: "is-swap-private" },
+        { type: "h3", text: "Is trading on DevoxSwap private?", id: "is-swap-private" },
         {
           type: "p",
           text: "The swap itself is public by construction: an AMM has to expose reserves and price to work. Privacy protects what you hold, not the act of trading it in a public pool.",
@@ -879,7 +879,7 @@ const faq: DocPage = {
         { type: "h3", text: "Where do I get the current addresses?", id: "addresses" },
         {
           type: "p",
-          text: "From the master table, config/veilpad.mainnet.json or config/veilpad.testnet.json, served at /api/config. Add ?network=testnet to ask for the other one. The deploy script rewrites whichever it deployed to, so neither drifts from what is actually on chain.",
+          text: "From the master table, config/devoxpad.mainnet.json or config/devoxpad.testnet.json, served at /api/config. Add ?network=testnet to ask for the other one. The deploy script rewrites whichever it deployed to, so neither drifts from what is actually on chain.",
         },
       ],
     },
@@ -984,7 +984,7 @@ npm run telegram:status     # what Telegram thinks is configured`,
       blocks: [
         {
           type: "p",
-          text: "An agent you create runs on VEILPAD infrastructure, not in your browser tab. Turn on its heartbeat and it keeps watching after you close the page, posting to its feed and reaching you in Telegram when something material changes.",
+          text: "An agent you create runs on DEVOXPAD infrastructure, not in your browser tab. Turn on its heartbeat and it keeps watching after you close the page, posting to its feed and reaching you in Telegram when something material changes.",
         },
         {
           type: "p",
@@ -999,7 +999,7 @@ npm run telegram:status     # what Telegram thinks is configured`,
 const bridge: DocPage = {
   slug: "bridge",
   title: "Bridge",
-  description: "COTI's own bridges, called directly from VEILPAD.",
+  description: "COTI's own bridges, called directly from DEVOXPAD.",
   sections: [
     {
       id: "two-bridges",
@@ -1012,7 +1012,7 @@ const bridge: DocPage = {
         {
           type: "note",
           tone: "good",
-          title: "The privacy bridge is a contract, so VEILPAD calls it",
+          title: "The privacy bridge is a contract, so DEVOXPAD calls it",
           text: "Each asset has a verified PrivacyBridge contract on COTI with public deposit and withdraw functions. Any wallet can call them, so there is no reason to open another site to do it. You approve and sign here.",
         },
       ],
@@ -1040,7 +1040,7 @@ const bridge: DocPage = {
           type: "note",
           tone: "warn",
           title: "Decimals are not cosmetic",
-          text: "The contract reverts with DecimalsMismatch unless the public token and its private twin agree. A six decimal stablecoin treated as eighteen would misprice by a factor of a trillion, so VEILPAD carries each asset's real precision.",
+          text: "The contract reverts with DecimalsMismatch unless the public token and its private twin agree. A six decimal stablecoin treated as eighteen would misprice by a factor of a trillion, so DEVOXPAD carries each asset's real precision.",
         },
       ],
     },
@@ -1062,7 +1062,7 @@ if (cotiLastUpdated != expectedCotiTimestamp)
         },
         {
           type: "p",
-          text: "It is an equality check, not a tolerance, so a quote is void the moment the oracle publishes again. VEILPAD re-quotes in the same click that signs, and if the oracle still beats you to it the error says so in words instead of hex.",
+          text: "It is an equality check, not a tolerance, so a quote is void the moment the oracle publishes again. DEVOXPAD re-quotes in the same click that signs, and if the oracle still beats you to it the error says so in words instead of hex.",
         },
       ],
     },
@@ -1092,7 +1092,7 @@ if (cotiLastUpdated != expectedCotiTimestamp)
       blocks: [
         {
           type: "p",
-          text: "This route has no contract on either side. COTI's own configuration names its destinations recipient addresses, and its relayer credits the far chain when it sees a transfer arrive. That is a plain token transfer, so VEILPAD builds it, switches your wallet to the right chain, and signs it here like any other transaction.",
+          text: "This route has no contract on either side. COTI's own configuration names its destinations recipient addresses, and its relayer credits the far chain when it sees a transfer arrive. That is a plain token transfer, so DEVOXPAD builds it, switches your wallet to the right chain, and signs it here like any other transaction.",
         },
         {
           type: "code",
@@ -1146,7 +1146,7 @@ if (cotiLastUpdated != expectedCotiTimestamp)
           type: "note",
           tone: "good",
           title: "The tracker is not load bearing",
-          text: "If COTI's service is unreachable the bridge still works, because the crossing happens on chain and the tracker only reports on it. VEILPAD degrades to what it can prove rather than blocking the transfer.",
+          text: "If COTI's service is unreachable the bridge still works, because the crossing happens on chain and the tracker only reports on it. DEVOXPAD degrades to what it can prove rather than blocking the transfer.",
         },
       ],
     },
@@ -1156,7 +1156,7 @@ if (cotiLastUpdated != expectedCotiTimestamp)
 const networks: DocPage = {
   slug: "networks",
   title: "Mainnet and testnet",
-  description: "One VEILPAD, two chains, and what does and does not cross between them.",
+  description: "One DEVOXPAD, two chains, and what does and does not cross between them.",
   sections: [
     {
       id: "switch",
@@ -1164,11 +1164,11 @@ const networks: DocPage = {
       blocks: [
         {
           type: "p",
-          text: "VEILPAD runs on both COTI networks from the same build. The switch sits in the header, next to Connect. Mainnet is the default.",
+          text: "DEVOXPAD runs on both COTI networks from the same build. The switch sits in the header, next to Connect. Mainnet is the default.",
         },
         {
           type: "table",
-          head: ["", "VEILPAD Mainnet", "VEILPAD Testnet"],
+          head: ["", "DEVOXPAD Mainnet", "DEVOXPAD Testnet"],
           rows: [
             ["Chain ID", "2632500", "7082400"],
             ["RPC", "https://mainnet.coti.io/rpc", "https://testnet.coti.io/rpc"],
@@ -1199,27 +1199,27 @@ const networks: DocPage = {
           head: ["URL", "What it does"],
           rows: [
             [
-              "veilpad-app.vercel.app",
+              "devoxpad-app.vercel.app",
               "Asks which network you want the first time, then remembers. The switch in the header changes it.",
             ],
             [
-              "veilpad-mainnet.vercel.app",
-              "Always VEILPAD Mainnet. Pinned by the hostname, so no cookie can change it.",
+              "devoxpad-mainnet.vercel.app",
+              "Always DEVOXPAD Mainnet. Pinned by the hostname, so no cookie can change it.",
             ],
             [
-              "veilpad-testnet.vercel.app",
-              "Always VEILPAD Testnet, pinned the same way.",
+              "devoxpad-testnet.vercel.app",
+              "Always DEVOXPAD Testnet, pinned the same way.",
             ],
           ],
         },
         {
           type: "p",
-          text: "The pinned pair exist because a cookie is a private fact. A link to veilpad-mainnet.vercel.app means mainnet for whoever opens it, whatever they last chose, which is the one thing a remembered preference can never promise. On those two the header switch becomes a link to the other host rather than a setting.",
+          text: "The pinned pair exist because a cookie is a private fact. A link to devoxpad-mainnet.vercel.app means mainnet for whoever opens it, whatever they last chose, which is the one thing a remembered preference can never promise. On those two the header switch becomes a link to the other host rather than a setting.",
         },
         {
           type: "note",
           tone: "info",
-          title: "Why not mainnet.veilpad-app.vercel.app",
+          title: "Why not mainnet.devoxpad-app.vercel.app",
           text: "That was the intended shape and Vercel will not issue it: it reserves the *.vercel.app namespace and refuses to delegate a subdomain of a project URL. A dedicated project per network is what it does allow. On a custom domain the true subdomains would work, and the app already recognises mainnet. and testnet. prefixes, so moving there would need no code change.",
         },
       ],
@@ -1249,9 +1249,9 @@ const networks: DocPage = {
         {
           type: "code",
           lang: "bash",
-          code: `curl "https://veilpad-app.vercel.app/api/tokens?network=mainnet"
-curl "https://veilpad-app.vercel.app/api/config?network=testnet&digest=1"
-curl "https://veilpad-app.vercel.app/api/bridge/assets?network=mainnet"`,
+          code: `curl "https://devoxpad-app.vercel.app/api/tokens?network=mainnet"
+curl "https://devoxpad-app.vercel.app/api/config?network=testnet&digest=1"
+curl "https://devoxpad-app.vercel.app/api/bridge/assets?network=mainnet"`,
         },
         {
           type: "p",
@@ -1272,8 +1272,8 @@ curl "https://veilpad-app.vercel.app/api/bridge/assets?network=mainnet"`,
           lang: "text",
           code: `/switch             two buttons: mainnet or testnet
 /network            which chain this chat is on
-/network mainnet    switch to VEILPAD Mainnet
-/network testnet    switch to VEILPAD Testnet`,
+/network mainnet    switch to DEVOXPAD Mainnet
+/network testnet    switch to DEVOXPAD Testnet`,
         },
       ],
     },
@@ -1283,7 +1283,7 @@ curl "https://veilpad-app.vercel.app/api/bridge/assets?network=mainnet"`,
 export const DOC_GROUPS: DocGroup[] = [
   { title: "Introduction", pages: [overview, quickstart, networks] },
   { title: "Launchpad", pages: [launching, curve] },
-  { title: "Trading", pages: [veilswap, bridge] },
+  { title: "Trading", pages: [devoxswap, bridge] },
   { title: "NFTs", pages: [nftPage] },
   { title: "Build on it", pages: [sdkPage, indexerPage] },
   { title: "Agents", pages: [agents, messaging, telegram] },

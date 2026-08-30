@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  * Turning what someone typed into an address.
  *
  * People know each other by handle, not by twenty bytes of hex, so anywhere
- * VEILPAD asks for a recipient it should accept either. The rule is that a
+ * DEVOXPAD asks for a recipient it should accept either. The rule is that a
  * handle must resolve to exactly one address before anything is sent: an
  * unresolved handle is refused rather than guessed at, because a message
  * encrypted to the wrong key is unreadable by everyone including the sender.

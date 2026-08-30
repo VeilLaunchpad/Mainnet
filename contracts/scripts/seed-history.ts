@@ -14,7 +14,7 @@ import { ethers, network } from "hardhat";
  * Four interfaces here are not what you would guess, and each one cost a
  * reverted transaction to find out:
  *
- *   VeilSwap        is not a Uniswap fork. The router takes a token, not a
+ *   DevoxSwap        is not a Uniswap fork. The router takes a token, not a
  *                   path: swapExactCotiForTokens(token, minOut, to, deadline).
  *
  *   COTI's bridge   has a separate native interface. `deposit` takes only the
@@ -26,7 +26,7 @@ import { ethers, network } from "hardhat";
  *                   non-zero allowance, so a failed attempt leaves a stale
  *                   approval that blocks the next one until it is zeroed.
  *
- *   gCOTI           has no VeilSwap pair; it only trades on the order book, and
+ *   gCOTI           has no DevoxSwap pair; it only trades on the order book, and
  *                   an order-book trade has to name the strategies it fills
  *                   against.
  *
@@ -35,7 +35,7 @@ import { ethers, network } from "hardhat";
 
 const STAKING = "0xEfACd7A94FDf34B5b35965D23d25c1509fa57546";
 const ROUTER = "0x8C464A9Ad2E08209f4e92D8c912d9B9467a2d74a";
-const VEIL = "0x11728cBe1734b437723D06Dd137549e05f358888";
+const DEVOX = "0x11728cBe1734b437723D06Dd137549e05f358888";
 const GCOTI = "0x7637C7838EC4Ec6b85080F28A678F8E234bB83D1";
 const P_COTI = "0xD2F2692B83C3ecDF2EAa0f7c2632BBd46Ae1cC91";
 const COTI_BRIDGE = "0x44D864973392064304dD88E2BDef39fF1ab11b7b";
@@ -70,7 +70,7 @@ const GCOTI_STRATEGY = 340282366920938463463374607431768211465n;
 async function main() {
   if (network.name !== "cotiMainnet") throw new Error("this is a mainnet script, on purpose");
   const [me] = await ethers.getSigners();
-  const staking = await ethers.getContractAt("VeilStaking", STAKING);
+  const staking = await ethers.getContractAt("DevoxStaking", STAKING);
 
   console.log("wallet :", me.address);
   console.log("balance:", ethers.formatEther(await ethers.provider.getBalance(me.address)), "COTI\n");
@@ -99,10 +99,10 @@ async function main() {
     return tx.hash;
   });
 
-  await step("pool 3 · 1,000,000 VEIL · 18% APY", async () => {
+  await step("pool 3 · 1,000,000 DEVOX · 18% APY", async () => {
     if ((await staked(3)) > 0n) return null;
     const amount = ethers.parseUnits("1000000", 18);
-    const t = new ethers.Contract(VEIL, erc20, me);
+    const t = new ethers.Contract(DEVOX, erc20, me);
     await (await t.approve(STAKING, amount, { gasLimit: 200_000 })).wait();
     const tx = await staking.stake(3, amount, { gasLimit: 1_000_000 });
     await tx.wait();
@@ -112,7 +112,7 @@ async function main() {
   await step("pool 1 · gCOTI · 12% APY", async () => {
     if ((await staked(1)) > 0n) return null;
 
-    // No VeilSwap pair, so buy it on the order book first.
+    // No DevoxSwap pair, so buy it on the order book first.
     const g = new ethers.Contract(GCOTI, erc20, me);
     let held = (await g.balanceOf(me.address)) as bigint;
     if (held < ethers.parseEther("0.1")) {
@@ -140,7 +140,7 @@ async function main() {
   await step("pool 2 · p.COTI · 14% APY", async () => {
     if ((await staked(2)) > 0n) return null;
 
-    // p.COTI comes from COTI's own privacy bridge, not from VEILPAD's portal -
+    // p.COTI comes from COTI's own privacy bridge, not from DEVOXPAD's portal -
     // the portal mints a twin of its own at a different address.
     const bridge = new ethers.Contract(COTI_BRIDGE, nativeBridgeAbi, me);
     if (!(await bridge.isDepositEnabled()) || (await bridge.paused())) {
@@ -176,14 +176,14 @@ async function main() {
     return tx.hash;
   });
 
-  /* ── VeilSwap ─────────────────────────────────────────────────────────── */
-  console.log("\nVeilSwap:");
-  await step("buy VEIL with 2 COTI", async () => {
+  /* ── DevoxSwap ─────────────────────────────────────────────────────────── */
+  console.log("\nDevoxSwap:");
+  await step("buy DEVOX with 2 COTI", async () => {
     const router = new ethers.Contract(ROUTER, routerAbi, me);
     const amountIn = ethers.parseEther("2");
-    const out = (await router.quoteBuyWithCoti(VEIL, amountIn)) as bigint;
+    const out = (await router.quoteBuyWithCoti(DEVOX, amountIn)) as bigint;
     const tx = await router.swapExactCotiForTokens(
-      VEIL,
+      DEVOX,
       (out * 97n) / 100n,
       me.address,
       Math.floor(Date.now() / 1000) + 1200,
@@ -195,9 +195,9 @@ async function main() {
 
   /* ── NFTs ─────────────────────────────────────────────────────────────── */
   console.log("\nNFTs:");
-  const drop = await ethers.getContractAt("VeilNFTDrop", GENESIS);
-  const market = await ethers.getContractAt("VeilNFTMarket", MARKET);
-  const nftStaking = await ethers.getContractAt("VeilNFTStaking", NFT_STAKING);
+  const drop = await ethers.getContractAt("DevoxNFTDrop", GENESIS);
+  const market = await ethers.getContractAt("DevoxNFTMarket", MARKET);
+  const nftStaking = await ethers.getContractAt("DevoxNFTStaking", NFT_STAKING);
 
   await step("mint Genesis", async () => {
     if ((await drop.balanceOf(me.address)) > 0n) return null;

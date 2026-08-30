@@ -10,7 +10,7 @@ import { Spinner } from "@/components/busy";
 import { useResult } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
-import { veilStakingAbi, veilTreasuryAbi, erc20Abi } from "@/lib/abis";
+import { devoxStakingAbi, devoxTreasuryAbi, erc20Abi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
 import { ensureAllowance } from "@/lib/allowance";
 import { explorerAddress } from "@/lib/chain";
@@ -76,8 +76,8 @@ export default function StakePage() {
   const [paidOut, setPaidOut] = useState<bigint | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const staking = addresses.veilStaking;
-  const treasury = addresses.veilTreasury;
+  const staking = addresses.devoxStaking;
+  const treasury = addresses.devoxTreasury;
   const ready = isDeployed(staking) && isDeployed(treasury);
 
   /** One pass over every pool, plus the caller's position in each. */
@@ -90,7 +90,7 @@ export default function StakePage() {
     const count = Number(
       await publicClient.readContract({
         address: staking,
-        abi: veilStakingAbi,
+        abi: devoxStakingAbi,
         functionName: "poolCount",
       }),
     );
@@ -99,7 +99,7 @@ export default function StakePage() {
     for (let pid = 0; pid < count; pid++) {
       const v = (await publicClient.readContract({
         address: staking,
-        abi: veilStakingAbi,
+        abi: devoxStakingAbi,
         functionName: "poolView",
         args: [BigInt(pid)],
       })) as readonly [Address, number, boolean, bigint, bigint, bigint, bigint, boolean, bigint];
@@ -131,8 +131,8 @@ export default function StakePage() {
     setPools(cards);
 
     const [bal, paid] = await Promise.all([
-      publicClient.readContract({ address: treasury, abi: veilTreasuryAbi, functionName: "balance" }).catch(() => 0n),
-      publicClient.readContract({ address: treasury, abi: veilTreasuryAbi, functionName: "paidOut" }).catch(() => 0n),
+      publicClient.readContract({ address: treasury, abi: devoxTreasuryAbi, functionName: "balance" }).catch(() => 0n),
+      publicClient.readContract({ address: treasury, abi: devoxTreasuryAbi, functionName: "paidOut" }).catch(() => 0n),
     ]);
     setReserve(bal as bigint);
     setPaidOut(paid as bigint);
@@ -146,11 +146,11 @@ export default function StakePage() {
     for (const c of cards) {
       const [s, pending] = await Promise.all([
         publicClient.readContract({
-          address: staking, abi: veilStakingAbi, functionName: "stakeOf",
+          address: staking, abi: devoxStakingAbi, functionName: "stakeOf",
           args: [BigInt(c.pid), address],
         }).catch(() => null),
         publicClient.readContract({
-          address: staking, abi: veilStakingAbi, functionName: "pendingReward",
+          address: staking, abi: devoxStakingAbi, functionName: "pendingReward",
           args: [BigInt(c.pid), address],
         }).catch(() => 0n),
       ]);
@@ -193,12 +193,12 @@ export default function StakePage() {
 
   if (!ready) {
     return (
-      <Section className="py-10" kicker="Staking" title="Stake, and earn VEILPAD">
+      <Section className="py-10" kicker="Staking" title="Stake, and earn DEVOXPAD">
         <Empty
           title="Not deployed on this network yet"
           body={
-            "VeilStaking has no address configured for " +
-            (net === "mainnet" ? "VEILPAD Mainnet" : "VEILPAD Testnet") +
+            "DevoxStaking has no address configured for " +
+            (net === "mainnet" ? "DEVOXPAD Mainnet" : "DEVOXPAD Testnet") +
             ". Switch networks, or check the contracts page for what is live."
           }
         />
@@ -210,19 +210,19 @@ export default function StakePage() {
     <Section
       className="py-10"
       kicker="Staking"
-      title="Stake, and earn VEILPAD"
+      title="Stake, and earn DEVOXPAD"
       sub="Each pool pays a fixed percentage. Somebody else depositing does not lower your rate, which is why every pool has a cap: a fixed rate on unlimited deposits could not be honoured."
       right={<ConnectButton />}
     >
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <Stat
           label="Reward reserve"
-          value={reserve === null ? "…" : fmt(reserve, 18, 0) + " VEIL"}
+          value={reserve === null ? "…" : fmt(reserve, 18, 0) + " DEVOX"}
           sub="What the treasury can still pay"
         />
         <Stat
           label="Paid out so far"
-          value={paidOut === null ? "…" : fmt(paidOut, 18, 4) + " VEIL"}
+          value={paidOut === null ? "…" : fmt(paidOut, 18, 4) + " DEVOX"}
           sub="Lifetime rewards claimed"
         />
         <Stat
@@ -271,7 +271,7 @@ export default function StakePage() {
       )}
 
       <p className="mt-8 max-w-3xl text-[12.5px] leading-relaxed text-white/40">
-        Rewards are paid in VEILPAD from{" "}
+        Rewards are paid in DEVOXPAD from{" "}
         <a
           href={explorerAddress(treasury, net)}
           target="_blank"
@@ -284,7 +284,7 @@ export default function StakePage() {
         never touch a principal. If the reserve is short, what you earned stays owed and is claimable
         once it is topped up. There is also an emergency exit that returns your principal without
         touching the treasury at all.{" "}
-        <Link href="/veil-contracts" className="text-cy-300 hover:underline">
+        <Link href="/devox-contracts" className="text-cy-300 hover:underline">
           Every address is here
         </Link>
         .
@@ -441,7 +441,7 @@ function PoolPanel({
             }
             const hash = await writeContractAsync({
               address: staking,
-              abi: veilStakingAbi,
+              abi: devoxStakingAbi,
               functionName: "stake",
               args: [BigInt(p.pid), wei],
               value: p.native ? wei : 0n,
@@ -453,7 +453,7 @@ function PoolPanel({
 
           const hash = await writeContractAsync({
             address: staking,
-            abi: veilStakingAbi,
+            abi: devoxStakingAbi,
             functionName: "unstake",
             args: [BigInt(p.pid), wei],
             gas: 1_500_000n,
@@ -476,7 +476,7 @@ function PoolPanel({
       await report({ success: "Reward claimed", failure: "The claim did not go through" }, async () => {
         const hash = await writeContractAsync({
           address: staking,
-          abi: veilStakingAbi,
+          abi: devoxStakingAbi,
           functionName: "claim",
           args: [BigInt(p.pid)],
           gas: 1_000_000n,
@@ -543,7 +543,7 @@ function PoolPanel({
           <div>
             <div className="text-[10.5px] uppercase tracking-wider text-white/35">Earned</div>
             <div className="mono text-[15px] font-semibold text-mint-400">
-              {fmt(pending, 18, 6)} VEIL
+              {fmt(pending, 18, 6)} DEVOX
             </div>
             {position && position.owed > 0n && pending > position.owed && (
               <div className="text-[10px] text-amber-300/80">
@@ -592,12 +592,12 @@ function PoolPanel({
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
             placeholder="0.0"
             inputMode="decimal"
-            className="mono min-w-0 flex-1 rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2.5 text-[15px] outline-none transition focus:border-veil-400/50"
+            className="mono min-w-0 flex-1 rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2.5 text-[15px] outline-none transition focus:border-devox-400/50"
           />
           <button
             onClick={submit}
             disabled={working || (mode === "stake" && (!p.active || !address))}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2.5 text-[13.5px] font-semibold transition hover:brightness-110 disabled:opacity-45"
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13.5px] font-semibold transition hover:brightness-110 disabled:opacity-45"
           >
             {working && <Spinner size={14} />}
             {mode === "stake" ? "Stake" : "Unstake"}
@@ -611,7 +611,7 @@ function PoolPanel({
           disabled={working}
           className="mt-2.5 w-full rounded-xl border border-mint-400/30 bg-mint-400/[0.07] py-2 text-[13px] font-semibold text-mint-400 transition hover:bg-mint-400/[0.12] disabled:opacity-45"
         >
-          Claim {fmt(pending, 18, 6)} VEIL
+          Claim {fmt(pending, 18, 6)} DEVOX
         </button>
       )}
 

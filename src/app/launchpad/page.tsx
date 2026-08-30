@@ -36,11 +36,11 @@ export default function LaunchpadPage() {
       <Section
         kicker="Launchpad"
         title="Private tokens, launched on a curve"
-        sub="Buy on the bonding curve while it fills. On graduation the whole reserve seeds a VeilSwap pair and the LP is locked."
+        sub="Buy on the bonding curve while it fills. On graduation the whole reserve seeds a DevoxSwap pair and the LP is locked."
         right={
           <Link
             href="/launch"
-            className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+            className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
           >
             Launch a token
           </Link>
@@ -50,8 +50,8 @@ export default function LaunchpadPage() {
           <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-400/25 bg-amber-400/[0.05] px-4 py-3">
             <span className="mt-0.5 shrink-0 text-[15px]">🟡</span>
             <p className="text-[12.5px] leading-relaxed text-amber-100/80">
-              <b className="text-amber-200">VEILPAD official token launched on Mainnet.</b>{" "}
-              The VEIL pinned below is the testnet rehearsal of it - same contract, same 8888
+              <b className="text-amber-200">DEVOXPAD official token launched on Mainnet.</b>{" "}
+              The DEVOX pinned below is the testnet rehearsal of it - same contract, same 8888
               address shape, worth nothing. The real one is{" "}
               <a
                 href={"https://mainnet.cotiscan.io/address/" + OFFICIAL_MAINNET_TOKEN}
@@ -62,8 +62,8 @@ export default function LaunchpadPage() {
                 {OFFICIAL_MAINNET_TOKEN.slice(0, 10)}…{OFFICIAL_MAINNET_TOKEN.slice(-6)}
               </a>{" "}
               on{" "}
-              <a href="https://veilpad-mainnet.vercel.app/launchpad" className="text-cy-300 hover:underline">
-                VEILPAD Mainnet
+              <a href="https://devoxpad-mainnet.vercel.app/launchpad" className="text-cy-300 hover:underline">
+                DEVOXPAD Mainnet
               </a>
               .
             </p>
@@ -89,7 +89,7 @@ export default function LaunchpadPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, ticker or address…"
-            className="min-w-[220px] flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-veil-400/50"
+            className="min-w-[220px] flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
           />
         </div>
 

@@ -7,7 +7,7 @@ import { Contract } from "@coti-io/coti-ethers";
 import { Section, Badge, Avatar, Skeleton } from "@/components/ui";
 import { Spinner } from "@/components/busy";
 import { useResult, readable } from "@/components/result-modal";
-import { veilPortalAbi, erc20Abi, privateErc20Abi } from "@/lib/abis";
+import { devoxPortalAbi, erc20Abi, privateErc20Abi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { useCotiSession } from "@/lib/coti-client";
@@ -193,7 +193,7 @@ export default function PortalPage() {
           setStep("Portalling in…");
           hash = await writeContractAsync({
             address: addresses.portal,
-            abi: veilPortalAbi,
+            abi: devoxPortalAbi,
             functionName: "wrapNative",
             value: wei,
             gas: 14_000_000n,
@@ -203,7 +203,7 @@ export default function PortalPage() {
           setStep("Portalling in…");
           hash = await writeContractAsync({
             address: addresses.portal,
-            abi: veilPortalAbi,
+            abi: devoxPortalAbi,
             functionName: "wrap",
             args: [active.address as Address, wei],
             gas: 14_000_000n,
@@ -216,14 +216,14 @@ export default function PortalPage() {
         hash = active.native
           ? await writeContractAsync({
               address: addresses.portal,
-              abi: veilPortalAbi,
+              abi: devoxPortalAbi,
               functionName: "unwrapNative",
               args: [wei],
               gas: 16_000_000n,
             })
           : await writeContractAsync({
               address: addresses.portal,
-              abi: veilPortalAbi,
+              abi: devoxPortalAbi,
               functionName: "unwrap",
               args: [active.address as Address, wei],
               gas: 16_000_000n,
@@ -524,18 +524,18 @@ function Crossing({
   return (
     <div className="flex w-full flex-col items-center gap-4 lg:w-[320px]">
       <div className="relative flex size-[190px] items-center justify-center">
-        <span className="absolute inset-0 rounded-full bg-gradient-to-br from-veil-500/40 via-transparent to-cy-500/40 blur-xl" />
+        <span className="absolute inset-0 rounded-full bg-gradient-to-br from-devox-500/40 via-transparent to-cy-500/40 blur-xl" />
         <span
           className={
             "absolute inset-0 rounded-full border-2 transition-colors duration-500 " +
-            (inbound ? "border-veil-400/60" : "border-cy-400/60")
+            (inbound ? "border-devox-400/60" : "border-cy-400/60")
           }
         />
         <span className="absolute inset-[18px] rounded-full border border-white/10" />
         <span
           className={
             "absolute inset-[42px] animate-pulse-slow rounded-full blur-md transition-colors duration-500 " +
-            (inbound ? "bg-veil-500/50" : "bg-cy-500/50")
+            (inbound ? "bg-devox-500/50" : "bg-cy-500/50")
           }
         />
         <span className="relative text-[13px] font-semibold tracking-wide text-white/85">
@@ -548,7 +548,7 @@ function Crossing({
           onClick={() => setDirection("in")}
           className={
             "flex-1 rounded-lg py-2 text-[12px] font-semibold transition " +
-            (inbound ? "bg-veil-500/25 text-veil-200" : "text-white/45 hover:text-white")
+            (inbound ? "bg-devox-500/25 text-devox-200" : "text-white/45 hover:text-white")
           }
         >
           Into privacy
@@ -574,7 +574,7 @@ function Crossing({
             </button>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-veil-400/50">
+        <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-devox-400/50">
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
@@ -594,7 +594,7 @@ function Crossing({
         className={
           "w-full rounded-xl py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40 " +
           (inbound
-            ? "bg-gradient-to-r from-veil-500 to-veil-600"
+            ? "bg-gradient-to-r from-devox-500 to-devox-600"
             : "bg-gradient-to-r from-cy-500 to-cy-400")
         }
       >
@@ -630,7 +630,7 @@ function PrivateColumn({
   return (
     <div className="card relative overflow-hidden p-4">
       <div className="flex items-center gap-2.5">
-        <span className="flex size-8 items-center justify-center rounded-full bg-veil-500/25 text-veil-300">
+        <span className="flex size-8 items-center justify-center rounded-full bg-devox-500/25 text-devox-300">
           <LockIcon />
         </span>
         <h2 className="text-[17px] font-semibold">Private Tokens</h2>
@@ -651,13 +651,13 @@ function PrivateColumn({
               className={
                 "flex w-full items-center gap-2.5 rounded-xl border p-2.5 text-left transition " +
                 (selected.toLowerCase() === p.underlying.toLowerCase()
-                  ? "border-veil-400/45 bg-veil-500/[0.08]"
+                  ? "border-devox-400/45 bg-devox-500/[0.08]"
                   : "border-white/[0.07] hover:border-white/20")
               }
             >
               <span className="relative">
                 <Avatar seed={p.symbol} size={30} rounded="rounded-full" />
-                <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-veil-500 text-[7px] text-white">
+                <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-devox-500 text-[7px] text-white">
                   <LockIcon small />
                 </span>
               </span>
@@ -685,7 +685,7 @@ function PrivateColumn({
             <button
               onClick={onUnlock}
               disabled={unlocking}
-              className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-veil-500 to-veil-600 px-4 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-devox-500 to-devox-600 px-4 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
             >
               <LockIcon small />
               {unlocking ? "Unlocking…" : "Unlock"}
@@ -705,7 +705,7 @@ function Explainer({ portal, pairs }: { portal?: string; pairs: Pair[] }) {
   return (
     <div className="mt-8 grid gap-3 md:grid-cols-3">
       <div className="card p-5">
-        <Badge tone="veil">One to one</Badge>
+        <Badge tone="devox">One to one</Badge>
         <h3 className="mt-2.5 text-[15px] font-semibold">Fully backed, publicly</h3>
         <p className="mt-1.5 text-[13px] leading-relaxed text-white/50">
           Every twin is minted against a public token locked in escrow here. The escrow figure is

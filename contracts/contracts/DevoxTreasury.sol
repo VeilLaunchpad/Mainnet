@@ -7,7 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
- * @title VeilTreasury - the reward reserve behind staking.
+ * @title DevoxTreasury - the reward reserve behind staking.
  *
  * Staking pays a fixed percentage, which means the rewards have to come from
  * somewhere that is not the stakers' own deposits. This holds that reserve, and
@@ -24,7 +24,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
  * `paidOut` and `balance()` are public so the runway is checkable from outside:
  * how much reward has ever left, and how much is left to pay.
  */
-contract VeilTreasury is Ownable, ReentrancyGuard {
+contract DevoxTreasury is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     /// The reward asset. Fixed at construction so a spender cannot be pointed elsewhere.

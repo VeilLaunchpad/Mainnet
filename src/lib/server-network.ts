@@ -31,7 +31,7 @@ export async function serverNetworkResolution(): Promise<NetworkResolution> {
 
   // Middleware copies the pin onto the request so a server component can see a
   // query parameter it otherwise has no access to.
-  const pin = h.get("x-veil-network-pin");
+  const pin = h.get("x-devox-network-pin");
   if (isNetworkName(pin)) return { net: pin, pinned: true, needsChoice: false };
 
   const stored = (await cookies()).get(NETWORK_COOKIE)?.value;

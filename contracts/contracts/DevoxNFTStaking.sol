@@ -9,7 +9,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
- * @title VeilNFTStaking - stake the NFT, earn the token it was paired with.
+ * @title DevoxNFTStaking - stake the NFT, earn the token it was paired with.
  *
  * A collection launches one of two ways. SOLO is an ordinary drop: art, a
  * price, nothing else. PAIRED means the creator escrowed a reward token before
@@ -30,7 +30,7 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
  * returns one without reading the reward maths at all, so a broken reward
  * configuration can never trap the art.
  */
-contract VeilNFTStaking is Ownable, ReentrancyGuard, IERC721Receiver {
+contract DevoxNFTStaking is Ownable, ReentrancyGuard, IERC721Receiver {
     using SafeERC20 for IERC20;
 
     uint256 private constant YEAR = 365 days;

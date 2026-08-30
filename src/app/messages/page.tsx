@@ -109,7 +109,7 @@ function MessagesInner() {
       return setErr(
         to.trim()
           ? "That handle does not resolve to an address yet."
-          : "Enter a VEILPAD handle or a 0x address.",
+          : "Enter a DEVOXPAD handle or a 0x address.",
       );
     }
 
@@ -183,7 +183,7 @@ function MessagesInner() {
                   <button
                     onClick={() => void coti.unlock()}
                     disabled={!address || coti.status === "onboarding"}
-                    className="rounded-lg border border-veil-400/30 bg-veil-500/10 px-3 py-1.5 text-[11px] font-semibold text-veil-300 transition hover:bg-veil-500/20 disabled:opacity-40"
+                    className="rounded-lg border border-devox-400/30 bg-devox-500/10 px-3 py-1.5 text-[11px] font-semibold text-devox-300 transition hover:bg-devox-500/20 disabled:opacity-40"
                   >
                     {coti.status === "onboarding" ? "Onboarding…" : "Unlock COTI key"}
                   </button>
@@ -225,12 +225,12 @@ function MessagesInner() {
                 onChange={(e) => setBody(e.target.value)}
                 rows={5}
                 placeholder="Encrypted before it leaves this browser."
-                className="mt-1 w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-veil-400/50"
+                className="mt-1 w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
               />
               <button
                 onClick={send}
                 disabled={sending || !address}
-                className="mt-3 w-full rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                className="mt-3 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
                 {sending ? "Encrypting and sending…" : "Send encrypted"}
               </button>

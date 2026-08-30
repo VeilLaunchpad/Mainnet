@@ -6,7 +6,7 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title VEILPAD - the protocol token.
+ * @title DEVOXPAD - the protocol token.
  *
  * Every token the launchpad makes is minted by a bonding curve that can keep
  * minting. This one is the opposite and deliberately so: the entire supply is
@@ -24,11 +24,11 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * It is a public ERC20, not a PrivateERC20, and that is the right shape for it:
  * staking has to read a balance to compute a reward, and a ciphertext balance
  * cannot be read by a contract. Privacy comes from wrapping it through
- * VeilPortal, which locks the public token and mints p.VEILPAD one to one - the
+ * DevoxPortal, which locks the public token and mints p.DEVOXPAD one to one - the
  * private twin is fully backed and the escrow behind it stays publicly
  * auditable.
  */
-contract VeilpadToken is ERC20, ERC20Burnable {
+contract DevoxpadToken is ERC20, ERC20Burnable {
     /// Points at the token's metadata, the same convention every launch uses.
     string public metadataURI;
 
@@ -52,14 +52,14 @@ contract VeilpadToken is ERC20, ERC20Burnable {
 }
 
 /**
- * @title VeilpadTokenDeployer - CREATE2, so the address can be chosen.
+ * @title DevoxpadTokenDeployer - CREATE2, so the address can be chosen.
  *
- * VEILPAD marks every token it launches with an address ending in 8888, and the
+ * DEVOXPAD marks every token it launches with an address ending in 8888, and the
  * protocol token is not going to be the exception. CREATE2 makes the address a
  * function of the salt, so a salt is mined off chain until the resulting
  * address ends the right way, and the chain only has to check the result.
  *
- * The deployer holds no role over what it makes. VeilpadToken has no owner and
+ * The deployer holds no role over what it makes. DevoxpadToken has no owner and
  * no minter, so unlike the launch deployers there is nothing here to renounce.
  *
  * `deploy` is owner-only, which is not about the address itself - CREATE2 binds
@@ -69,7 +69,7 @@ contract VeilpadToken is ERC20, ERC20Burnable {
  * every signal the project asks people to trust: the same deployer, the same
  * name, an 8888 address. Closing it means "came from here" stays a real claim.
  */
-contract VeilpadTokenDeployer is Ownable {
+contract DevoxpadTokenDeployer is Ownable {
     constructor() Ownable(msg.sender) {}
 
     event Deployed(address indexed token, bytes32 salt, address recipient, uint256 supply);
@@ -82,7 +82,7 @@ contract VeilpadTokenDeployer is Ownable {
         address recipient,
         uint256 supply
     ) external onlyOwner returns (address token) {
-        VeilpadToken t = new VeilpadToken{salt: salt}(name, symbol, metadataURI, recipient, supply);
+        DevoxpadToken t = new DevoxpadToken{salt: salt}(name, symbol, metadataURI, recipient, supply);
         token = address(t);
         emit Deployed(token, salt, recipient, supply);
     }
@@ -105,7 +105,7 @@ contract VeilpadTokenDeployer is Ownable {
         return
             keccak256(
                 abi.encodePacked(
-                    type(VeilpadToken).creationCode,
+                    type(DevoxpadToken).creationCode,
                     abi.encode(name, symbol, metadataURI, recipient, supply)
                 )
             );
@@ -122,7 +122,7 @@ contract VeilpadTokenDeployer is Ownable {
     ) external view returns (address) {
         bytes32 h = keccak256(
             abi.encodePacked(
-                type(VeilpadToken).creationCode,
+                type(DevoxpadToken).creationCode,
                 abi.encode(name, symbol, metadataURI, recipient, supply)
             )
         );

@@ -31,7 +31,7 @@ struct DropConfig {
 }
 
 /**
- * @title VeilNFTDrop - a scheduled drop whose metadata only the owner can read.
+ * @title DevoxNFTDrop - a scheduled drop whose metadata only the owner can read.
  *
  * "Reveal after mint" on every other chain is a promise: the art sits on a
  * server behind a flag somebody can flip early, and you are trusting them not
@@ -50,7 +50,7 @@ struct DropConfig {
  * Supply is fixed at construction because a drop that can grow is not a drop,
  * and a mint price of zero is a first-class case rather than an edge one.
  */
-contract VeilNFTDrop is PrivateERC721URIStorage, Ownable, ReentrancyGuard {
+contract DevoxNFTDrop is PrivateERC721URIStorage, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     /// Native COTI is spelled as the zero address, as everywhere else here.

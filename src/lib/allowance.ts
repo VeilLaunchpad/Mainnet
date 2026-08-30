@@ -42,7 +42,7 @@ export interface EnsureAllowanceArgs {
    * Approve far more than this one action needs, so the next one needs no
    * approval at all.
    *
-   * Only for VEILPAD's own contracts. ERC-20 cannot approve and act in a single
+   * Only for DEVOXPAD's own contracts. ERC-20 cannot approve and act in a single
    * transaction, so the first time you touch a spender there will always be two
    * wallet prompts - that is the chain's rule. What is avoidable is paying that
    * cost again on every subsequent stake, which is what a per-amount approval

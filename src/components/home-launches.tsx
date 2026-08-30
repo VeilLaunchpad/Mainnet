@@ -20,7 +20,7 @@ export function HomeLaunches() {
       className="py-4"
       kicker="Launchpad"
       title="Fresh off the curve"
-      sub="Every launch starts on a bonding curve and graduates into a VeilSwap pair."
+      sub="Every launch starts on a bonding curve and graduates into a DevoxSwap pair."
       right={
         <Link href="/launchpad" className="text-[13px] font-semibold text-white/50 transition hover:text-white">
           See all →

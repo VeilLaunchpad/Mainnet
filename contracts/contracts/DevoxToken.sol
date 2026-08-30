@@ -6,7 +6,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
- * @title VeilToken - a launch token with encrypted holder balances.
+ * @title DevoxToken - a launch token with encrypted holder balances.
  *
  * Thin concrete wrapper over COTI's PrivateERC20. Balances live in contract
  * storage as ciphertext and only the holder's AES key turns them into a number;
@@ -17,7 +17,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
  * create supply. It mints on buy and burns what it receives on sell, so the
  * curve's accounting never depends on reading an encrypted balance.
  */
-contract VeilToken is PrivateERC20 {
+contract DevoxToken is PrivateERC20 {
     string public metadataURI;
     address public immutable creator;
 
@@ -36,12 +36,12 @@ contract VeilToken is PrivateERC20 {
 }
 
 /**
- * @title VeilPublicToken - the opt-out.
+ * @title DevoxPublicToken - the opt-out.
  *
  * A launcher who wants a conventional, fully transparent token gets a plain
  * ERC20 instead. Same curve, same graduation; no privacy claims made.
  */
-contract VeilPublicToken is ERC20, AccessControl {
+contract DevoxPublicToken is ERC20, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     string public metadataURI;

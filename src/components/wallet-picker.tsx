@@ -118,7 +118,7 @@ export function WalletPicker({ onClose }: { onClose: () => void }) {
                     key={c.uid}
                     onClick={() => pick(c)}
                     disabled={isPending}
-                    className="flex w-full items-center gap-3 rounded-xl border border-white/[0.07] px-3.5 py-3 text-left transition hover:border-veil-400/45 hover:bg-white/[0.04] disabled:opacity-50"
+                    className="flex w-full items-center gap-3 rounded-xl border border-white/[0.07] px-3.5 py-3 text-left transition hover:border-devox-400/45 hover:bg-white/[0.04] disabled:opacity-50"
                   >
                     <WalletIcon icon={c.icon} name={c.name} />
                     <span className="min-w-0 flex-1">
@@ -162,7 +162,7 @@ export function WalletPicker({ onClose }: { onClose: () => void }) {
 
           <p className="border-t border-white/[0.06] px-5 py-3 text-[11px] leading-relaxed text-white/30">
             {hasWallet
-              ? "VEILPAD never sees your key. It asks your wallet to sign, and your wallet decides."
+              ? "DEVOXPAD never sees your key. It asks your wallet to sign, and your wallet decides."
               : "Install one, refresh this page, and it will appear here. Then the faucet can fund it."}
           </p>
         </div>
@@ -178,7 +178,7 @@ function WalletIcon({ icon, name }: { icon?: string; name: string }) {
     return <img src={icon} alt="" className="size-8 shrink-0 rounded-lg object-contain" />;
   }
   return (
-    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-veil-500/20 text-[13px] font-bold text-veil-300">
+    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-devox-500/20 text-[13px] font-bold text-devox-300">
       {name.slice(0, 1).toUpperCase()}
     </span>
   );

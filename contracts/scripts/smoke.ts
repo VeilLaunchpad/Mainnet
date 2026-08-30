@@ -11,7 +11,7 @@ import * as path from "node:path";
  * tag that ethers reaches for during estimation, and MPC operations on a
  * PrivateERC20 cost far more than a plain SSTORE.
  *
- * Set VEIL_TOKEN and VEIL_CURVE to continue against an existing launch instead
+ * Set DEVOX_TOKEN and DEVOX_CURVE to continue against an existing launch instead
  * of minting another one.
  */
 
@@ -24,20 +24,20 @@ const GAS = {
 
 // Overridable so the same script can mint a distinct token each run instead of
 // colliding with an earlier one.
-const NAME = process.env.VEIL_NAME || "Night Shift";
-const SYMBOL = process.env.VEIL_SYMBOL || "NIGHT";
+const NAME = process.env.DEVOX_NAME || "Night Shift";
+const SYMBOL = process.env.DEVOX_SYMBOL || "NIGHT";
 const DESCRIPTION =
-  process.env.VEIL_DESC || "For the people who ship at 3am. Smoke-test launch.";
+  process.env.DEVOX_DESC || "For the people who ship at 3am. Smoke-test launch.";
 
 function masterTable() {
   return JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, "../../config/veilpad.testnet.json"), "utf8"),
+    fs.readFileSync(path.resolve(__dirname, "../../config/devoxpad.testnet.json"), "utf8"),
   );
 }
 
 async function main() {
   const [signer] = await ethers.getSigners();
-  const factoryAddress = masterTable().contracts.veilpad.factory.address;
+  const factoryAddress = masterTable().contracts.devoxpad.factory.address;
 
   console.log("network :", network.name);
   console.log("signer  :", signer.address);
@@ -49,7 +49,7 @@ async function main() {
   console.log("factory :", factoryAddress);
   console.log("");
 
-  const factory = await ethers.getContractAt("VeilPadFactory", factoryAddress);
+  const factory = await ethers.getContractAt("DevoxPadFactory", factoryAddress);
   const launchFee = await factory.launchFee();
 
   console.log("factory params");
@@ -64,8 +64,8 @@ async function main() {
 
   const { token, curve, launchTxHash } = await launchOrResume(factory, launchFee);
 
-  const c = await ethers.getContractAt("VeilCurve", curve);
-  const erc = await ethers.getContractAt("VeilToken", token);
+  const c = await ethers.getContractAt("DevoxCurve", curve);
+  const erc = await ethers.getContractAt("DevoxToken", token);
 
   console.log("token metadata, read back from chain");
   console.log("  name         ", await erc.name());
@@ -152,15 +152,15 @@ async function launchOrResume(
   factory: any,
   launchFee: bigint,
 ) {
-  const resumeToken = process.env.VEIL_TOKEN || "";
-  const resumeCurve = process.env.VEIL_CURVE || "";
+  const resumeToken = process.env.DEVOX_TOKEN || "";
+  const resumeCurve = process.env.DEVOX_CURVE || "";
 
   if (resumeToken && resumeCurve) {
     console.log("resuming existing launch");
     console.log("  token ", resumeToken);
     console.log("  curve ", resumeCurve);
     console.log("");
-    return { token: resumeToken, curve: resumeCurve, launchTxHash: process.env.VEIL_TX || "" };
+    return { token: resumeToken, curve: resumeCurve, launchTxHash: process.env.DEVOX_TX || "" };
   }
 
   console.log("launching " + SYMBOL + " with private balances");

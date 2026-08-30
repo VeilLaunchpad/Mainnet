@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as Record<string, string>;
   const address = String(body.address || "");
-  const contract = String(body.contract || "VeilToken");
+  const contract = String(body.contract || "DevoxToken");
 
   if (!isAddress(address)) return Response.json({ error: "invalid address" }, { status: 400 });
 

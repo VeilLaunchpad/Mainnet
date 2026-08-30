@@ -9,7 +9,7 @@ import type { CotiNetworkName } from "./chain";
  * Carbon's own API is the right source for the whole table - it carries trade
  * counts and USD liquidity that no contract knows about - but it indexes off
  * chain and lags a new strategy by some minutes. That is fine for somebody
- * else's pair and not fine for ours: "VEILPAD is not on Carbon" is a false
+ * else's pair and not fine for ours: "DEVOXPAD is not on Carbon" is a false
  * statement to render while the position is demonstrably live.
  *
  * So the protocol token's pair is read from the contract as well, and merged
@@ -73,7 +73,7 @@ const carbonAbi = [
 ] as const;
 
 export interface CarbonSide {
-  /** True when this side holds VEIL and is therefore the ask. */
+  /** True when this side holds DEVOX and is therefore the ask. */
   holdsToken: boolean;
   amount: bigint;
   /** Price bounds in counter-token per token, low first. */
@@ -95,13 +95,13 @@ export interface CarbonPosition {
  * is why its chart reads "not available" rather than showing zero. Returning
  * null for that case lets the caller say so plainly.
  */
-export async function veilCarbonPosition(
+export async function devoxCarbonPosition(
   net: CotiNetworkName,
 ): Promise<CarbonPosition | null> {
   if (net !== "mainnet") return null;
 
-  const veil = addressesFor(net).veilToken;
-  if (!veil || /^0x0{40}$/.test(veil)) return null;
+  const devox = addressesFor(net).devoxToken;
+  if (!devox || /^0x0{40}$/.test(devox)) return null;
 
   try {
     const c = publicClient(net);
@@ -109,7 +109,7 @@ export async function veilCarbonPosition(
       address: CARBON_CONTROLLER,
       abi: carbonAbi,
       functionName: "strategiesByPairCount",
-      args: [veil, CARBON_NATIVE],
+      args: [devox, CARBON_NATIVE],
     })) as bigint;
 
     if (count === 0n) return null;
@@ -118,7 +118,7 @@ export async function veilCarbonPosition(
       address: CARBON_CONTROLLER,
       abi: carbonAbi,
       functionName: "strategiesByPair",
-      args: [veil, CARBON_NATIVE, 0n, count > 20n ? 20n : count],
+      args: [devox, CARBON_NATIVE, 0n, count > 20n ? 20n : count],
     })) as readonly {
       tokens: readonly Address[];
       orders: readonly { y: bigint; z: bigint; A: bigint; B: bigint }[];
@@ -131,12 +131,12 @@ export async function veilCarbonPosition(
     for (const s of list) {
       s.orders.forEach((o, i) => {
         if (o.y === 0n) return;
-        const holdsToken = s.tokens[i].toLowerCase() === veil.toLowerCase();
+        const holdsToken = s.tokens[i].toLowerCase() === devox.toLowerCase();
         const low = rateOf(expandRate(o.B));
         const high = rateOf(expandRate(o.B) + expandRate(o.A));
 
         // An order's rate is its own token out per counter-token in. For the
-        // side holding VEIL that is VEIL-per-COTI, so the price is inverted.
+        // side holding DEVOX that is DEVOX-per-COTI, so the price is inverted.
         const [priceLow, priceHigh] = holdsToken
           ? [high > 0 ? 1 / high : 0, low > 0 ? 1 / low : 0]
           : [low, high];

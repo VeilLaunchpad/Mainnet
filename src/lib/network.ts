@@ -24,7 +24,7 @@ export interface NetworkResolution {
  *
  * Order matters, and it runs from least to most negotiable.
  *
- * A pinned host wins outright. `veilpad-mainnet.vercel.app` proxies with
+ * A pinned host wins outright. `devoxpad-mainnet.vercel.app` proxies with
  * `__net=mainnet`, and no cookie from a previous visit may override it - the
  * whole reason to have a per-network URL is that the link means one thing for
  * everyone who opens it.

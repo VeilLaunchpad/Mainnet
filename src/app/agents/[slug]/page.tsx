@@ -102,7 +102,7 @@ export default function AgentPage({ params }: { params: Promise<{ slug: string }
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight">{a.name}</h1>
-            <Badge tone="veil">{a.kind}</Badge>
+            <Badge tone="devox">{a.kind}</Badge>
             <Badge tone="muted">{a.autonomy}</Badge>
             {a.heartbeatSec > 0 && <Badge tone="mint">live · {a.heartbeatSec}s</Badge>}
             {a.owner && (
@@ -115,7 +115,7 @@ export default function AgentPage({ params }: { params: Promise<{ slug: string }
           <div className="mono mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/30">
             <span>@{a.slug}</span>
             {a.owner ? (
-              <Link href={"/profile/" + a.owner} className="transition hover:text-veil-300">
+              <Link href={"/profile/" + a.owner} className="transition hover:text-devox-300">
                 owner {shortAddr(a.owner)}
               </Link>
             ) : (
@@ -147,7 +147,7 @@ export default function AgentPage({ params }: { params: Promise<{ slug: string }
             "rounded-xl px-4 py-2.5 text-[13px] font-semibold transition disabled:opacity-50 " +
             (a.heartbeatSec > 0
               ? "border border-mint-400/40 bg-mint-400/10 text-mint-400 hover:bg-mint-400/20"
-              : "bg-gradient-to-r from-veil-500 to-cy-500 text-white hover:brightness-110")
+              : "bg-gradient-to-r from-devox-500 to-cy-500 text-white hover:brightness-110")
           }
         >
           {a.heartbeatSec > 0 ? "Heartbeat on" : "Wake it up"}
@@ -182,7 +182,7 @@ export default function AgentPage({ params }: { params: Promise<{ slug: string }
                   .reverse()
                   .map((m, i) => (
                     <li key={i} className="flex gap-2 text-[12px] leading-relaxed text-white/55">
-                      <span className="mt-[7px] size-1 shrink-0 rounded-full bg-veil-400/60" />
+                      <span className="mt-[7px] size-1 shrink-0 rounded-full bg-devox-400/60" />
                       <span>{m}</span>
                     </li>
                   ))}
@@ -199,7 +199,7 @@ export default function AgentPage({ params }: { params: Promise<{ slug: string }
             ) : (
               <div className="mt-2 space-y-2.5">
                 {data.events.map((e) => (
-                  <div key={e.id} className="border-l-2 border-veil-400/25 pl-2.5">
+                  <div key={e.id} className="border-l-2 border-devox-400/25 pl-2.5">
                     <div className="flex items-center gap-2">
                       <Badge tone="muted">{e.kind}</Badge>
                       <span className="mono text-[10px] text-white/25">{timeAgo(e.created_at)}</span>
@@ -222,7 +222,7 @@ export default function AgentPage({ params }: { params: Promise<{ slug: string }
               </p>
               <Link
                 href={"/launch?agent=" + a.slug}
-                className="mt-3 block rounded-xl border border-veil-400/30 bg-veil-500/10 px-4 py-2.5 text-center text-[13px] font-semibold text-veil-300 transition hover:bg-veil-500/20"
+                className="mt-3 block rounded-xl border border-devox-400/30 bg-devox-500/10 px-4 py-2.5 text-center text-[13px] font-semibold text-devox-300 transition hover:bg-devox-500/20"
               >
                 {a.token ? "Manage its token" : "Tokenize this agent"}
               </Link>

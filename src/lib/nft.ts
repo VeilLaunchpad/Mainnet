@@ -3,12 +3,12 @@ import { publicClient } from "./rpc";
 import { addressesFor, isDeployed } from "./addresses";
 import { ACTIVE_NETWORK, type CotiNetworkName } from "./chain";
 import {
-  veilNFTDropAbi,
-  veilNFTEditionsAbi,
-  veilNFTFactoryAbi,
-  veilNFTEditionsFactoryAbi,
-  veilNFTMarketAbi,
-  veilNFTStakingAbi,
+  devoxNFTDropAbi,
+  devoxNFTEditionsAbi,
+  devoxNFTFactoryAbi,
+  devoxNFTEditionsFactoryAbi,
+  devoxNFTMarketAbi,
+  devoxNFTStakingAbi,
 } from "./nft-abis";
 
 /**
@@ -85,7 +85,7 @@ export async function collections(
     const page = (await client
       .readContract({
         address: a.nftFactory,
-        abi: veilNFTFactoryAbi,
+        abi: devoxNFTFactoryAbi,
         functionName: "page",
         args: [0n, BigInt(limit)],
       })
@@ -122,7 +122,7 @@ export async function collections(
     const page = (await client
       .readContract({
         address: a.nftEditionsFactory,
-        abi: veilNFTEditionsFactoryAbi,
+        abi: devoxNFTEditionsFactoryAbi,
         functionName: "page",
         args: [0n, BigInt(limit)],
       })
@@ -177,7 +177,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
     client.multicall({
       contracts: drops.map((c) => ({
         address: c.address,
-        abi: veilNFTDropAbi,
+        abi: devoxNFTDropAbi,
         functionName: "totalMinted",
       })),
       allowFailure: true,
@@ -185,7 +185,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
     client.multicall({
       contracts: drops.map((c) => ({
         address: c.address,
-        abi: veilNFTDropAbi,
+        abi: devoxNFTDropAbi,
         functionName: "previewURI",
       })),
       allowFailure: true,
@@ -193,7 +193,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
     client.multicall({
       contracts: editions.map((c) => ({
         address: c.address,
-        abi: veilNFTEditionsAbi,
+        abi: devoxNFTEditionsAbi,
         functionName: "editionCount",
       })),
       allowFailure: true,
@@ -201,7 +201,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
     client.multicall({
       contracts: editions.map((c) => ({
         address: c.address,
-        abi: veilNFTEditionsAbi,
+        abi: devoxNFTEditionsAbi,
         functionName: "previewURI",
       })),
       allowFailure: true,
@@ -210,7 +210,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
       ? client.multicall({
           contracts: list.map((c) => ({
             address: a.nftMarket,
-            abi: veilNFTMarketAbi,
+            abi: devoxNFTMarketAbi,
             functionName: "official",
             args: [c.address],
           })),
@@ -221,7 +221,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
       ? client.multicall({
           contracts: list.map((c) => ({
             address: a.nftStaking,
-            abi: veilNFTStakingAbi,
+            abi: devoxNFTStakingAbi,
             functionName: "poolOf",
             args: [c.address],
           })),
@@ -267,7 +267,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
       client.multicall({
         contracts: pairedIdx.map((i) => ({
           address: a.nftStaking,
-          abi: veilNFTStakingAbi,
+          abi: devoxNFTStakingAbi,
           functionName: "pool",
           args: [BigInt(list[i].paired!.poolId)],
         })),
@@ -276,7 +276,7 @@ async function enrich(list: NFTCollection[], net: CotiNetworkName) {
       client.multicall({
         contracts: pairedIdx.map((i) => ({
           address: a.nftStaking,
-          abi: veilNFTStakingAbi,
+          abi: devoxNFTStakingAbi,
           functionName: "apyBps",
           args: [BigInt(list[i].paired!.poolId)],
         })),
@@ -310,7 +310,7 @@ export async function collection(
     const [from, c] = (await client
       .readContract({
         address: a.nftFactory,
-        abi: veilNFTFactoryAbi,
+        abi: devoxNFTFactoryAbi,
         functionName: "isFromFactory",
         args: [address],
       })
@@ -342,7 +342,7 @@ export async function collection(
     const [from, c] = (await client
       .readContract({
         address: a.nftEditionsFactory,
-        abi: veilNFTEditionsFactoryAbi,
+        abi: devoxNFTEditionsFactoryAbi,
         functionName: "isFromFactory",
         args: [address],
       })
@@ -384,7 +384,7 @@ export async function listings(
 
   const count = Number(
     await client
-      .readContract({ address: a.nftMarket, abi: veilNFTMarketAbi, functionName: "listingCount" })
+      .readContract({ address: a.nftMarket, abi: devoxNFTMarketAbi, functionName: "listingCount" })
       .catch(() => 0n),
   );
   if (count === 0) return [];
@@ -396,7 +396,7 @@ export async function listings(
     client.multicall({
       contracts: ids.map((i) => ({
         address: a.nftMarket,
-        abi: veilNFTMarketAbi,
+        abi: devoxNFTMarketAbi,
         functionName: "listing",
         args: [BigInt(i)],
       })),
@@ -405,7 +405,7 @@ export async function listings(
     client.multicall({
       contracts: ids.map((i) => ({
         address: a.nftMarket,
-        abi: veilNFTMarketAbi,
+        abi: devoxNFTMarketAbi,
         functionName: "listingLive",
         args: [BigInt(i)],
       })),
@@ -443,7 +443,7 @@ export async function pools(net: CotiNetworkName = ACTIVE_NETWORK): Promise<NFTP
 
   const count = Number(
     await client
-      .readContract({ address: a.nftStaking, abi: veilNFTStakingAbi, functionName: "poolCount" })
+      .readContract({ address: a.nftStaking, abi: devoxNFTStakingAbi, functionName: "poolCount" })
       .catch(() => 0n),
   );
   if (count === 0) return [];
@@ -453,7 +453,7 @@ export async function pools(net: CotiNetworkName = ACTIVE_NETWORK): Promise<NFTP
     client.multicall({
       contracts: ids.map((i) => ({
         address: a.nftStaking,
-        abi: veilNFTStakingAbi,
+        abi: devoxNFTStakingAbi,
         functionName: "pool",
         args: [BigInt(i)],
       })),
@@ -462,7 +462,7 @@ export async function pools(net: CotiNetworkName = ACTIVE_NETWORK): Promise<NFTP
     client.multicall({
       contracts: ids.map((i) => ({
         address: a.nftStaking,
-        abi: veilNFTStakingAbi,
+        abi: devoxNFTStakingAbi,
         functionName: "apyBps",
         args: [BigInt(i)],
       })),
@@ -471,7 +471,7 @@ export async function pools(net: CotiNetworkName = ACTIVE_NETWORK): Promise<NFTP
     client.multicall({
       contracts: ids.map((i) => ({
         address: a.nftStaking,
-        abi: veilNFTStakingAbi,
+        abi: devoxNFTStakingAbi,
         functionName: "runway",
         args: [BigInt(i)],
       })),

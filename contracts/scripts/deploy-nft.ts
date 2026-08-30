@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 /**
- * Deploys the NFT stack and opens VEILPAD's own collection.
+ * Deploys the NFT stack and opens DEVOXPAD's own collection.
  *
  * Order is forced by dependency. The factory and marketplace stand alone; the
  * official collection has to exist before it can be marked official or paired;
@@ -21,21 +21,21 @@ const SUFFIX = "8888";
 
 /** The official collection. Free to mint, and capped like a real drop. */
 const OFFICIAL = {
-  name: "VEILPAD Genesis",
-  symbol: "VEILG",
+  name: "DEVOXPAD Genesis",
+  symbol: "DEVOXG",
   supply: 10_000n,
   price: 0n, // free mint
   maxPerWallet: 10n,
-  preview: "https://veilpad-nft.vercel.app/genesis/",
+  preview: "https://devoxpad-nft.vercel.app/genesis/",
   /** What only a holder can read. Sealed to each minter by the contract. */
-  secret: "VEILPAD Genesis · holder key · veilpad-nft.vercel.app/genesis/unlock",
+  secret: "DEVOXPAD Genesis · holder key · devoxpad-nft.vercel.app/genesis/unlock",
 };
 
 /** What a staked Genesis earns, and what backs it. */
 const PAIRING = {
-  rewardPerNftPerYear: ethers.parseUnits("500", 18), // 500 VEIL per NFT per year
+  rewardPerNftPerYear: ethers.parseUnits("500", 18), // 500 DEVOX per NFT per year
   notionalPerNft: 0n, // a free mint has no price to be a percentage of
-  budget: ethers.parseUnits("5000000", 18), // 5M VEIL escrowed up front
+  budget: ethers.parseUnits("5000000", 18), // 5M DEVOX escrowed up front
 };
 
 const MARKET_FEE_BPS = 250; // 2.5%
@@ -66,32 +66,32 @@ async function main() {
   const suffix = isMainnet ? "MAINNET" : "TESTNET";
   const netKey = isMainnet ? "mainnet" : "testnet";
 
-  const veil = process.env["NEXT_PUBLIC_VEIL_TOKEN_" + suffix] || "";
-  if (!veil) throw new Error("VEILPAD token address missing for " + netKey);
+  const devox = process.env["NEXT_PUBLIC_DEVOX_TOKEN_" + suffix] || "";
+  if (!devox) throw new Error("DEVOXPAD token address missing for " + netKey);
 
   console.log("network :", network.name);
   console.log("deployer:", deployer.address);
   console.log("balance :", ethers.formatEther(await ethers.provider.getBalance(deployer.address)), "COTI");
-  console.log("$VEIL   :", veil, "\n");
+  console.log("$DEVOX   :", devox, "\n");
 
   // ── the three singletons ────────────────────────────────────────────────
   console.log("deploying:");
-  const { address: factoryAddr, contract: factory } = await deploy("VeilNFTFactory", [
+  const { address: factoryAddr, contract: factory } = await deploy("DevoxNFTFactory", [
     deployer.address,
     deployer.address,
     LAUNCH_FEE,
   ]);
-  const { address: marketAddr } = await deploy("VeilNFTMarket", [
+  const { address: marketAddr } = await deploy("DevoxNFTMarket", [
     deployer.address,
     deployer.address,
     MARKET_FEE_BPS,
   ]);
-  const { address: stakingAddr } = await deploy("VeilNFTStaking", [deployer.address]);
+  const { address: stakingAddr } = await deploy("DevoxNFTStaking", [deployer.address]);
 
   // Re-attached through getContractAt so the calls below are typed. The factory
   // handle from `deploy` is a bare BaseContract and knows none of these methods.
-  const market = await ethers.getContractAt("VeilNFTMarket", marketAddr);
-  const staking = await ethers.getContractAt("VeilNFTStaking", stakingAddr);
+  const market = await ethers.getContractAt("DevoxNFTMarket", marketAddr);
+  const staking = await ethers.getContractAt("DevoxNFTStaking", stakingAddr);
 
   // ── the official collection, at a mined address ─────────────────────────
   const params = {
@@ -140,7 +140,7 @@ async function main() {
 
   const code = await ethers.provider.getCode(predicted);
   if (code === "0x") throw new Error("collection did not land at the predicted address");
-  console.log("  VEILPAD Genesis   " + predicted + "  (mined, verified on chain)");
+  console.log("  DEVOXPAD Genesis   " + predicted + "  (mined, verified on chain)");
 
   // ── the private metadata, encrypted to the network ──────────────────────
   //
@@ -161,7 +161,7 @@ async function main() {
   await cotiWallet.generateOrRecoverAes();
   console.log("  deployer AES key ready");
 
-  const drop = await ethers.getContractAt("VeilNFTDrop", predicted);
+  const drop = await ethers.getContractAt("DevoxNFTDrop", predicted);
   const selector = drop.interface.getFunction("setSecret")!.selector;
   const encrypted = await cotiWallet.encryptValue(OFFICIAL.secret, predicted, selector);
 
@@ -176,12 +176,12 @@ async function main() {
   await (await market.setRoyalty(predicted, deployer.address, 500, { gasLimit: 300_000 })).wait();
   console.log("  royalty 5% to the creator");
 
-  const token = await ethers.getContractAt("VeilpadToken", veil);
+  const token = await ethers.getContractAt("DevoxpadToken", devox);
   await (await token.approve(stakingAddr, PAIRING.budget, { gasLimit: 200_000 })).wait();
   await (
     await staking.openPool(
       predicted,
-      veil,
+      devox,
       PAIRING.rewardPerNftPerYear,
       PAIRING.notionalPerNft,
       PAIRING.budget,
@@ -189,7 +189,7 @@ async function main() {
     )
   ).wait();
   console.log(
-    "  paired with $VEIL: " +
+    "  paired with $DEVOX: " +
       ethers.formatUnits(PAIRING.rewardPerNftPerYear, 18) +
       " per NFT per year, " +
       Number(ethers.formatUnits(PAIRING.budget, 18)).toLocaleString("en-US") +
@@ -217,7 +217,7 @@ async function main() {
       OFFICIAL.maxPerWallet +
       " per wallet, metadata sealed to the holder.",
   );
-  console.log("Stake one and it earns $VEIL. Runway with nothing staked yet: unbounded (" + staked + ").");
+  console.log("Stake one and it earns $DEVOX. Runway with nothing staked yet: unbounded (" + staked + ").");
 }
 
 function writeMasterTable(
@@ -227,7 +227,7 @@ function writeMasterTable(
   staking: string,
   genesis: string,
 ) {
-  const file = path.resolve(__dirname, "../../config/veilpad." + netKey + ".json");
+  const file = path.resolve(__dirname, "../../config/devoxpad." + netKey + ".json");
   if (!fs.existsSync(file)) return;
   const table = JSON.parse(fs.readFileSync(file, "utf8"));
 
@@ -247,7 +247,7 @@ function writeMasterTable(
         supply: OFFICIAL.supply.toString(),
         mintPrice: "0",
         maxPerWallet: OFFICIAL.maxPerWallet.toString(),
-        pairedWith: "VEIL",
+        pairedWith: "DEVOX",
         rewardPerNftPerYear: ethers.formatUnits(PAIRING.rewardPerNftPerYear, 18),
         budget: ethers.formatUnits(PAIRING.budget, 18),
       },

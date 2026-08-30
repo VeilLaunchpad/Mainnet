@@ -68,7 +68,7 @@ export default function NFTHome() {
         right={
           <Link
             href="/nft/studio"
-            className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+            className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
           >
             Open the Studio
           </Link>
@@ -83,33 +83,33 @@ export default function NFTHome() {
       </Section>
 
       {official && (
-        <Section className="mt-10" kicker="Official" title="VEILPAD Genesis">
+        <Section className="mt-10" kicker="Official" title="DEVOXPAD Genesis">
           <Link
             href={"/nft/collection/" + official.address}
             className="card flex flex-col gap-5 p-5 transition hover:border-white/20 sm:flex-row sm:items-center"
           >
             <div className="size-28 shrink-0 overflow-hidden rounded-xl border border-white/10">
-              <div className="flex size-full items-center justify-center bg-gradient-to-br from-veil-600/40 to-cy-500/20">
+              <div className="flex size-full items-center justify-center bg-gradient-to-br from-devox-600/40 to-cy-500/20">
                 <span className="mono text-2xl font-black text-white/50">VG</span>
               </div>
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-lg font-bold">{official.name}</span>
-                <Badge tone="veil">Official</Badge>
+                <Badge tone="devox">Official</Badge>
                 {official.paired && official.paired.apyBps > 0 && (
                   <Badge tone="mint">{(official.paired.apyBps / 100).toFixed(0)}% APY</Badge>
                 )}
               </div>
               <p className="mt-1.5 max-w-2xl text-[13px] text-white/45">
-                10,000 free to mint, ten per wallet, paired with $VEIL so a staked Genesis earns
-                yield. The address was mined to end in 8888, like every VEILPAD launch.
+                10,000 free to mint, ten per wallet, paired with $DEVOX so a staked Genesis earns
+                yield. The address was mined to end in 8888, like every DEVOXPAD launch.
               </p>
               <div className="mono mt-2.5 flex flex-wrap gap-4 text-[11px] text-white/35">
                 <span>{Number(official.minted).toLocaleString()} minted</span>
                 <span>{Number(official.maxSupply).toLocaleString()} supply</span>
                 <span>Free mint</span>
-                <span className="text-veil-300/70">…{official.address.slice(-4)}</span>
+                <span className="text-devox-300/70">…{official.address.slice(-4)}</span>
               </div>
             </div>
             <div className="shrink-0 rounded-xl bg-white/[0.06] px-4 py-2 text-[13px] font-semibold">

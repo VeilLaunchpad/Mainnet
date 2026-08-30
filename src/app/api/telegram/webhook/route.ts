@@ -33,7 +33,7 @@ import {
   collection as nftCollection,
   pools as nftPools,
 } from "@/lib/nft";
-import { veilNFTDropAbi, veilNFTStakingAbi } from "@/lib/nft-abis";
+import { devoxNFTDropAbi, devoxNFTStakingAbi } from "@/lib/nft-abis";
 import { nativeBalance, readCurve, publicClient } from "@/lib/rpc";
 import { isDeployed, addressesFor } from "@/lib/addresses";
 import {
@@ -203,7 +203,7 @@ function start(chatId: string, firstName: string, linked: boolean, net: CotiNetw
 
   return sendMessage(
     chatId,
-    h`🕶️ <b>VEILPAD</b>
+    h`🕶️ <b>DEVOXPAD</b>
 <i>The agentic privacy superapp on COTI</i>
 
 👋 ${hello}. I carry the same agents that run on the site, and I read the chain for you right here in this chat.
@@ -328,7 +328,7 @@ function help(chatId: string) {
 🌱 /nftstake  every pool, its rate and its runway
 
 <b>🤖 Agents</b>
-/agent &lt;name&gt;  veil · shade · forge · relay · ledger · oracle
+/agent &lt;name&gt;  devox · shade · forge · relay · ledger · oracle
 
 <b>⛓ Network</b>
 🔄 /switch  pick mainnet or testnet, with buttons
@@ -477,7 +477,7 @@ async function launches(chatId: string, net: CotiNetworkName) {
       const curve = isDeployed(t.curve) ? await readCurve(t.curve as Address, net).catch(() => null) : null;
       const pooled = t.graduated || curve?.graduated;
       const state = pooled
-        ? "🏊 pooled on VeilSwap"
+        ? "🏊 pooled on DevoxSwap"
         : curve
           ? "📈 " + curve.progress.toFixed(1) + "% to graduation"
           : "📉 on the curve";
@@ -524,7 +524,7 @@ async function token(chatId: string, arg: string, address?: string) {
     recordChatActivity(chatId, address, "telegram_read", "Checked " + d.token.symbol, "via Telegram");
   }
 
-  const facts: string[] = [h`🏛 Venue: ${d.pool ? "VeilSwap" : "bonding curve"}`];
+  const facts: string[] = [h`🏛 Venue: ${d.pool ? "DevoxSwap" : "bonding curve"}`];
   if (d.pool) facts.push(h`💵 Price: ${d.pool.priceCoti.toExponential(4)} COTI`);
   if (d.curve && !d.curve.graduated) {
     facts.push(
@@ -587,7 +587,7 @@ ${raw(cross)}
  * Switching agents, and seeing which ones exist.
  *
  * The list is built for whoever this chat speaks for: the house agents that
- * ship with VEILPAD, plus the agents that address created. A private agent
+ * ship with DEVOXPAD, plus the agents that address created. A private agent
  * belongs to its creator, so it appears here only when the chat is linked to
  * that address, and never in anyone else's list.
  */
@@ -625,7 +625,7 @@ Link this chat with /link and the agents you built will show up here. Nobody els
 ${raw(mineList)}`
         : h`🔒 <b>Your agents</b>
 You have not built one yet. ${APP}/agents/new
-<i>It runs on VEILPAD infrastructure, so it keeps working after you close this chat.</i>`;
+<i>It runs on DEVOXPAD infrastructure, so it keeps working after you close this chat.</i>`;
 
     return sendMessage(
       chatId,
@@ -705,7 +705,7 @@ ${raw(lines.join("\n\n"))}
 /* ── talking to the agent ───────────────────────────────────────────────── */
 
 async function talk(chatId: string, text: string, link: { address: string; agent: string } | null) {
-  const agent = getAgent(link?.agent || "veil");
+  const agent = getAgent(link?.agent || "devox");
   if (!agent) return sendMessage(chatId, h`😴 No agent is available right now.`);
 
   // The turn can take seconds, so say something is happening.
@@ -868,7 +868,7 @@ async function nftCommand(chatId: string, args: string, net: CotiNetworkName) {
     if (!c) {
       return sendMessage(
         chatId,
-        h`🤷 No VEILPAD collection at that address on ${net}.
+        h`🤷 No DEVOXPAD collection at that address on ${net}.
 
 It might live on the other network — /switch — or be a plain NFT contract.`,
       );
@@ -923,7 +923,7 @@ It might live on the other network — /switch — or be a plain NFT contract.`,
 
   return sendMessage(
     chatId,
-    h`🖼 <b>VEILPAD NFT · ${net}</b>
+    h`🖼 <b>DEVOXPAD NFT · ${net}</b>
 
 ${raw(lines.join("\n\n"))}
 
@@ -948,7 +948,7 @@ async function myNft(chatId: string, net: CotiNetworkName, address?: string) {
       chatId,
       h`🖼 <b>Nothing yet</b>
 
-You do not hold any VEILPAD NFTs on ${net}.
+You do not hold any DEVOXPAD NFTs on ${net}.
 
 🎟 The official Genesis drop is a free mint — ${APP}/nft`,
     );
@@ -1041,7 +1041,7 @@ async function heldByAcross(
 
     const count = Number(
       await client
-        .readContract({ address: c.address, abi: veilNFTDropAbi, functionName: "balanceOf", args: [who] })
+        .readContract({ address: c.address, abi: devoxNFTDropAbi, functionName: "balanceOf", args: [who] })
         .catch(() => 0n),
     );
 
@@ -1051,7 +1051,7 @@ async function heldByAcross(
       const s = await client
         .readContract({
           address: a.nftStaking,
-          abi: veilNFTStakingAbi,
+          abi: devoxNFTStakingAbi,
           functionName: "stakeOf",
           args: [BigInt(c.paired.poolId), who],
         })
@@ -1062,7 +1062,7 @@ async function heldByAcross(
         const owed = (await client
           .readContract({
             address: a.nftStaking,
-            abi: veilNFTStakingAbi,
+            abi: devoxNFTStakingAbi,
             functionName: "pendingReward",
             args: [BigInt(c.paired.poolId), who],
           })

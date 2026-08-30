@@ -36,7 +36,7 @@ async function main() {
   console.log("deploying:");
 
   const tokenDeployer = await deployContract("PortalTokenDeployer");
-  const portal = await deployContract("VeilPortal", [tokenDeployer]);
+  const portal = await deployContract("DevoxPortal", [tokenDeployer]);
 
   const suffix = network.name === "cotiMainnet" ? "MAINNET" : "TESTNET";
   const netKey = network.name === "cotiMainnet" ? "mainnet" : "testnet";
@@ -49,22 +49,22 @@ async function main() {
 
   console.log("");
   console.log("NEXT_PUBLIC_PORTAL_" + suffix + "=" + portal);
-  console.log("Updated ../config/veilpad." + netKey + ".json");
+  console.log("Updated ../config/devoxpad." + netKey + ".json");
 }
 
 function writeMasterTable(netKey: string, addresses: Record<string, string>) {
-  const file = path.resolve(__dirname, "../../config/veilpad." + netKey + ".json");
+  const file = path.resolve(__dirname, "../../config/devoxpad." + netKey + ".json");
   if (!fs.existsSync(file)) return;
 
   const table = JSON.parse(fs.readFileSync(file, "utf8"));
-  const block = table?.contracts?.veilpad;
+  const block = table?.contracts?.devoxpad;
   if (!block) return;
 
   const roles: Record<string, string> = {
     portal:
       "Privacy portal. Locks a public token and mints its private twin one to one; burns the twin to release the escrow.",
     portalTokenDeployer:
-      "Holds VeilPortalToken creation code so the portal stays under the 24KB limit. Renounces its own admin on every twin it makes.",
+      "Holds DevoxPortalToken creation code so the portal stays under the 24KB limit. Renounces its own admin on every twin it makes.",
   };
 
   for (const [key, address] of Object.entries(addresses)) {

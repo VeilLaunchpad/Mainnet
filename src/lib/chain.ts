@@ -73,13 +73,13 @@ export type CotiChain = (typeof chainByNetwork)[CotiNetworkName];
 /**
  * What each network is called in the interface.
  *
- * Both are VEILPAD; only the chain underneath differs. Naming them after the
+ * Both are DEVOXPAD; only the chain underneath differs. Naming them after the
  * app rather than after COTI is what makes the switch read as one product on
  * two chains instead of two separate deployments.
  */
 export const NETWORK_LABEL: Record<CotiNetworkName, string> = {
-  mainnet: "VEILPAD Mainnet",
-  testnet: "VEILPAD Testnet",
+  mainnet: "DEVOXPAD Mainnet",
+  testnet: "DEVOXPAD Testnet",
 };
 
 export const NETWORK_BLURB: Record<CotiNetworkName, string> = {
@@ -111,13 +111,13 @@ export const ACTIVE_NETWORK: CotiNetworkName = DEFAULT_NETWORK;
 export const activeChain = chainByNetwork[DEFAULT_NETWORK];
 
 /** How the chosen network travels: a cookie the server can read, plus a query string. */
-export const NETWORK_COOKIE = "veil-network";
+export const NETWORK_COOKIE = "devox-network";
 export const NETWORK_PARAM = "network";
 
 /**
  * The parameter a per-network host pins itself with.
  *
- * `veilpad-mainnet.vercel.app` proxies every request to the origin with
+ * `devoxpad-mainnet.vercel.app` proxies every request to the origin with
  * `__net=mainnet` attached, and that beats both the query string and the
  * cookie. A hostname that names a network has to mean that network for
  * everyone who opens the link, or it is not worth having.
@@ -132,7 +132,7 @@ export const NETWORK_PIN_PARAM = "__net";
  * Hostnames that pin a network, and the network each one means.
  *
  * Two shapes are recognised. The first is a real subdomain, which is what a
- * custom domain would give: `mainnet.veilpad.app`. The second is a dedicated
+ * custom domain would give: `mainnet.devoxpad.app`. The second is a dedicated
  * project host, which is what Vercel actually allows today, since it reserves
  * the `*.vercel.app` namespace and will not delegate a subdomain of a project
  * URL. Supporting both means moving to a custom domain later changes nothing
@@ -146,14 +146,14 @@ export function hostPin(host: string | null | undefined): CotiNetworkName | null
   if (h.startsWith("testnet.")) return "testnet";
 
   const label = h.split(".")[0];
-  if (label === "veilpad-mainnet" || label.startsWith("veilpad-mainnet-")) return "mainnet";
-  if (label === "veilpad-testnet" || label.startsWith("veilpad-testnet-")) return "testnet";
+  if (label === "devoxpad-mainnet" || label.startsWith("devoxpad-mainnet-")) return "mainnet";
+  if (label === "devoxpad-testnet" || label.startsWith("devoxpad-testnet-")) return "testnet";
 
   return null;
 }
 
 /**
- * VEILPAD's own token on mainnet, the one every other copy is measured against.
+ * DEVOXPAD's own token on mainnet, the one every other copy is measured against.
  *
  * It lives here rather than beside the seeding code because the client needs it
  * too - the testnet launchpad points at it by address - and that module reaches
@@ -163,8 +163,8 @@ export const OFFICIAL_MAINNET_TOKEN = "0x11728cBe1734b437723D06Dd137549e05f35888
 
 /** Where to send someone who wants the other network as a URL rather than a cookie. */
 export const NETWORK_HOST: Record<CotiNetworkName, string> = {
-  mainnet: "https://veilpad-mainnet.vercel.app",
-  testnet: "https://veilpad-testnet.vercel.app",
+  mainnet: "https://devoxpad-mainnet.vercel.app",
+  testnet: "https://devoxpad-testnet.vercel.app",
 };
 
 export function chainFor(net: CotiNetworkName) {

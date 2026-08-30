@@ -8,7 +8,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 /**
- * @title VeilNFTMarket - listings and offers, without taking custody.
+ * @title DevoxNFTMarket - listings and offers, without taking custody.
  *
  * A listing is an approval and a price, not a deposit. The seller keeps the NFT
  * in their own wallet the whole time, which matters more here than usual: on a
@@ -25,7 +25,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
  * good when it is accepted, so the money is escrowed here. An offer nobody can
  * pay is not an offer.
  */
-contract VeilNFTMarket is Ownable, ReentrancyGuard {
+contract DevoxNFTMarket is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     address public constant NATIVE = address(0);
@@ -102,7 +102,7 @@ contract VeilNFTMarket is Ownable, ReentrancyGuard {
     }
 
     /**
-     * Marks a collection as VEILPAD's own.
+     * Marks a collection as DEVOXPAD's own.
      *
      * A marketplace is exactly where a convincing copy gets listed beside the
      * real thing, so "official" is a flag the contract owner sets and the card

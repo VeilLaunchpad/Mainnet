@@ -59,7 +59,7 @@ export function NetworkChooser() {
       >
         <div className="animate-rise my-auto w-full max-w-lg overflow-hidden rounded-2xl border border-white/12 bg-ink-900 shadow-2xl shadow-black/70">
           <div className="border-b border-white/[0.07] px-5 py-4">
-            <h2 className="text-[16px] font-semibold">Which VEILPAD?</h2>
+            <h2 className="text-[16px] font-semibold">Which DEVOXPAD?</h2>
             <p className="mt-0.5 text-[12.5px] leading-relaxed text-white/45">
               The same app runs on both COTI networks. They share nothing: separate
               contracts, separate launches, separate balances.

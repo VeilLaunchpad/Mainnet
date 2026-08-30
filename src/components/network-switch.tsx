@@ -14,7 +14,7 @@ import {
 import { Spinner } from "./busy";
 
 /**
- * Switching between VEILPAD Mainnet and VEILPAD Testnet.
+ * Switching between DEVOXPAD Mainnet and DEVOXPAD Testnet.
  *
  * The app half of the switch is instant: context changes, contracts change,
  * every page re-reads. The wallet half is a request, because only the wallet
@@ -149,7 +149,7 @@ export function NetworkSwitch() {
                 {busy === n ? (
                   <Spinner size={12} />
                 ) : selected ? (
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="mt-1 text-veil-300">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="mt-1 text-devox-300">
                     <path d="m2.5 6.5 2.5 2.5 4.5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 ) : null}

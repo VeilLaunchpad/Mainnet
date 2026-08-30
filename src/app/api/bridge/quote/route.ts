@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         error: "quote-failed",
         message:
-          "COTI's price oracle would not quote this route just now. That is the bridge declining, not VEILPAD.",
+          "COTI's price oracle would not quote this route just now. That is the bridge declining, not DEVOXPAD.",
         detail: String((e as Error).message || e).slice(0, 200),
       },
       { status: 502 },
@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
  *
  * There is no contract on either side. COTI's bridge sends the token to a
  * recipient address its relayer watches, then credits the same address on the
- * far chain. That is a plain transfer, so VEILPAD can build and send it in
+ * far chain. That is a plain transfer, so DEVOXPAD can build and send it in
  * app, and the only thing it must never do is guess the recipient.
  */
 function crossChainQuote(b: Body, net: CotiNetworkName) {
@@ -212,7 +212,7 @@ function crossChainQuote(b: Body, net: CotiNetworkName) {
     inApp: true,
     direction: toCoti ? "eth_to_coti" : "coti_to_eth",
     asset: { key: asset.key, symbol: asset.symbol, decimals: asset.decimals },
-    /** The transfer VEILPAD builds for you to sign here. */
+    /** The transfer DEVOXPAD builds for you to sign here. */
     transfer: {
       chainId: toCoti ? cc.ethChainId : cc.cotiChainId,
       token: toCoti ? asset.ethToken : asset.cotiToken,

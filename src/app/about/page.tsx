@@ -42,7 +42,7 @@ export default async function AboutPage() {
             <p className="mt-2.5 text-[13px] leading-relaxed text-white/50">
               To read your own encrypted state you need an AES key. Your wallet signs an RSA public
               key, the on-chain onboarding contract returns the AES key sealed to it, and the SDK
-              unwraps it locally. VEILPAD caches it in your browser so you sign once.
+              unwraps it locally. DEVOXPAD caches it in your browser so you sign once.
             </p>
             <p className="mt-2.5 text-[13px] leading-relaxed text-white/50">
               It never reaches our server. Every decrypt on this site - your balance, your inbox -
@@ -52,13 +52,13 @@ export default async function AboutPage() {
         </div>
 
         <div className="card mt-3 p-6">
-          <h2 className="text-[17px] font-semibold">What VEILPAD adds on top</h2>
+          <h2 className="text-[17px] font-semibold">What DEVOXPAD adds on top</h2>
           <div className="mt-4 grid gap-5 md:grid-cols-3">
             <div>
-              <Badge tone="veil">Launchpad</Badge>
+              <Badge tone="devox">Launchpad</Badge>
               <p className="mt-2 text-[13px] leading-relaxed text-white/50">
                 A PrivateERC20 plus a bonding curve deploy together. The curve fills, graduates, and
-                seeds a VeilSwap pair with its whole reserve, and the LP is locked in the curve.
+                seeds a DevoxSwap pair with its whole reserve, and the LP is locked in the curve.
               </p>
             </div>
             <div>
@@ -81,13 +81,13 @@ export default async function AboutPage() {
         <div className="card mt-3 p-6">
           <h2 className="text-[17px] font-semibold">Built on the COTI agent skill stack</h2>
           <p className="mt-1.5 text-[13px] text-white/45">
-            These are the primitives VEILPAD sits on. Each is a real skill you can hand to your own
+            These are the primitives DEVOXPAD sits on. Each is a real skill you can hand to your own
             agent outside this app.
           </p>
           <div className="mt-4 space-y-2">
             {SKILLS.map(([name, body]) => (
               <div key={name} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-white/[0.05] pb-2 last:border-0">
-                <span className="mono text-[12px] font-medium text-veil-300">{name}</span>
+                <span className="mono text-[12px] font-medium text-devox-300">{name}</span>
                 <span className="flex-1 text-[12px] leading-relaxed text-white/45">{body}</span>
               </div>
             ))}
@@ -120,13 +120,13 @@ export default async function AboutPage() {
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href="/launch"
-              className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+              className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
             >
               Launch something
             </Link>
             <Link
               href="/agents"
-              className="rounded-xl border border-white/12 px-4 py-2.5 text-[13px] font-semibold transition hover:border-veil-400/50"
+              className="rounded-xl border border-white/12 px-4 py-2.5 text-[13px] font-semibold transition hover:border-devox-400/50"
             >
               Talk to an agent
             </Link>

@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
- * @title VeilTestToken - a stand-in for a mainnet asset, on testnet only.
+ * @title DevoxTestToken - a stand-in for a mainnet asset, on testnet only.
  *
  * The COTI privacy portal carries seven assets on mainnet: COTI, wETH, wBTC,
  * USDT, USDC.e, wADA and gCOTI. None of them exist on testnet, so testing the
@@ -15,7 +15,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * a wrapper gets wrong: a six-decimal stablecoin treated as eighteen misprices
  * by a factor of a trillion.
  */
-contract VeilTestToken is ERC20 {
+contract DevoxTestToken is ERC20 {
     uint8 private immutable _decimals;
 
     /// The asset this stands in for, so nobody mistakes it for the real thing.

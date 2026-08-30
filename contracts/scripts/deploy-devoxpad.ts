@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 /**
- * Deploys the VEILPAD protocol token, its treasury and staking.
+ * Deploys the DEVOXPAD protocol token, its treasury and staking.
  *
  * The token address is mined before it exists, the same way every launch on
  * this platform is: CREATE2 turns the address into a function of the salt, so a
@@ -18,8 +18,8 @@ import * as path from "node:path";
 
 const SUFFIX = "8888";
 
-const NAME = "VEILPAD";
-const SYMBOL = "VEIL";
+const NAME = "DEVOXPAD";
+const SYMBOL = "DEVOX";
 const SUPPLY = ethers.parseUnits("1000000000", 18); // one billion, fixed forever
 
 /** A fifth of supply is set aside to pay staking, and nothing can mint more. */
@@ -30,7 +30,7 @@ const TREASURY_ALLOCATION = ethers.parseUnits("200000000", 18);
  *
  * A fixed APY on an unbounded deposit is an unbounded promise, so every pool is
  * capped and the cap is what makes the promise keepable. At these numbers the
- * treasury owes at most about 4.04M VEIL a year against a 200M reserve, which
+ * treasury owes at most about 4.04M DEVOX a year against a 200M reserve, which
  * is roughly fifty years of runway before anyone has to top it up.
  */
 interface PoolPlan {
@@ -46,7 +46,7 @@ interface PoolPlan {
 
 const GCOTI_MAINNET = "0x7637C7838EC4Ec6b85080F28A678F8E234bB83D1";
 
-function plans(veil: string, isMainnet: boolean): PoolPlan[] {
+function plans(devox: string, isMainnet: boolean): PoolPlan[] {
   const gcoti = isMainnet ? GCOTI_MAINNET : process.env.NEXT_PUBLIC_GCOTI_TESTNET || "";
   const list: PoolPlan[] = [
     {
@@ -60,14 +60,14 @@ function plans(veil: string, isMainnet: boolean): PoolPlan[] {
       blurb: "Stake the gas token itself.",
     },
     {
-      key: "VEIL",
-      token: veil,
+      key: "DEVOX",
+      token: devox,
       apyBps: 1800,
       cap: ethers.parseUnits("20000000", 18),
       minStake: ethers.parseUnits("1", 18),
       maxPerUser: ethers.parseUnits("2000000", 18), // a tenth of the pool
       privateToken: false,
-      blurb: "Stake VEILPAD, earn VEILPAD.",
+      blurb: "Stake DEVOXPAD, earn DEVOXPAD.",
     },
   ];
 
@@ -141,11 +141,11 @@ async function main() {
   if (balance === 0n) throw new Error("Deployer has no COTI.");
 
   const metadataURI =
-    process.env.VEIL_METADATA_URI || "https://veilpad-app.vercel.app/veil.json";
+    process.env.DEVOX_METADATA_URI || "https://devoxpad-app.vercel.app/devox.json";
 
   console.log("deploying:");
   const { address: deployerAddress, contract: tokenDeployer } =
-    await deployContract("VeilpadTokenDeployer");
+    await deployContract("DevoxpadTokenDeployer");
 
   // ── mine the 8888 address ────────────────────────────────────────────────
   const initCodeHash = await (tokenDeployer as never as {
@@ -176,7 +176,7 @@ async function main() {
   console.log(
     "  found after " + attempts.toLocaleString("en-US") + " tries in " + (Date.now() - began) + "ms",
   );
-  console.log("  VEILPAD will be " + predicted);
+  console.log("  DEVOXPAD will be " + predicted);
 
   const deployTx = await (tokenDeployer as never as {
     deploy: (
@@ -191,24 +191,24 @@ async function main() {
   const code = await ethers.provider.getCode(predicted);
   if (code === "0x") throw new Error("token did not land at the predicted address");
   if (!predicted.toLowerCase().endsWith(SUFFIX)) throw new Error("address does not end in " + SUFFIX);
-  console.log("  VeilpadToken          " + predicted + "  (mined, verified on chain)");
+  console.log("  DevoxpadToken          " + predicted + "  (mined, verified on chain)");
 
-  const veil = await ethers.getContractAt("VeilpadToken", predicted);
+  const devox = await ethers.getContractAt("DevoxpadToken", predicted);
 
   // ── treasury and staking ─────────────────────────────────────────────────
   console.log("");
-  const { address: treasuryAddress } = await deployContract("VeilTreasury", [
+  const { address: treasuryAddress } = await deployContract("DevoxTreasury", [
     predicted,
     deployer.address,
   ]);
-  const { address: stakingAddress } = await deployContract("VeilStaking", [
+  const { address: stakingAddress } = await deployContract("DevoxStaking", [
     predicted,
     treasuryAddress,
     deployer.address,
   ]);
 
-  const treasury = await ethers.getContractAt("VeilTreasury", treasuryAddress);
-  const staking = await ethers.getContractAt("VeilStaking", stakingAddress);
+  const treasury = await ethers.getContractAt("DevoxTreasury", treasuryAddress);
+  const staking = await ethers.getContractAt("DevoxStaking", stakingAddress);
 
   console.log("\nwiring:");
   // The grant is a budget, not a blank cheque: staking may pay out at most the
@@ -218,9 +218,9 @@ async function main() {
   ).wait();
   console.log("  staking approved as the only treasury spender");
 
-  await (await veil.approve(treasuryAddress, TREASURY_ALLOCATION, { gasLimit: 200_000 })).wait();
+  await (await devox.approve(treasuryAddress, TREASURY_ALLOCATION, { gasLimit: 200_000 })).wait();
   await (await treasury.fund(TREASURY_ALLOCATION, { gasLimit: 300_000 })).wait();
-  console.log("  treasury funded with " + ethers.formatUnits(TREASURY_ALLOCATION, 18) + " VEIL");
+  console.log("  treasury funded with " + ethers.formatUnits(TREASURY_ALLOCATION, 18) + " DEVOX");
 
   console.log("\npools:");
   const pools = plans(predicted, isMainnet);
@@ -252,40 +252,40 @@ async function main() {
   if (portal.startsWith("0x")) {
     console.log("\nprivate twin:");
     const seedAmount = ethers.parseUnits("1000", 18);
-    const p = await ethers.getContractAt("VeilPortal", portal);
-    await (await veil.approve(portal, seedAmount, { gasLimit: 200_000 })).wait();
+    const p = await ethers.getContractAt("DevoxPortal", portal);
+    await (await devox.approve(portal, seedAmount, { gasLimit: 200_000 })).wait();
     await (await p.wrap(predicted, seedAmount, { gasLimit: 12_000_000 })).wait();
     twin = await p.twinOf(predicted);
-    console.log("  p.VEILPAD             " + twin);
-    console.log("  backed by " + ethers.formatUnits(await p.locked(predicted), 18) + " VEIL in escrow");
+    console.log("  p.DEVOXPAD             " + twin);
+    console.log("  backed by " + ethers.formatUnits(await p.locked(predicted), 18) + " DEVOX in escrow");
   } else {
     console.log("\nprivate twin: skipped, no portal address for " + netKey);
   }
 
   // ── record it ────────────────────────────────────────────────────────────
   const mapping: Record<string, string> = {
-    ["NEXT_PUBLIC_VEIL_TOKEN_" + suffix]: predicted,
-    ["NEXT_PUBLIC_VEIL_TREASURY_" + suffix]: treasuryAddress,
-    ["NEXT_PUBLIC_VEIL_STAKING_" + suffix]: stakingAddress,
-    ["NEXT_PUBLIC_VEIL_TOKEN_DEPLOYER_" + suffix]: deployerAddress,
+    ["NEXT_PUBLIC_DEVOX_TOKEN_" + suffix]: predicted,
+    ["NEXT_PUBLIC_DEVOX_TREASURY_" + suffix]: treasuryAddress,
+    ["NEXT_PUBLIC_DEVOX_STAKING_" + suffix]: stakingAddress,
+    ["NEXT_PUBLIC_DEVOX_TOKEN_DEPLOYER_" + suffix]: deployerAddress,
   };
-  if (twin) mapping["NEXT_PUBLIC_VEIL_TOKEN_TWIN_" + suffix] = twin;
+  if (twin) mapping["NEXT_PUBLIC_DEVOX_TOKEN_TWIN_" + suffix] = twin;
 
   writeEnv(mapping);
   writeMasterTable(netKey, {
-    veilpadToken: predicted,
-    veilpadTokenDeployer: deployerAddress,
-    veilTreasury: treasuryAddress,
-    veilStaking: stakingAddress,
-    ...(twin ? { veilpadTokenTwin: twin } : {}),
+    devoxpadToken: predicted,
+    devoxpadTokenDeployer: deployerAddress,
+    devoxTreasury: treasuryAddress,
+    devoxStaking: stakingAddress,
+    ...(twin ? { devoxpadTokenTwin: twin } : {}),
   }, created, twin);
 
   console.log("\nWrote to ../.env.local:");
   for (const [k, v] of Object.entries(mapping)) console.log("  " + k + "=" + v);
-  console.log("Updated ../config/veilpad." + netKey + ".json");
+  console.log("Updated ../config/devoxpad." + netKey + ".json");
   console.log(
     "\nSupply is fixed at " + ethers.formatUnits(SUPPLY, 18) +
-      " VEIL. There is no mint function, so nothing can raise it.",
+      " DEVOX. There is no mint function, so nothing can raise it.",
   );
 }
 
@@ -295,36 +295,36 @@ function writeMasterTable(
   pools: { pid: number; key: string; token: string; apyBps: number; cap: string }[],
   twin: string,
 ) {
-  const file = path.resolve(__dirname, "../../config/veilpad." + netKey + ".json");
+  const file = path.resolve(__dirname, "../../config/devoxpad." + netKey + ".json");
   if (!fs.existsSync(file)) {
     console.warn("master table not found at " + file + " - skipping");
     return;
   }
 
   const table = JSON.parse(fs.readFileSync(file, "utf8"));
-  const block = table?.contracts?.veilpad;
+  const block = table?.contracts?.devoxpad;
   if (!block) return;
 
   const roles: Record<string, string> = {
-    veilpadToken:
+    devoxpadToken:
       "The protocol token. One billion, minted once in the constructor, with no mint function afterwards.",
-    veilpadTokenDeployer:
+    devoxpadTokenDeployer:
       "CREATE2 deployer that gave the protocol token its 8888 address. Holds no role over what it made.",
-    veilTreasury:
+    devoxTreasury:
       "Reward reserve for staking. Only the staking contract may spend it, and no staked principal is ever held here.",
-    veilStaking:
-      "Fixed-APY staking. Rewards are paid in VEILPAD from the treasury; principal never pays another user's reward.",
-    veilpadTokenTwin:
-      "p.VEILPAD, the private twin. Minted one to one against VEILPAD locked in VeilPortal.",
+    devoxStaking:
+      "Fixed-APY staking. Rewards are paid in DEVOXPAD from the treasury; principal never pays another user's reward.",
+    devoxpadTokenTwin:
+      "p.DEVOXPAD, the private twin. Minted one to one against DEVOXPAD locked in DevoxPortal.",
   };
 
   const suffix = netKey === "mainnet" ? "MAINNET" : "TESTNET";
   const envKeys: Record<string, string> = {
-    veilpadToken: "NEXT_PUBLIC_VEIL_TOKEN_" + suffix,
-    veilpadTokenDeployer: "NEXT_PUBLIC_VEIL_TOKEN_DEPLOYER_" + suffix,
-    veilTreasury: "NEXT_PUBLIC_VEIL_TREASURY_" + suffix,
-    veilStaking: "NEXT_PUBLIC_VEIL_STAKING_" + suffix,
-    veilpadTokenTwin: "NEXT_PUBLIC_VEIL_TOKEN_TWIN_" + suffix,
+    devoxpadToken: "NEXT_PUBLIC_DEVOX_TOKEN_" + suffix,
+    devoxpadTokenDeployer: "NEXT_PUBLIC_DEVOX_TOKEN_DEPLOYER_" + suffix,
+    devoxTreasury: "NEXT_PUBLIC_DEVOX_TREASURY_" + suffix,
+    devoxStaking: "NEXT_PUBLIC_DEVOX_STAKING_" + suffix,
+    devoxpadTokenTwin: "NEXT_PUBLIC_DEVOX_TOKEN_TWIN_" + suffix,
   };
 
   for (const [key, address] of Object.entries(addresses)) {
@@ -337,10 +337,10 @@ function writeMasterTable(
 
   table.staking = {
     _comment:
-      "Fixed APY per pool, paid in VEILPAD from VeilTreasury. Every pool is capped, and the caps are what bound what the treasury can owe.",
-    rewardToken: addresses.veilpadToken,
-    treasury: addresses.veilTreasury,
-    staking: addresses.veilStaking,
+      "Fixed APY per pool, paid in DEVOXPAD from DevoxTreasury. Every pool is capped, and the caps are what bound what the treasury can owe.",
+    rewardToken: addresses.devoxpadToken,
+    treasury: addresses.devoxTreasury,
+    staking: addresses.devoxStaking,
     pools: pools.map((p) => ({
       pid: p.pid,
       asset: p.key,
@@ -353,9 +353,9 @@ function writeMasterTable(
 
   table.token = {
     _comment: "The protocol token, not a launch. Fixed supply and no minter.",
-    address: addresses.veilpadToken,
-    symbol: "VEIL",
-    name: "VEILPAD",
+    address: addresses.devoxpadToken,
+    symbol: "DEVOX",
+    name: "DEVOXPAD",
     decimals: 18,
     totalSupply: "1000000000",
     mintable: false,

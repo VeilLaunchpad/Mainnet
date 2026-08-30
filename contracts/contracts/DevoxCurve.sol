@@ -2,12 +2,12 @@
 pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IWCOTI, IVeilMintable} from "./interfaces/IUniswapV3.sol";
-import {VeilSwapFactory} from "./VeilSwapFactory.sol";
-import {VeilSwapPair} from "./VeilSwapPair.sol";
+import {IWCOTI, IDevoxMintable} from "./interfaces/IUniswapV3.sol";
+import {DevoxSwapFactory} from "./DevoxSwapFactory.sol";
+import {DevoxSwapPair} from "./DevoxSwapPair.sol";
 
 /**
- * @title VeilCurve - the bonding curve a VEILPAD launch lives on until it graduates.
+ * @title DevoxCurve - the bonding curve a DEVOXPAD launch lives on until it graduates.
  *
  * Pricing is a constant-product curve over *virtual* reserves, so the very
  * first buyer does not need a counterparty and price rises smoothly with
@@ -23,7 +23,7 @@ import {VeilSwapPair} from "./VeilSwapPair.sol";
  * When real COTI raised reaches `graduationTarget`, trading on the curve stops
  * and `graduate()` moves everything into a Uniswap V3 pool.
  */
-contract VeilCurve is ReentrancyGuard {
+contract DevoxCurve is ReentrancyGuard {
     // ── configuration ────────────────────────────────────────────────────
     /// Set once by the factory immediately after deployment. The curve is
     /// deployed before its token so the token can name it as sole minter in
@@ -149,7 +149,7 @@ contract VeilCurve is ReentrancyGuard {
         accruedFees += fee;
         sold += tokensOut;
 
-        IVeilMintable(token).mint(msg.sender, tokensOut);
+        IDevoxMintable(token).mint(msg.sender, tokensOut);
 
         emit Traded(msg.sender, true, msg.value, tokensOut, spotPrice());
     }
@@ -174,8 +174,8 @@ contract VeilCurve is ReentrancyGuard {
         reserve -= gross;
         accruedFees += fee;
 
-        IVeilMintable(token).transferFrom(msg.sender, address(this), tokensIn);
-        IVeilMintable(token).burn(tokensIn);
+        IDevoxMintable(token).transferFrom(msg.sender, address(this), tokensIn);
+        IDevoxMintable(token).burn(tokensIn);
 
         (bool ok, ) = msg.sender.call{value: cotiOut}("");
         if (!ok) revert TransferFailed();
@@ -187,7 +187,7 @@ contract VeilCurve is ReentrancyGuard {
 
     /**
      * Permissionless once the target is hit. Freezes the curve, mints the pool
-     * allocation, and moves the entire reserve into a VeilSwap pair.
+     * allocation, and moves the entire reserve into a DevoxSwap pair.
      *
      * If no swap factory is configured on this network the curve still freezes
      * and holds the reserve, so `seedPool` can finish the job later rather than
@@ -231,19 +231,19 @@ contract VeilCurve is ReentrancyGuard {
         address wcoti,
         uint256 cotiLiquidity
     ) internal returns (address created) {
-        created = VeilSwapFactory(swapFactory).getPair(token, wcoti);
+        created = DevoxSwapFactory(swapFactory).getPair(token, wcoti);
         if (created == address(0)) {
-            created = VeilSwapFactory(swapFactory).createPair(token, wcoti);
+            created = DevoxSwapFactory(swapFactory).createPair(token, wcoti);
         }
 
         IWCOTI(wcoti).deposit{value: cotiLiquidity}();
-        IVeilMintable(token).mint(address(this), poolSupply);
+        IDevoxMintable(token).mint(address(this), poolSupply);
 
         // The pair pulls what it needs, so it must be allowed to.
         IWCOTI(wcoti).approve(created, cotiLiquidity);
-        IVeilMintable(token).approve(created, poolSupply);
+        IDevoxMintable(token).approve(created, poolSupply);
 
-        VeilSwapPair pair = VeilSwapPair(created);
+        DevoxSwapPair pair = DevoxSwapPair(created);
         (uint256 amount0, uint256 amount1) = pair.token0() == token
             ? (poolSupply, cotiLiquidity)
             : (cotiLiquidity, poolSupply);

@@ -27,7 +27,7 @@ const ASSETS: { name: string; symbol: string; decimals: number; represents: stri
 function tablePath() {
   return path.resolve(
     __dirname,
-    "../../config/veilpad." + (network.name === "cotiMainnet" ? "mainnet" : "testnet") + ".json",
+    "../../config/devoxpad." + (network.name === "cotiMainnet" ? "mainnet" : "testnet") + ".json",
   );
 }
 
@@ -51,8 +51,8 @@ async function deployContract(name: string, args: unknown[] = []) {
 async function main() {
   const [signer] = await ethers.getSigners();
   const table = JSON.parse(fs.readFileSync(tablePath(), "utf8"));
-  const portalAddress = table.contracts.veilpad.portal.address;
-  const portal = await ethers.getContractAt("VeilPortal", portalAddress);
+  const portalAddress = table.contracts.devoxpad.portal.address;
+  const portal = await ethers.getContractAt("DevoxPortal", portalAddress);
 
   console.log("signer :", signer.address);
   console.log("portal :", portalAddress);
@@ -63,7 +63,7 @@ async function main() {
   const deployed: Record<string, { address: string; decimals: number; name: string }> = {};
 
   for (const a of ASSETS) {
-    const address = await deployContract("VeilTestToken", [
+    const address = await deployContract("DevoxTestToken", [
       a.name,
       a.symbol,
       a.decimals,
@@ -79,7 +79,7 @@ async function main() {
 
   for (const a of ASSETS) {
     const info = deployed[a.symbol];
-    const token = await ethers.getContractAt("VeilTestToken", info.address);
+    const token = await ethers.getContractAt("DevoxTestToken", info.address);
 
     const mint = await token.faucet({ gasLimit: GAS.faucet });
     await mint.wait();

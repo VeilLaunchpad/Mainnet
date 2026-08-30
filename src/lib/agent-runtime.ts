@@ -45,11 +45,11 @@ and nobody copy-trades you. You watch the curve, you form a thesis, you size it,
 falsify it. You never claim a number you did not fetch with a tool.`,
 
   launcher: `You are a LAUNCH AGENT. You take a half-formed idea and turn it into a shipped token on
-VEILPAD: name, ticker, launch copy, and the actual on-chain launch. You are opinionated about naming
-and honest about risk. Tokens start on a bonding curve and graduate into a VeilSwap pair once the
+DEVOXPAD: name, ticker, launch copy, and the actual on-chain launch. You are opinionated about naming
+and honest about risk. Tokens start on a bonding curve and graduate into a DevoxSwap pair once the
 curve fills.
 
-Supply is fixed at 1,000,000,000 for every VEILPAD launch. Never ask the user to choose a supply and
+Supply is fixed at 1,000,000,000 for every DEVOXPAD launch. Never ask the user to choose a supply and
 never quote a different number. Ask only for what you actually need: ticker, name, description. An
 image, socials and a dev buy are optional. Keep, burn or lock of the dev's own tokens is chosen on
 the launch page at signing time, not by you.`,
@@ -86,7 +86,7 @@ export function systemPrompt(agent: AgentRow, ctx: ToolContext, extra?: string):
   }
 
   return [
-    `You are ${agent.name}, an autonomous agent living inside VEILPAD - the agentic privacy superapp on COTI.`,
+    `You are ${agent.name}, an autonomous agent living inside DEVOXPAD - the agentic privacy superapp on COTI.`,
     agent.tagline ? `Your tagline: ${agent.tagline}` : "",
     "",
     KIND_BRIEF[agent.kind] || KIND_BRIEF.research,
@@ -104,15 +104,15 @@ export function systemPrompt(agent: AgentRow, ctx: ToolContext, extra?: string):
      *
      * A model that has read a thousand launchpad docs will confidently ask for
      * an initial supply, because that is how most of them work. Stating the
-     * house rules here stops any agent inventing a flow VEILPAD does not have,
+     * house rules here stops any agent inventing a flow DEVOXPAD does not have,
      * including the ones with no launch tool of their own.
      */
-    `HOW VEILPAD ACTUALLY WORKS. Do not infer these from other launchpads:`,
+    `HOW DEVOXPAD ACTUALLY WORKS. Do not infer these from other launchpads:`,
     `- Every launch has a FIXED supply of 1,000,000,000 tokens. There is no supply choice. Never ask for one.`,
     `- A launch needs only a ticker, a name and a description. Image, socials and a dev buy are optional.`,
     `- Keeping, burning or locking the creator's own tokens is chosen on the launch page at signing time.`,
     `- Every launched contract address ends in 8888.`,
-    `- Tokens start on a bonding curve and graduate into a VeilSwap pair when the curve fills.`,
+    `- Tokens start on a bonding curve and graduate into a DevoxSwap pair when the curve fills.`,
     `- The bridge has two halves. COTI to COTI Private carries exactly seven assets: COTI, gCOTI, WETH,`,
     `  WBTC, USDT, USDC.e and WADA. Ethereum to COTI carries COTI and gCOTI only. These are settled`,
     `  facts, so state them directly rather than searching the web for them.`,
@@ -163,7 +163,7 @@ export function getAgent(idOrSlug: string): AgentRow | null {
  *
  * The rule is deliberately simple, because anything subtler gets a privacy
  * decision wrong eventually: a private agent is visible to the address that
- * created it and to nobody else, and the house agents that ship with VEILPAD
+ * created it and to nobody else, and the house agents that ship with DEVOXPAD
  * have no owner so they are always public.
  *
  * Passing no viewer is the anonymous case, and it sees only public agents.

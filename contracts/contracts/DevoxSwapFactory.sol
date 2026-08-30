@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {VeilSwapPair} from "./VeilSwapPair.sol";
+import {DevoxSwapPair} from "./DevoxSwapPair.sol";
 
 /**
- * @title VeilSwapFactory - one pair per token pair, deterministic and permissionless.
+ * @title DevoxSwapFactory - one pair per token pair, deterministic and permissionless.
  *
  * Deliberately Uniswap V2's shape: tokens sorted by address, CREATE2 with the
  * sorted pair as salt, so a pair's address is derivable off-chain before it
  * exists and nobody can front-run a listing into a different address.
  */
-contract VeilSwapFactory {
+contract DevoxSwapFactory {
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
 
@@ -39,8 +39,8 @@ contract VeilSwapFactory {
         if (getPair[token0][token1] != address(0)) revert PairExists();
 
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
-        pair = address(new VeilSwapPair{salt: salt}());
-        VeilSwapPair(pair).initialize(token0, token1);
+        pair = address(new DevoxSwapPair{salt: salt}());
+        DevoxSwapPair(pair).initialize(token0, token1);
 
         // Both directions, so callers never have to sort.
         getPair[token0][token1] = pair;
@@ -54,7 +54,7 @@ contract VeilSwapFactory {
     function pairFor(address tokenA, address tokenB) external view returns (address) {
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
-        bytes32 initCodeHash = keccak256(type(VeilSwapPair).creationCode);
+        bytes32 initCodeHash = keccak256(type(DevoxSwapPair).creationCode);
         return
             address(
                 uint160(

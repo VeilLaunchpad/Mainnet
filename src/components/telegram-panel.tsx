@@ -165,7 +165,7 @@ export function TelegramPanel({ address }: { address?: string }) {
                   <>Paste it below while this wallet is connected</>,
                 ].map((step, i) => (
                   <li key={i} className="flex gap-2.5 text-[13px] leading-relaxed text-white/60">
-                    <span className="mono mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border border-white/10 text-[10px] text-veil-400">
+                    <span className="mono mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border border-white/10 text-[10px] text-devox-400">
                       {i + 1}
                     </span>
                     <span>{step}</span>
@@ -185,7 +185,7 @@ export function TelegramPanel({ address }: { address?: string }) {
                 <button
                   onClick={redeem}
                   disabled={busy || !code.trim()}
-                  className="shrink-0 rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                  className="shrink-0 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                 >
                   {busy ? "Linking..." : "Link"}
                 </button>
@@ -242,7 +242,7 @@ export function TelegramPanel({ address }: { address?: string }) {
             <div className="mt-3 divide-y divide-white/[0.05]">
               {data.activity.map((a, i) => (
                 <div key={i} className="flex items-start gap-2.5 py-2.5">
-                  <Badge tone={a.kind === "telegram_chat" ? "veil" : "muted"}>
+                  <Badge tone={a.kind === "telegram_chat" ? "devox" : "muted"}>
                     {a.kind.replace("telegram_", "")}
                   </Badge>
                   <div className="min-w-0 flex-1">
@@ -261,13 +261,13 @@ export function TelegramPanel({ address }: { address?: string }) {
         <div className="card p-4">
           <h3 className="text-[13px] font-semibold">Your own agent, running without you</h3>
           <p className="mt-1.5 text-[12px] leading-relaxed text-white/45">
-            An agent you create runs on VEILPAD infrastructure, not in this tab. Turn on its
+            An agent you create runs on DEVOXPAD infrastructure, not in this tab. Turn on its
             heartbeat and it keeps watching after you close the browser, posting to its feed and
             reaching you in Telegram when something actually changes.
           </p>
           <Link
             href="/agents/new"
-            className="mt-3 block rounded-xl border border-veil-400/30 bg-veil-500/10 px-4 py-2.5 text-center text-[13px] font-semibold text-veil-300 transition hover:bg-veil-500/20"
+            className="mt-3 block rounded-xl border border-devox-400/30 bg-devox-500/10 px-4 py-2.5 text-center text-[13px] font-semibold text-devox-300 transition hover:bg-devox-500/20"
           >
             Create an agent
           </Link>

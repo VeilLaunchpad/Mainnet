@@ -10,12 +10,12 @@ import { ACTIVE_NETWORK, type CotiNetworkName } from "./chain";
  *  1. The privacy bridge. Contracts on COTI itself that take a public token
  *     and mint its private twin, or burn the twin and release the public
  *     token. Every one of them is a real, verified, callable contract, so
- *     VEILPAD does this in-app. Nothing is handed off.
+ *     DEVOXPAD does this in-app. Nothing is handed off.
  *
  *  2. The cross-chain bridge. Ethereum to COTI and back. This one has no
  *     contract on either side: the user sends the token to a recipient
  *     address and COTI's relayer credits the same address on the far chain.
- *     That is a plain transfer, which VEILPAD can also build in-app, so the
+ *     That is a plain transfer, which DEVOXPAD can also build in-app, so the
  *     signature happens here too.
  *
  * Only assets COTI actually operates appear here. There is no long menu of
@@ -446,7 +446,7 @@ export interface CrossChainAsset {
  * COTI's config names its destinations recipient addresses: the user sends the
  * token there and a relayer credits the same address on the far chain. That is
  * why there is no contract to call and never was, and it is also why a plain
- * transfer is enough for VEILPAD to run the whole thing in app.
+ * transfer is enough for DEVOXPAD to run the whole thing in app.
  *
  * The testnet addresses below are not from any doc. COTI does not publish
  * them, so each one was recovered by pulling completed transfers out of COTI's

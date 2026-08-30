@@ -1,7 +1,7 @@
 import { keccak256, encodePacked, getAddress, type Address, type Hex } from "viem";
 
 /**
- * Vanity addresses for VEILPAD launches.
+ * Vanity addresses for DEVOXPAD launches.
  *
  * Every token launched here lands on an address ending in 8888. That is not
  * decoration: it is a mark a lookalike cannot cheaply fake, so someone pasted a

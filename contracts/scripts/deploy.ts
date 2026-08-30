@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 /**
- * Deploys the VEILPAD stack and writes the resulting addresses straight back
+ * Deploys the DEVOXPAD stack and writes the resulting addresses straight back
  * into ../.env.local, so the app picks them up on the next boot with no
  * copy-paste step.
  */
@@ -55,13 +55,13 @@ async function main() {
   console.log("deploying:");
 
   out.WCOTI = await deployContract("WCOTI");
-  out.SWAP_FACTORY = await deployContract("VeilSwapFactory");
-  out.SWAP_ROUTER = await deployContract("VeilSwapRouter", [out.SWAP_FACTORY, out.WCOTI]);
+  out.SWAP_FACTORY = await deployContract("DevoxSwapFactory");
+  out.SWAP_ROUTER = await deployContract("DevoxSwapRouter", [out.SWAP_FACTORY, out.WCOTI]);
 
   const privDepAddr = await deployContract("PrivateTokenDeployer");
   const pubDepAddr = await deployContract("PublicTokenDeployer");
-  out.LOCKER = await deployContract("VeilLocker");
-  out.VEIL_FACTORY = await deployContract("VeilPadFactory", [
+  out.LOCKER = await deployContract("DevoxLocker");
+  out.DEVOX_FACTORY = await deployContract("DevoxPadFactory", [
     deployer.address,
     privDepAddr,
     pubDepAddr,
@@ -74,13 +74,13 @@ async function main() {
   // when the faucet hands out ten, so tune the curve to something a tester can
   // actually push over the line and watch graduate.
   if (network.name !== "cotiMainnet") {
-    const factory = await ethers.getContractAt("VeilPadFactory", out.VEIL_FACTORY);
+    const factory = await ethers.getContractAt("DevoxPadFactory", out.DEVOX_FACTORY);
     const tune = await factory.setParams(
       ethers.parseEther("2"),          // virtualCoti
       ethers.parseUnits("800000000", 18), // curveSupply
       ethers.parseUnits("200000000", 18), // poolSupply
       ethers.parseEther("2"),          // graduationTarget
-      3000,                            // feeTier, informational on VeilSwap
+      3000,                            // feeTier, informational on DevoxSwap
       { gasLimit: 300_000 },
     );
     await tune.wait();
@@ -90,7 +90,7 @@ async function main() {
   const suffix = network.name === "cotiMainnet" ? "MAINNET" : "TESTNET";
   const netKey = network.name === "cotiMainnet" ? "mainnet" : "testnet";
   const mapping: Record<string, string> = {
-    ["NEXT_PUBLIC_VEIL_FACTORY_" + suffix]: out.VEIL_FACTORY,
+    ["NEXT_PUBLIC_DEVOX_FACTORY_" + suffix]: out.DEVOX_FACTORY,
     ["NEXT_PUBLIC_PROFILE_REGISTRY_" + suffix]: out.PROFILE_REGISTRY,
     ["NEXT_PUBLIC_AGENT_REGISTRY_" + suffix]: out.AGENT_REGISTRY,
     ["NEXT_PUBLIC_WCOTI_" + suffix]: out.WCOTI,
@@ -112,7 +112,7 @@ async function main() {
       locker: out.LOCKER,
       privateTokenDeployer: privDepAddr,
       publicTokenDeployer: pubDepAddr,
-      factory: out.VEIL_FACTORY,
+      factory: out.DEVOX_FACTORY,
       profileRegistry: out.PROFILE_REGISTRY,
       agentRegistry: out.AGENT_REGISTRY,
     },
@@ -121,16 +121,16 @@ async function main() {
 
   console.log("\nWrote to ../.env.local:");
   for (const [k, v] of Object.entries(mapping)) console.log("  " + k + "=" + v);
-  console.log("Updated ../config/veilpad." + netKey + ".json");
+  console.log("Updated ../config/devoxpad." + netKey + ".json");
   console.log(
-    "\nVeilSwap is the DEX graduated launches land in. COTI has no Uniswap" +
+    "\nDevoxSwap is the DEX graduated launches land in. COTI has no Uniswap" +
       "\ndeployment, and a stock V2 pair could not work here anyway: it derives" +
       "\nreserves from balanceOf, which on a PrivateERC20 is ciphertext.",
   );
 }
 
 /**
- * Rewrites only the veilpad contract block and the deployer status. Curve
+ * Rewrites only the devoxpad contract block and the deployer status. Curve
  * tuning, routes and the agent catalog are left exactly as they were - this
  * script deploys contracts, it does not own the rest of the table.
  */
@@ -139,16 +139,16 @@ function writeMasterTable(
   addresses: Record<string, string>,
   deployerAddress: string,
 ) {
-  const file = path.resolve(__dirname, "../../config/veilpad." + netKey + ".json");
+  const file = path.resolve(__dirname, "../../config/devoxpad." + netKey + ".json");
   if (!fs.existsSync(file)) {
     console.warn("master table not found at " + file + " - skipping");
     return;
   }
 
   const table = JSON.parse(fs.readFileSync(file, "utf8"));
-  const block = table?.contracts?.veilpad;
+  const block = table?.contracts?.devoxpad;
   if (!block) {
-    console.warn("master table has no contracts.veilpad block - skipping");
+    console.warn("master table has no contracts.devoxpad block - skipping");
     return;
   }
 
@@ -158,8 +158,8 @@ function writeMasterTable(
     block[key].status = "deployed";
   }
 
-  block.veilCurve = block.veilCurve || {};
-  block.veilCurve.status = "per-token";
+  block.devoxCurve = block.devoxCurve || {};
+  block.devoxCurve.status = "per-token";
 
   if (table.deployer) {
     table.deployer.address = deployerAddress;

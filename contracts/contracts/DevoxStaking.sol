@@ -7,13 +7,13 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-interface IVeilTreasury {
+interface IDevoxTreasury {
     function payReward(address to, uint256 amount) external returns (uint256 sent);
     function balance() external view returns (uint256);
 }
 
 /**
- * @title VeilStaking - stake, and earn VEILPAD at a stated percentage.
+ * @title DevoxStaking - stake, and earn DEVOXPAD at a stated percentage.
  *
  * Each pool pays a fixed APY rather than splitting a fixed emission. The
  * difference matters to whoever is staking: a fixed emission means your yield
@@ -23,7 +23,7 @@ interface IVeilTreasury {
  * That guarantee costs something, and the cost is solvency. A fixed rate on an
  * unbounded deposit is an unbounded liability, so every pool carries a cap, and
  * the cap is what actually bounds what the treasury can owe. Rewards are paid
- * from VeilTreasury, never from deposits, so the reserve running dry can delay
+ * from DevoxTreasury, never from deposits, so the reserve running dry can delay
  * a reward but can never touch a principal.
  *
  * Accounting is the standard per-share accumulator. `accRewardPerShare` is the
@@ -32,10 +32,10 @@ interface IVeilTreasury {
  * difference is what they are owed. Because it is per-token rather than
  * per-pool, time passing with an empty pool creates nothing to claim.
  */
-contract VeilStaking is Ownable, ReentrancyGuard {
+contract DevoxStaking is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    /// Native COTI is spelled as the zero address, the same convention VeilPortal uses.
+    /// Native COTI is spelled as the zero address, the same convention DevoxPortal uses.
     address public constant NATIVE = address(0);
 
     uint256 private constant PRECISION = 1e18;
@@ -96,7 +96,7 @@ contract VeilStaking is Ownable, ReentrancyGuard {
         uint64 since;
     }
 
-    IVeilTreasury public treasury;
+    IDevoxTreasury public treasury;
     IERC20 public immutable rewardToken;
 
     Pool[] private _pools;
@@ -128,7 +128,7 @@ contract VeilStaking is Ownable, ReentrancyGuard {
     constructor(address rewardToken_, address treasury_, address owner_) Ownable(owner_) {
         require(rewardToken_ != address(0), "reward token is zero");
         rewardToken = IERC20(rewardToken_);
-        treasury = IVeilTreasury(treasury_);
+        treasury = IDevoxTreasury(treasury_);
         emit TreasurySet(treasury_);
     }
 
@@ -223,7 +223,7 @@ contract VeilStaking is Ownable, ReentrancyGuard {
     }
 
     function setTreasury(address treasury_) external onlyOwner {
-        treasury = IVeilTreasury(treasury_);
+        treasury = IDevoxTreasury(treasury_);
         emit TreasurySet(treasury_);
     }
 

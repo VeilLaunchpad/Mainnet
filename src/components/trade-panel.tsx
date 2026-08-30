@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { parseEther, type Address } from "viem";
-import { veilCurveAbi, veilSwapRouterAbi, erc20Abi } from "@/lib/abis";
+import { devoxCurveAbi, devoxSwapRouterAbi, erc20Abi } from "@/lib/abis";
 import { isDeployed, SWAP_FEE_BPS } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "./network-provider";
 import { explorerTx, explorerAddress } from "@/lib/chain";
@@ -15,7 +15,7 @@ import { ensureAllowance } from "@/lib/allowance";
  * One panel, two venues.
  *
  * Before graduation a token trades against its bonding curve; after, against
- * its VeilSwap pair. The mechanics differ - the curve mints and burns, the pair
+ * its DevoxSwap pair. The mechanics differ - the curve mints and burns, the pair
  * swaps against reserves - but the user is doing the same thing, so the UI
  * stays put and only the plumbing underneath changes.
  *
@@ -57,7 +57,7 @@ export function TradePanel({
   const onPair = graduated && isDeployed(poolAddress || "") && isDeployed(addresses.swapRouter);
   const onCurve = !graduated && isDeployed(curve);
   const tradable = onPair || onCurve;
-  const venue = onPair ? "VeilSwap" : "Bonding curve";
+  const venue = onPair ? "DevoxSwap" : "Bonding curve";
 
   useEffect(() => {
     setQuote(null);
@@ -71,13 +71,13 @@ export function TradePanel({
         const out = onPair
           ? ((await publicClient.readContract({
               address: addresses.swapRouter,
-              abi: veilSwapRouterAbi,
+              abi: devoxSwapRouterAbi,
               functionName: side === "buy" ? "quoteBuyWithCoti" : "quoteSellForCoti",
               args: [token as Address, amountIn],
             })) as bigint)
           : ((await publicClient.readContract({
               address: curve as Address,
-              abi: veilCurveAbi,
+              abi: devoxCurveAbi,
               functionName: side === "buy" ? "quoteBuy" : "quoteSell",
               args: [amountIn],
             })) as bigint);
@@ -135,7 +135,7 @@ export function TradePanel({
           setStep("Swapping…");
           hash = await writeContractAsync({
             address: addresses.swapRouter,
-            abi: veilSwapRouterAbi,
+            abi: devoxSwapRouterAbi,
             functionName: "swapExactCotiForTokens",
             args: [token as Address, 0n, address, deadline],
             value: parseEther(amount),
@@ -147,7 +147,7 @@ export function TradePanel({
           setStep("Swapping…");
           hash = await writeContractAsync({
             address: addresses.swapRouter,
-            abi: veilSwapRouterAbi,
+            abi: devoxSwapRouterAbi,
             functionName: "swapExactTokensForCoti",
             args: [token as Address, amountIn, 0n, address, deadline],
             gas: 16_000_000n,
@@ -157,7 +157,7 @@ export function TradePanel({
         setStep("Buying…");
         hash = await writeContractAsync({
           address: curve as Address,
-          abi: veilCurveAbi,
+          abi: devoxCurveAbi,
           functionName: "buy",
           args: [0n],
           value: parseEther(amount),
@@ -169,7 +169,7 @@ export function TradePanel({
         setStep("Selling…");
         hash = await writeContractAsync({
           address: curve as Address,
-          abi: veilCurveAbi,
+          abi: devoxCurveAbi,
           functionName: "sell",
           args: [amountIn, 0n],
           gas: 14_000_000n,
@@ -190,7 +190,7 @@ export function TradePanel({
           cotiIn: side === "buy" ? amount : quote || "0",
           tokenOut: side === "buy" ? quote || "0" : amount,
           txHash: hash,
-          venue: onPair ? "veilswap" : "curve",
+          venue: onPair ? "devoxswap" : "curve",
         }),
       }).catch(() => undefined);
 
@@ -211,7 +211,7 @@ export function TradePanel({
         <p className="mt-2 text-[13px] leading-relaxed text-white/45">
           {graduated
             ? "This token has graduated but its pair is not readable on this network yet."
-            : "This token has no VEILPAD bonding curve, so there is nothing to quote against here. It may have been deployed outside the launchpad."}
+            : "This token has no DEVOXPAD bonding curve, so there is nothing to quote against here. It may have been deployed outside the launchpad."}
         </p>
       </div>
     );
@@ -221,7 +221,7 @@ export function TradePanel({
     <div className="card p-4">
       <div className="mb-2.5 flex items-center justify-between">
         <h3 className="text-[15px] font-semibold">Trade</h3>
-        {onPair ? <Badge tone="mint">{venue} · 0.3%</Badge> : <Badge tone="veil">{venue}</Badge>}
+        {onPair ? <Badge tone="mint">{venue} · 0.3%</Badge> : <Badge tone="devox">{venue}</Badge>}
       </div>
 
       <div className="flex rounded-xl border border-white/10 bg-white/[0.03] p-1">
@@ -259,7 +259,7 @@ export function TradePanel({
             </button>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-veil-400/50">
+        <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-devox-400/50">
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
@@ -292,7 +292,7 @@ export function TradePanel({
             <button
               key={v}
               onClick={() => setAmount(v)}
-              className="flex-1 rounded-lg border border-white/10 py-1.5 text-[11px] text-white/50 transition hover:border-veil-400/40 hover:text-white"
+              className="flex-1 rounded-lg border border-white/10 py-1.5 text-[11px] text-white/50 transition hover:border-devox-400/40 hover:text-white"
             >
               {v}
             </button>
@@ -307,7 +307,7 @@ export function TradePanel({
           "mt-3 w-full rounded-xl py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40 " +
           (side === "buy"
             ? "bg-gradient-to-r from-mint-400 to-cy-500"
-            : "bg-gradient-to-r from-rose-400 to-veil-500")
+            : "bg-gradient-to-r from-rose-400 to-devox-500")
         }
       >
         {busy ? step || "Confirming…" : side === "buy" ? "Buy " + symbol : "Sell " + symbol}

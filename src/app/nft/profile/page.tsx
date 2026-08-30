@@ -15,7 +15,7 @@ import { CollectionCard, type Collection } from "@/components/nft/shared";
 /**
  * My profile.
  *
- * The handle is the same one VEILPAD already uses - claiming a username here
+ * The handle is the same one DEVOXPAD already uses - claiming a username here
  * claims it everywhere, and somebody who already has one sees it rather than
  * being asked again. One wallet, one identity, across the token side and the
  * NFT side.
@@ -103,7 +103,7 @@ export default function ProfilePage() {
       result.show({
         ok: true,
         title: profile?.username ? "Handle updated" : "Handle claimed",
-        detail: "@" + handle + " now points at this wallet, across all of VEILPAD.",
+        detail: "@" + handle + " now points at this wallet, across all of DEVOXPAD.",
       });
       loadProfile();
     } catch (e) {
@@ -137,7 +137,7 @@ export default function ProfilePage() {
                 <span className="text-xl font-bold">
                   {profile?.username ? "@" + profile.username : shortAddr(me, 6)}
                 </span>
-                {profile?.username && <Badge tone="veil">VEILPAD handle</Badge>}
+                {profile?.username && <Badge tone="devox">DEVOXPAD handle</Badge>}
               </div>
               <div className="mono mt-1 text-[11px] text-white/35">{me}</div>
             </div>
@@ -148,19 +148,19 @@ export default function ProfilePage() {
               {profile?.username ? "Change your handle" : "Claim a handle"}
             </div>
             <p className="mt-1 text-[12px] text-white/40">
-              One handle for the whole of VEILPAD — the launchpad, the desk, and here.
+              One handle for the whole of DEVOXPAD — the launchpad, the desk, and here.
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               <input
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
                 placeholder="yourname"
-                className="mono w-56 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+                className="mono w-56 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
               />
               <button
                 onClick={claim}
                 disabled={saving || handle.length < 3}
-                className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
                 {saving ? <Spinner /> : profile?.username ? "Update" : "Claim"}
               </button>

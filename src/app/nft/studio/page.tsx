@@ -13,11 +13,11 @@ import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { useCotiSession } from "@/lib/coti-client";
 import {
-  veilNFTFactoryAbi,
-  veilNFTEditionsFactoryAbi,
-  veilNFTDropAbi,
-  veilNFTEditionsAbi,
-  veilNFTStakingAbi,
+  devoxNFTFactoryAbi,
+  devoxNFTEditionsFactoryAbi,
+  devoxNFTDropAbi,
+  devoxNFTEditionsAbi,
+  devoxNFTStakingAbi,
 } from "@/lib/nft-abis";
 import { erc20Abi } from "@/lib/abis";
 import { addressesFor, isDeployed } from "@/lib/addresses";
@@ -39,7 +39,7 @@ import { NATIVE } from "@/components/nft/shared";
  * is what makes it a guarantee instead of a roadmap.
  *
  * The address is mined here, in the browser, before anything is deployed. That
- * is the same CREATE2 trick every VEILPAD token launch uses, and it is why a
+ * is the same CREATE2 trick every DEVOXPAD token launch uses, and it is why a
  * collection can carry an 8888 address that a copycat cannot fake.
  */
 
@@ -105,13 +105,13 @@ export default function StudioPage() {
         format === "drop"
           ? ((await client.readContract({
               address: factory,
-              abi: veilNFTFactoryAbi,
+              abi: devoxNFTFactoryAbi,
               functionName: "dropInitCodeHash",
               args: [dropParams(), me],
             })) as `0x${string}`)
           : ((await client.readContract({
               address: factory,
-              abi: veilNFTEditionsFactoryAbi,
+              abi: devoxNFTEditionsFactoryAbi,
               functionName: "editionsInitCodeHash",
               args: [{ name, symbol, previewURI: image }, me],
             })) as `0x${string}`);
@@ -204,7 +204,7 @@ export default function StudioPage() {
       setBusy("Deploying the collection");
       const fee = (await client.readContract({
         address: factory,
-        abi: format === "drop" ? veilNFTFactoryAbi : veilNFTEditionsFactoryAbi,
+        abi: format === "drop" ? devoxNFTFactoryAbi : devoxNFTEditionsFactoryAbi,
         functionName: "launchFee",
       })) as bigint;
 
@@ -212,7 +212,7 @@ export default function StudioPage() {
         format === "drop"
           ? await writeContractAsync({
               address: factory,
-              abi: veilNFTFactoryAbi,
+              abi: devoxNFTFactoryAbi,
               functionName: "createDrop",
               args: [mined.salt, dropParams(), mined.address],
               value: fee,
@@ -220,7 +220,7 @@ export default function StudioPage() {
             })
           : await writeContractAsync({
               address: factory,
-              abi: veilNFTEditionsFactoryAbi,
+              abi: devoxNFTEditionsFactoryAbi,
               functionName: "createEditions",
               args: [mined.salt, { name, symbol, previewURI }, mined.address],
               value: fee,
@@ -236,12 +236,12 @@ export default function StudioPage() {
       if (!session) throw new Error("a COTI key is needed to encrypt the private metadata");
 
       if (format === "drop") {
-        const c = new Contract(mined.address, veilNFTDropAbi as never, session.signer);
+        const c = new Contract(mined.address, devoxNFTDropAbi as never, session.signer);
         const selector = c.interface.getFunction("setSecret")!.selector;
         const enc = await session.signer.encryptValue(secret, mined.address, selector);
         await (await c.setSecret(enc, { gasLimit: 12_000_000 })).wait();
       } else {
-        const c = new Contract(mined.address, veilNFTEditionsAbi as never, session.signer);
+        const c = new Contract(mined.address, devoxNFTEditionsAbi as never, session.signer);
         const selector = c.interface.getFunction("createEdition")!.selector;
         const enc = await session.signer.encryptValue(secret, mined.address, selector);
         await (
@@ -283,7 +283,7 @@ export default function StudioPage() {
         setBusy("Opening the staking pool");
         await writeContractAsync({
           address: a.nftStaking,
-          abi: veilNFTStakingAbi,
+          abi: devoxNFTStakingAbi,
           functionName: "openPool",
           args: [mined.address, rewardToken as Address, perYearWei, 0n, budgetWei],
           gas: 1_000_000n,
@@ -390,7 +390,7 @@ export default function StudioPage() {
                         setTraits((p) => p.map((x, j) => (j === i ? { ...x, trait_type: e.target.value } : x)))
                       }
                       placeholder="Trait"
-                      className="w-1/2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+                      className="w-1/2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
                     />
                     <input
                       value={t.value}
@@ -398,7 +398,7 @@ export default function StudioPage() {
                         setTraits((p) => p.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))
                       }
                       placeholder="Value"
-                      className="w-1/2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+                      className="w-1/2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
                     />
                     <button
                       onClick={() => setTraits((p) => p.filter((_, j) => j !== i))}
@@ -410,7 +410,7 @@ export default function StudioPage() {
                 ))}
                 <button
                   onClick={() => setTraits((p) => [...p, { trait_type: "", value: "" }])}
-                  className="text-[12px] font-medium text-veil-300 hover:text-veil-200"
+                  className="text-[12px] font-medium text-devox-300 hover:text-devox-200"
                 >
                   + add a trait
                 </button>
@@ -445,7 +445,7 @@ export default function StudioPage() {
                   type="datetime-local"
                   value={publicStart}
                   onChange={(e) => setPublicStart(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
                 />
                 <p className="mt-1 text-[11px] text-white/30">Leave empty to open immediately.</p>
               </div>
@@ -456,14 +456,14 @@ export default function StudioPage() {
           <div className="card space-y-3 p-5">
             <div className="flex items-center gap-2">
               <Label>The private half</Label>
-              <Badge tone="veil">Encrypted</Badge>
+              <Badge tone="devox">Encrypted</Badge>
             </div>
             <textarea
               value={secret}
               onChange={(e) => setSecret(e.target.value)}
               rows={3}
               placeholder="An unlock link, a key, the real art — whatever only a holder should see"
-              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
             />
             <p className="text-[12px] text-white/40">
               Encrypted in this browser under your key, validated by COTI&apos;s MPC network, and
@@ -498,8 +498,8 @@ export default function StudioPage() {
                   label="Reward token address"
                   value={rewardToken}
                   onChange={setRewardToken}
-                  placeholder={a.veilToken}
-                  hint="$VEIL, or any ERC-20 you hold. Paste the address."
+                  placeholder={a.devoxToken}
+                  hint="$DEVOX, or any ERC-20 you hold. Paste the address."
                 />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Reward per NFT per year" value={rewardPerYear} onChange={setRewardPerYear} placeholder="500" />
@@ -527,7 +527,7 @@ export default function StudioPage() {
             <Label>Address</Label>
             {mined ? (
               <div>
-                <div className="mono break-all text-[13px] font-semibold text-veil-200">
+                <div className="mono break-all text-[13px] font-semibold text-devox-200">
                   {mined.address}
                 </div>
                 <div className="mt-1 text-[11px] text-white/35">
@@ -536,7 +536,7 @@ export default function StudioPage() {
               </div>
             ) : (
               <p className="text-[12px] text-white/40">
-                Every VEILPAD launch ends in {SUFFIX}. The salt is searched in this browser and
+                Every DEVOXPAD launch ends in {SUFFIX}. The salt is searched in this browser and
                 checked on chain, so the address you see is the address you get.
               </p>
             )}
@@ -567,7 +567,7 @@ export default function StudioPage() {
                 <button
                   onClick={launch}
                   disabled={!mined || !!busy}
-                  className="w-full rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                  className="w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                 >
                   {busy ? <Spinner /> : mined ? "Launch" : "Mine an address first"}
                 </button>
@@ -622,14 +622,14 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={2}
-          className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+          className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
         />
       ) : (
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="mono mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+          className="mono mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
         />
       )}
       {hint && <p className="mt-1 text-[11px] text-white/30">{hint}</p>}
@@ -655,12 +655,12 @@ function Choice({
       onClick={onClick}
       className={
         "rounded-xl border p-4 text-left transition " +
-        (on ? "border-veil-400/40 bg-veil-500/[0.07]" : "border-white/10 hover:border-white/20")
+        (on ? "border-devox-400/40 bg-devox-500/[0.07]" : "border-white/10 hover:border-white/20")
       }
     >
       <div className="flex items-center justify-between gap-2">
         <span className="text-[14px] font-semibold">{title}</span>
-        {on && <span className="text-veil-300">●</span>}
+        {on && <span className="text-devox-300">●</span>}
       </div>
       <p className="mt-1 text-[12px] leading-relaxed text-white/45">{body}</p>
       <div className="mono mt-2 text-[10px] uppercase tracking-wider text-white/25">{tag}</div>

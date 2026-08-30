@@ -7,11 +7,11 @@ import { useNetwork } from "@/components/network-provider";
 import { explorerAddress, OFFICIAL_MAINNET_TOKEN } from "@/lib/chain";
 
 /**
- * Every order-book pair on COTI, presented as VEILPAD's own explore surface.
+ * Every order-book pair on COTI, presented as DEVOXPAD's own explore surface.
  *
  * The numbers are read from COTI's public order-book indexes (Carbon's API,
  * internally - see lib/carbon.ts). That is a data source, not a brand: the page
- * carries no third-party badge, and its Trade button goes to VeilSwap rather
+ * carries no third-party badge, and its Trade button goes to DevoxSwap rather
  * than sending the reader somewhere else.
  *
  * An order book is not an AMM, and the difference is the whole reason this page
@@ -20,7 +20,7 @@ import { explorerAddress, OFFICIAL_MAINNET_TOKEN } from "@/lib/chain";
  * with no strategies has no price at all - not a broken listing, just nobody
  * quoting yet.
  *
- * VEIL is highlighted when it appears, because the first question anyone asks
+ * DEVOX is highlighted when it appears, because the first question anyone asks
  * here is whether the protocol token is tradable and where.
  */
 
@@ -64,7 +64,7 @@ export default function ExplorePage() {
       .catch(() => setData({ network: net, available: false, reason: "Could not reach the API.", pairs: [] }));
   }, [net]);
 
-  const isVeil = (p: Pair) =>
+  const isDevox = (p: Pair) =>
     [p.token0, p.token1].some((t) => t.toLowerCase() === OFFICIAL_MAINNET_TOKEN.toLowerCase());
 
   const filtered = (data?.pairs ?? []).filter((p) =>
@@ -72,14 +72,14 @@ export default function ExplorePage() {
   );
 
   const totalLiquidity = (data?.pairs ?? []).reduce((a, p) => a + p.liquidityUsd, 0);
-  const veilPair = (data?.pairs ?? []).find(isVeil);
+  const devoxPair = (data?.pairs ?? []).find(isDevox);
 
   return (
     <Section
       className="py-10"
       kicker="Explore"
       title="Every pair on COTI"
-      sub="Order-book depth from across the chain, alongside VeilSwap. Every pair here is tradable on VeilSwap — if there is no pool for a token, the swap fills against these orders instead. Liquidity here is the sum of what people have posted rather than a pool, so a pair with no strategies simply has nobody quoting it yet."
+      sub="Order-book depth from across the chain, alongside DevoxSwap. Every pair here is tradable on DevoxSwap — if there is no pool for a token, the swap fills against these orders instead. Liquidity here is the sum of what people have posted rather than a pool, so a pair with no strategies simply has nobody quoting it yet."
       right={
         <Link
           href="/swap"
@@ -111,16 +111,16 @@ export default function ExplorePage() {
             />
           </div>
 
-          {data && !veilPair && (
+          {data && !devoxPair && (
             <div className="mb-5 flex items-start gap-3 rounded-xl border border-white/[0.09] bg-white/[0.02] px-4 py-3">
               <span className="mt-0.5 shrink-0 text-[15px]">ℹ️</span>
               <p className="text-[12.5px] leading-relaxed text-white/55">
-                <b className="text-white/80">VEIL has no order-book quote yet.</b> An order book
+                <b className="text-white/80">DEVOX has no order-book quote yet.</b> An order book
                 holds no pool: a pair exists only once somebody posts an order for it, which is why
                 its chart reads &ldquo;price data not available&rdquo; rather than showing zero.
-                VEIL trades today on{" "}
+                DEVOX trades today on{" "}
                 <Link href="/swap" className="text-cy-300 hover:underline">
-                  VeilSwap
+                  DevoxSwap
                 </Link>
                 , where there is a real pair with real depth.
               </p>
@@ -131,7 +131,7 @@ export default function ExplorePage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Filter by pair, e.g. COTI/USDCe…"
-            className="mb-4 w-full max-w-md rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-veil-400/50"
+            className="mb-4 w-full max-w-md rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
           />
 
           {!data ? (
@@ -161,7 +161,7 @@ export default function ExplorePage() {
                       key={p.key}
                       className={
                         "border-b border-white/[0.04] transition last:border-0 hover:bg-white/[0.02] " +
-                        (isVeil(p) ? "bg-amber-400/[0.05]" : "")
+                        (isDevox(p) ? "bg-amber-400/[0.05]" : "")
                       }
                     >
                       <td className="px-4 py-3">
@@ -169,7 +169,7 @@ export default function ExplorePage() {
                           <span className="font-semibold">
                             {p.symbol0}/{p.symbol1}
                           </span>
-                          {isVeil(p) && <Badge tone="amber">Official</Badge>}
+                          {isDevox(p) && <Badge tone="amber">Official</Badge>}
                           {p.fromChain && <Badge tone="cy">live on chain</Badge>}
                           {p.strategies === 0 && <Badge tone="muted">no orders</Badge>}
                         </div>
@@ -208,7 +208,7 @@ export default function ExplorePage() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {/* Trading happens here, on VeilSwap, not on someone
+                        {/* Trading happens here, on DevoxSwap, not on someone
                             else's site. The pair is carried through so the
                             swap opens on the same market the row describes. */}
                         <Link

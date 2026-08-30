@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-interface IVeilTransferable {
+interface IDevoxTransferable {
     // Declared void so one interface fits both shapes: OpenZeppelin's ERC20
     // returns bool, COTI's PrivateERC20 returns nothing. Extra return data is
     // ignored by the ABI decoder; a missing bool would not be.
@@ -12,7 +12,7 @@ interface IVeilTransferable {
 }
 
 /**
- * @title VeilSwapPair - a constant-product AMM that works with encrypted tokens.
+ * @title DevoxSwapPair - a constant-product AMM that works with encrypted tokens.
  *
  * Uniswap V2 derives its reserves from `balanceOf(address(this))`. That is
  * exactly what a COTI PrivateERC20 cannot answer: `balanceOf` returns a
@@ -30,10 +30,10 @@ interface IVeilTransferable {
  * tokens are unsupported. Both are acceptable; reading an encrypted balance is
  * not possible at all.
  */
-contract VeilSwapPair is ReentrancyGuard {
+contract DevoxSwapPair is ReentrancyGuard {
     // ── LP token (public on purpose: shares must be transferable and readable)
-    string public constant name = "VeilSwap LP";
-    string public constant symbol = "VEIL-LP";
+    string public constant name = "DevoxSwap LP";
+    string public constant symbol = "DEVOX-LP";
     uint8 public constant decimals = 18;
 
     uint256 public totalSupply;
@@ -107,7 +107,7 @@ contract VeilSwapPair is ReentrancyGuard {
     function transferFrom(address from, address to, uint256 value) external returns (bool) {
         uint256 allowed = allowance[from][msg.sender];
         if (allowed != type(uint256).max) {
-            require(allowed >= value, "VeilSwap: LP allowance");
+            require(allowed >= value, "DevoxSwap: LP allowance");
             allowance[from][msg.sender] = allowed - value;
         }
         _transferLp(from, to, value);
@@ -115,7 +115,7 @@ contract VeilSwapPair is ReentrancyGuard {
     }
 
     function _transferLp(address from, address to, uint256 value) internal {
-        require(balanceOf[from] >= value, "VeilSwap: LP balance");
+        require(balanceOf[from] >= value, "DevoxSwap: LP balance");
         balanceOf[from] -= value;
         balanceOf[to] += value;
         emit Transfer(from, to, value);
@@ -128,7 +128,7 @@ contract VeilSwapPair is ReentrancyGuard {
     }
 
     function _burnLp(address from, uint256 value) internal {
-        require(balanceOf[from] >= value, "VeilSwap: LP balance");
+        require(balanceOf[from] >= value, "DevoxSwap: LP balance");
         balanceOf[from] -= value;
         totalSupply -= value;
         emit Transfer(from, address(0), value);
@@ -147,8 +147,8 @@ contract VeilSwapPair is ReentrancyGuard {
     ) external nonReentrant returns (uint256 liquidity) {
         if (amount0 == 0 || amount1 == 0) revert InsufficientInput();
 
-        IVeilTransferable(token0).transferFrom(msg.sender, address(this), amount0);
-        IVeilTransferable(token1).transferFrom(msg.sender, address(this), amount1);
+        IDevoxTransferable(token0).transferFrom(msg.sender, address(this), amount0);
+        IDevoxTransferable(token1).transferFrom(msg.sender, address(this), amount1);
 
         uint256 supply = totalSupply;
         if (supply == 0) {
@@ -190,8 +190,8 @@ contract VeilSwapPair is ReentrancyGuard {
         reserve1 -= amount1;
         kLast = reserve0 * reserve1;
 
-        IVeilTransferable(token0).transfer(to, amount0);
-        IVeilTransferable(token1).transfer(to, amount1);
+        IDevoxTransferable(token0).transfer(to, amount0);
+        IDevoxTransferable(token1).transfer(to, amount1);
 
         emit Burn(msg.sender, amount0, amount1, to);
         emit Sync(reserve0, reserve1);
@@ -239,8 +239,8 @@ contract VeilSwapPair is ReentrancyGuard {
 
         address tokenOut = zeroForOne ? token1 : token0;
 
-        IVeilTransferable(tokenIn).transferFrom(msg.sender, address(this), amountIn);
-        IVeilTransferable(tokenOut).transfer(to, amountOut);
+        IDevoxTransferable(tokenIn).transferFrom(msg.sender, address(this), amountIn);
+        IDevoxTransferable(tokenOut).transfer(to, amountOut);
 
         if (zeroForOne) {
             reserve0 += amountIn;

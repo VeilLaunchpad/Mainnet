@@ -38,9 +38,9 @@ export function Nav() {
     <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-ink-950/70 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-4 sm:px-6">
         <Link href="/" className="group flex items-center gap-2.5">
-          <VeilMark />
+          <DevoxMark />
           <span className="text-[15px] font-bold tracking-tight">
-            VEIL<span className="text-veil-400">PAD</span>
+            DEVOX<span className="text-devox-400">PAD</span>
           </span>
         </Link>
 
@@ -74,7 +74,7 @@ export function Nav() {
           </Link>
           <Link
             href="/launch"
-            className="hidden rounded-xl border border-veil-400/30 bg-veil-500/10 px-3.5 py-2 text-[13px] font-semibold text-veil-300 transition hover:bg-veil-500/20 sm:block"
+            className="hidden rounded-xl border border-devox-400/30 bg-devox-500/10 px-3.5 py-2 text-[13px] font-semibold text-devox-300 transition hover:bg-devox-500/20 sm:block"
           >
             Launch
           </Link>
@@ -97,7 +97,7 @@ export function Nav() {
           {[
             ...LINKS,
             { href: "/launch", label: "Launch a token" },
-            { href: "/skills", label: "VEIL Skills" },
+            { href: "/skills", label: "DEVOX Skills" },
             { href: "/docs", label: "Docs" },
             { href: "/status", label: "Status" },
           ].map((l) => (
@@ -116,7 +116,7 @@ export function Nav() {
   );
 }
 
-export function VeilMark({ size = 22 }: { size?: number }) {
+export function DevoxMark({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
       <defs>

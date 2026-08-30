@@ -13,7 +13,7 @@ import { Wallet as CotiWallet, JsonRpcProvider as CotiProvider } from "@coti-io/
  * That needs a funded second wallet, so this costs a little COTI to run.
  */
 
-const SECRET = "VEILPAD Editions · print no.1 · veilpad-nft.vercel.app/editions/unlock";
+const SECRET = "DEVOXPAD Editions · print no.1 · devoxpad-nft.vercel.app/editions/unlock";
 
 async function main() {
   const [signer] = await ethers.getSigners();
@@ -26,13 +26,13 @@ async function main() {
   const factoryAddr = process.env["NEXT_PUBLIC_NFT_EDITIONS_FACTORY_" + suffix] || "";
   if (!factoryAddr) throw new Error("editions factory not deployed on " + network.name);
 
-  const factory = await ethers.getContractAt("VeilNFTEditionsFactory", factoryAddr);
+  const factory = await ethers.getContractAt("DevoxNFTEditionsFactory", factoryAddr);
   console.log("network :", network.name);
   console.log("wallet  :", signer.address);
   console.log("factory :", factoryAddr);
 
   // ── 1. open a collection at a mined address ─────────────────────────────
-  const params = { name: "VEILPAD Editions", symbol: "VEILE", previewURI: "https://veilpad-nft.vercel.app/editions/" };
+  const params = { name: "DEVOXPAD Editions", symbol: "DEVOXE", previewURI: "https://devoxpad-nft.vercel.app/editions/" };
   const initCodeHash = await factory.editionsInitCodeHash(params, signer.address);
 
   console.log("\n[1] mining an address ending in 8888");
@@ -57,7 +57,7 @@ async function main() {
   if ((await ethers.provider.getCode(predicted)) === "0x") throw new Error("collection did not land");
   console.log("    " + predicted + "  after " + tries.toLocaleString("en-US") + " tries");
 
-  const coll = await ethers.getContractAt("VeilNFTEditions", predicted);
+  const coll = await ethers.getContractAt("DevoxNFTEditions", predicted);
 
   // ── 2. open an edition, open-ended, free ────────────────────────────────
   console.log("\n[2] opening an edition: open-ended supply, free");
@@ -85,7 +85,7 @@ async function main() {
   const sealedA = await coll.secretOf(id, signer.address);
   const plainA = String(await alice.decryptValue(sealedA as never));
   console.log("    holder A reads: " + plainA);
-  if (!plainA.includes("VEILPAD")) throw new Error("holder A could not read it, got: " + plainA);
+  if (!plainA.includes("DEVOXPAD")) throw new Error("holder A could not read it, got: " + plainA);
 
   // ── 4. a second real holder, with their own key ─────────────────────────
   console.log("\n[4] sending one copy to a second wallet");

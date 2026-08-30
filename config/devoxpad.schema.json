@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://veilpad.local/veilpad.schema.json",
-  "title": "VEILPAD master table",
-  "description": "Registry of record for one VEILPAD deployment: chain params, contract addresses, launch economics, routes, agents and tools. Addresses and public config only - credentials live in .env.local and are never written here.",
+  "$id": "https://devoxpad.local/devoxpad.schema.json",
+  "title": "DEVOXPAD master table",
+  "description": "Registry of record for one DEVOXPAD deployment: chain params, contract addresses, launch economics, routes, agents and tools. Addresses and public config only - credentials live in .env.local and are never written here.",
   "type": "object",
   "required": ["app", "chain", "contracts", "launch", "routes"],
   "properties": {
@@ -60,21 +60,21 @@
     },
     "contracts": {
       "type": "object",
-      "required": ["coti", "veilpad"],
+      "required": ["coti", "devoxpad"],
       "properties": {
         "coti": {
           "type": "object",
           "description": "Deployed and maintained by COTI, not by this project.",
           "additionalProperties": { "$ref": "#/$defs/contractEntry" }
         },
-        "veilpad": {
+        "devoxpad": {
           "type": "object",
           "description": "Written by contracts/scripts/deploy.ts.",
           "additionalProperties": { "$ref": "#/$defs/contractEntry" }
         },
         "uniswapV3": {
           "type": "object",
-          "description": "External. VEILPAD speaks the standard V3 interfaces and reads these from env."
+          "description": "External. DEVOXPAD speaks the standard V3 interfaces and reads these from env."
         }
       }
     },

@@ -7,7 +7,7 @@
  */
 export function commentDigest(token: string, body: string, nonce: number): string {
   return (
-    "VEILPAD comment\n" +
+    "DEVOXPAD comment\n" +
     "token: " +
     token.toLowerCase() +
     "\n" +

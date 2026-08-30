@@ -10,7 +10,7 @@ import { Spinner } from "@/components/busy";
 import { useResult } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
-import { veilNFTStakingAbi, veilNFTDropAbi } from "@/lib/nft-abis";
+import { devoxNFTStakingAbi, devoxNFTDropAbi } from "@/lib/nft-abis";
 import { erc20Abi } from "@/lib/abis";
 import { addressesFor, isDeployed } from "@/lib/addresses";
 import { shortAddr } from "@/lib/format";
@@ -108,7 +108,7 @@ export default function NFTStakePage() {
         client
           .readContract({
             address: a.nftStaking,
-            abi: veilNFTStakingAbi,
+            abi: devoxNFTStakingAbi,
             functionName: "stakeOf",
             args: [BigInt(p.id), me],
           })
@@ -116,7 +116,7 @@ export default function NFTStakePage() {
         client
           .readContract({
             address: a.nftStaking,
-            abi: veilNFTStakingAbi,
+            abi: devoxNFTStakingAbi,
             functionName: "pendingReward",
             args: [BigInt(p.id), me],
           })
@@ -203,7 +203,7 @@ export default function NFTStakePage() {
       const owners = await client.multicall({
         contracts: candidates.map((id) => ({
           address: a.nftStaking,
-          abi: veilNFTStakingAbi,
+          abi: devoxNFTStakingAbi,
           functionName: "stakerOf" as const,
           args: [BigInt(p.id), id],
         })),
@@ -234,7 +234,7 @@ export default function NFTStakePage() {
     try {
       const approved = (await client!.readContract({
         address: p.collection,
-        abi: veilNFTDropAbi,
+        abi: devoxNFTDropAbi,
         functionName: "isApprovedForAll",
         args: [me as Address, a.nftStaking],
       })) as boolean;
@@ -242,7 +242,7 @@ export default function NFTStakePage() {
       if (!approved) {
         await writeContractAsync({
           address: p.collection,
-          abi: veilNFTDropAbi,
+          abi: devoxNFTDropAbi,
           functionName: "setApprovalForAll",
           args: [a.nftStaking, true],
           gas: 1_000_000n,
@@ -252,7 +252,7 @@ export default function NFTStakePage() {
 
       const hash = await writeContractAsync({
         address: a.nftStaking,
-        abi: veilNFTStakingAbi,
+        abi: devoxNFTStakingAbi,
         functionName: "stake",
         args: [BigInt(p.id), ids],
         gas: BigInt(500_000 + 400_000 * ids.length),
@@ -277,7 +277,7 @@ export default function NFTStakePage() {
     try {
       const hash = await writeContractAsync({
         address: a.nftStaking,
-        abi: veilNFTStakingAbi,
+        abi: devoxNFTStakingAbi,
         functionName: "claim",
         args: [BigInt(p.id)],
         gas: 1_000_000n,
@@ -300,7 +300,7 @@ export default function NFTStakePage() {
 
       const hash = await writeContractAsync({
         address: a.nftStaking,
-        abi: veilNFTStakingAbi,
+        abi: devoxNFTStakingAbi,
         functionName: "unstake",
         args: [BigInt(p.id), staked],
         gas: BigInt(500_000 + 400_000 * staked.length),
@@ -371,14 +371,14 @@ export default function NFTStakePage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
                         href={"/nft/collection/" + p.collection}
-                        className="text-[16px] font-semibold hover:text-veil-200"
+                        className="text-[16px] font-semibold hover:text-devox-200"
                       >
                         {coll?.name ?? shortAddr(p.collection)}
                       </Link>
                       {p.apyBps > 0 ? (
                         <Badge tone="mint">{(p.apyBps / 100).toFixed(1)}% APY</Badge>
                       ) : (
-                        <Badge tone="veil">
+                        <Badge tone="devox">
                           {formatUnits(BigInt(p.rewardPerNftPerYear), 18)} {reward?.symbol ?? ""} / yr
                         </Badge>
                       )}
@@ -402,7 +402,7 @@ export default function NFTStakePage() {
                       <button
                         onClick={() => stake(p)}
                         disabled={busy !== null}
-                        className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                        className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                       >
                         {busy === "stake-" + p.id ? <Spinner /> : "Stake"}
                       </button>

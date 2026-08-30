@@ -27,7 +27,7 @@ interface Activity {
 }
 
 const TONE = {
-  launch: "veil",
+  launch: "devox",
   list: "cy",
   sale: "mint",
   stake: "amber",
@@ -101,7 +101,7 @@ export default function ActivityPage() {
 
               <span className="text-[13px]">
                 {r.collection ? (
-                  <Link href={"/nft/collection/" + r.collection} className="hover:text-veil-200">
+                  <Link href={"/nft/collection/" + r.collection} className="hover:text-devox-200">
                     {r.label}
                   </Link>
                 ) : (

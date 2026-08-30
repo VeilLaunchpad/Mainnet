@@ -36,12 +36,12 @@ const ONBOARD_GAS = 12_000_000n;
  * returns a plausible number for a balance that is not yours.
  */
 function keyStore(address: string, net: CotiNetworkName) {
-  return "veilpad.aes." + net + "." + address.toLowerCase();
+  return "devoxpad.aes." + net + "." + address.toLowerCase();
 }
 
 /** Keys cached before the app had two networks. They were all testnet. */
 function legacyKeyStore(address: string) {
-  return "veilpad.aes." + address.toLowerCase();
+  return "devoxpad.aes." + address.toLowerCase();
 }
 
 export function readCachedAes(

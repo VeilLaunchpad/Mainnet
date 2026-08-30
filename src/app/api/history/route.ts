@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
           f.side === "buy"
             ? coti + " COTI for " + amount + " " + token.symbol
             : amount + " " + token.symbol + " for " + coti + " COTI",
-        venue: f.venue === "veilswap" ? "VeilSwap" : "Bonding curve",
+        venue: f.venue === "devoxswap" ? "DevoxSwap" : "Bonding curve",
         token: token.address,
         symbol: token.symbol,
         amountCoti: coti,

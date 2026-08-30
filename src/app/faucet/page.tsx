@@ -161,7 +161,7 @@ export default function FaucetPage() {
                 <button
                   onClick={claim}
                   disabled={!canClaim}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                 >
                   {claiming && <Spinner size={15} />}
                   {!isConnected
@@ -174,7 +174,7 @@ export default function FaucetPage() {
                 </button>
 
                 <p className="mt-3 text-center text-[11px] text-white/30">
-                  Sent from the VEILPAD treasury on {chain.name}. Testnet COTI has no value.
+                  Sent from the DEVOXPAD treasury on {chain.name}. Testnet COTI has no value.
                 </p>
               </>
             )}
@@ -257,7 +257,7 @@ export default function FaucetPage() {
               <h3 className="text-[13px] font-semibold">If this runs dry</h3>
               <p className="mt-1.5 text-[12px] leading-relaxed text-white/45">
                 COTI runs its own faucet through their Discord, which does not have a treasury cap.
-                This one exists so you can try VEILPAD without leaving the tab first.
+                This one exists so you can try DEVOXPAD without leaving the tab first.
               </p>
               <Link
                 href="/launch"

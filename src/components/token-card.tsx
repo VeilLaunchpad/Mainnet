@@ -18,7 +18,7 @@ export interface TokenSummary {
   spotPriceCoti?: number | null;
   kind?: string;
   createdAt?: number;
-  /** VEILPAD's own token, as marked by the server. Never set by a launch. */
+  /** DEVOXPAD's own token, as marked by the server. Never set by a launch. */
   official?: boolean;
 }
 
@@ -34,7 +34,7 @@ export function TokenCard({ t }: { t: TokenSummary }) {
             {t.graduated ? (
               <Badge tone="mint">Graduated</Badge>
             ) : t.official ? null : (
-              <Badge tone="veil">Curve</Badge>
+              <Badge tone="devox">Curve</Badge>
             )}
             {t.kind === "private" && <Badge tone="cy">Encrypted</Badge>}
           </div>
@@ -52,7 +52,7 @@ export function TokenCard({ t }: { t: TokenSummary }) {
       <div className="mt-3.5">
         {t.graduated ? (
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-white/35">VeilSwap pair</span>
+            <span className="text-white/35">DevoxSwap pair</span>
             <span className="mono text-mint-400">live</span>
           </div>
         ) : (

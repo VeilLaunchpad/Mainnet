@@ -107,7 +107,7 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
               <h1 className="text-2xl font-bold tracking-tight">{t.symbol}</h1>
               <span className="text-[15px] text-white/45">{t.name}</span>
               {t.isPrivate && <Badge tone="cy">Encrypted balances</Badge>}
-              {data.pool ? <Badge tone="mint">Graduated</Badge> : <Badge tone="veil">On curve</Badge>}
+              {data.pool ? <Badge tone="mint">Graduated</Badge> : <Badge tone="devox">On curve</Badge>}
 
               {/*
                 A pooled token trades on the DEX rather than the curve, so the
@@ -118,9 +118,9 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
               {data.pool && (
                 <Link
                   href={"/swap?token=" + t.address}
-                  className="ml-auto rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+                  className="ml-auto rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
                 >
-                  Trade on VeilSwap
+                  Trade on DevoxSwap
                 </Link>
               )}
             </div>
@@ -141,7 +141,7 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
                   by{" "}
                   <Link
                     href={t.creatorProfile ? "/profile/" + t.creatorProfile.username : "/profile/" + t.creator}
-                    className="text-white/55 transition hover:text-veil-300"
+                    className="text-white/55 transition hover:text-devox-300"
                   >
                     {t.creatorProfile ? "@" + t.creatorProfile.username : shortAddr(t.creator)}
                   </Link>
@@ -161,7 +161,7 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
               <div className="mono text-[12px] text-white/35">{fmtPriceUsd(priceUsd)}</div>
             ) : null}
             <div className="mt-0.5 text-[10px] text-white/25">
-              {data.pool ? "VeilSwap pair" : "bonding curve"}
+              {data.pool ? "DevoxSwap pair" : "bonding curve"}
             </div>
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
           <div className="border-t border-white/[0.06] px-5 py-4">
             <Progress
               pct={c.progressPct}
-              label={`${c.reserveCoti} / ${c.targetCoti} COTI raised - the whole reserve seeds a VeilSwap pair on graduation`}
+              label={`${c.reserveCoti} / ${c.targetCoti} COTI raised - the whole reserve seeds a DevoxSwap pair on graduation`}
             />
           </div>
         )}
@@ -194,7 +194,7 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
                 <Stat label="Sold" value={c?.sold ?? "-"} sub="from the curve" />
               </>
             )}
-            <Stat label="Fills" value={data.stats.tradeCount} sub="recorded on VEILPAD" />
+            <Stat label="Fills" value={data.stats.tradeCount} sub="recorded on DEVOXPAD" />
             <Stat
               label="Supply"
               value={t.isPrivate ? "sealed" : "public"}
@@ -229,12 +229,12 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
                     <span
                       className={
                         "hidden w-[68px] shrink-0 rounded px-1.5 py-0.5 text-center text-[9px] font-semibold uppercase tracking-wider sm:inline " +
-                        (tr.venue === "veilswap"
+                        (tr.venue === "devoxswap"
                           ? "bg-cy-500/12 text-cy-300"
-                          : "bg-veil-500/12 text-veil-300")
+                          : "bg-devox-500/12 text-devox-300")
                       }
                     >
-                      {tr.venue === "veilswap" ? "swap" : "curve"}
+                      {tr.venue === "devoxswap" ? "swap" : "curve"}
                     </span>
                     <span className="mono w-24 shrink-0 truncate text-white/45">
                       {shortAddr(tr.trader)}

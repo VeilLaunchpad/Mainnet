@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const c = await collection(address as Address, net).catch(() => null);
   if (!c) {
     return Response.json(
-      { error: "not a VEILPAD collection on " + net },
+      { error: "not a DEVOXPAD collection on " + net },
       { status: 404 },
     );
   }

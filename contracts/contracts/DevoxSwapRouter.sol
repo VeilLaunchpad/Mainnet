@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {VeilSwapPair} from "./VeilSwapPair.sol";
-import {VeilSwapFactory} from "./VeilSwapFactory.sol";
+import {DevoxSwapPair} from "./DevoxSwapPair.sol";
+import {DevoxSwapFactory} from "./DevoxSwapFactory.sol";
 
 interface IWCOTIRouter {
     function deposit() external payable;
@@ -22,14 +22,14 @@ interface IRouterToken {
 }
 
 /**
- * @title VeilSwapRouter - native COTI in, native COTI out.
+ * @title DevoxSwapRouter - native COTI in, native COTI out.
  *
  * The pairs pull their own tokens, so the router's job is narrow: wrap and
  * unwrap native COTI around a swap, apply a deadline, and expose quotes. It
  * holds no funds between calls and has no admin.
  */
-contract VeilSwapRouter is ReentrancyGuard {
-    VeilSwapFactory public immutable factory;
+contract DevoxSwapRouter is ReentrancyGuard {
+    DevoxSwapFactory public immutable factory;
     address public immutable wcoti;
 
     error Expired();
@@ -43,13 +43,13 @@ contract VeilSwapRouter is ReentrancyGuard {
     }
 
     constructor(address factory_, address wcoti_) {
-        factory = VeilSwapFactory(factory_);
+        factory = DevoxSwapFactory(factory_);
         wcoti = wcoti_;
     }
 
     receive() external payable {
         // Only the wrapper may push COTI here, during an unwrap.
-        require(msg.sender == wcoti, "VeilSwapRouter: direct send");
+        require(msg.sender == wcoti, "DevoxSwapRouter: direct send");
     }
 
     // ── quotes ────────────────────────────────────────────────────────────
@@ -65,14 +65,14 @@ contract VeilSwapRouter is ReentrancyGuard {
     ) public view returns (uint256) {
         address pair = factory.getPair(tokenIn, tokenOut);
         if (pair == address(0)) return 0;
-        return VeilSwapPair(pair).quote(tokenIn, amountIn);
+        return DevoxSwapPair(pair).quote(tokenIn, amountIn);
     }
 
     /// Price of one whole `token` denominated in COTI, scaled to 1e18.
     function priceInCoti(address token) external view returns (uint256) {
         address pair = factory.getPair(token, wcoti);
         if (pair == address(0)) return 0;
-        VeilSwapPair p = VeilSwapPair(pair);
+        DevoxSwapPair p = DevoxSwapPair(pair);
         (uint256 r0, uint256 r1) = p.getReserves();
         if (r0 == 0 || r1 == 0) return 0;
         (uint256 rToken, uint256 rCoti) = p.token0() == token ? (r0, r1) : (r1, r0);
@@ -102,7 +102,7 @@ contract VeilSwapRouter is ReentrancyGuard {
         IWCOTIRouter(wcoti).deposit{value: msg.value}();
         _approvePair(wcoti, pair, msg.value);
 
-        amountOut = VeilSwapPair(pair).swapExactIn(wcoti, msg.value, amountOutMin, to, deadline);
+        amountOut = DevoxSwapPair(pair).swapExactIn(wcoti, msg.value, amountOutMin, to, deadline);
     }
 
     /// Token -> native COTI. The caller approves this router for `amountIn`.
@@ -120,7 +120,7 @@ contract VeilSwapRouter is ReentrancyGuard {
         _approvePair(token, pair, amountIn);
 
         // Land the WCOTI here so it can be unwrapped before forwarding.
-        amountOut = VeilSwapPair(pair).swapExactIn(token, amountIn, amountOutMin, address(this), deadline);
+        amountOut = DevoxSwapPair(pair).swapExactIn(token, amountIn, amountOutMin, address(this), deadline);
 
         IWCOTIRouter(wcoti).withdraw(amountOut);
         (bool ok, ) = to.call{value: amountOut}("");
@@ -142,7 +142,7 @@ contract VeilSwapRouter is ReentrancyGuard {
         IRouterToken(tokenIn).transferFrom(msg.sender, address(this), amountIn);
         _approvePair(tokenIn, pair, amountIn);
 
-        amountOut = VeilSwapPair(pair).swapExactIn(tokenIn, amountIn, amountOutMin, to, deadline);
+        amountOut = DevoxSwapPair(pair).swapExactIn(tokenIn, amountIn, amountOutMin, to, deadline);
     }
 
     // ── liquidity ─────────────────────────────────────────────────────────
@@ -163,7 +163,7 @@ contract VeilSwapRouter is ReentrancyGuard {
         _approvePair(token, pair, amountToken);
         _approvePair(wcoti, pair, msg.value);
 
-        VeilSwapPair p = VeilSwapPair(pair);
+        DevoxSwapPair p = DevoxSwapPair(pair);
         (uint256 amount0, uint256 amount1) = p.token0() == token
             ? (amountToken, msg.value)
             : (msg.value, amountToken);

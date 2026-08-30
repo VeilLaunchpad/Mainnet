@@ -63,15 +63,15 @@ const FILTERS: { key: Kind | "all"; label: string }[] = [
   { key: "telegram", label: "Telegram" },
 ];
 
-const TONE: Record<Kind, "mint" | "rose" | "veil" | "cy" | "amber" | "muted"> = {
+const TONE: Record<Kind, "mint" | "rose" | "devox" | "cy" | "amber" | "muted"> = {
   buy: "mint",
   sell: "rose",
   launch: "amber",
-  portal_in: "veil",
+  portal_in: "devox",
   portal_out: "cy",
   bridge: "cy",
   comment: "muted",
-  agent: "veil",
+  agent: "devox",
   profile: "muted",
   telegram: "cy",
 };
@@ -157,7 +157,7 @@ export function HistoryFeed({ address }: { address?: string }) {
             className={
               "rounded-lg border px-3 py-1.5 text-[12px] font-medium transition " +
               (filter === f.key
-                ? "border-veil-400/50 bg-veil-500/12 text-veil-300"
+                ? "border-devox-400/50 bg-devox-500/12 text-devox-300"
                 : "border-white/10 text-white/45 hover:text-white")
             }
           >

@@ -88,7 +88,7 @@ export function AgentChat({
       </div>
 
       <div className="mt-2 shrink-0">
-        <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-2 focus-within:border-veil-400/50">
+        <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-2 focus-within:border-devox-400/50">
           <textarea
             ref={inputRef}
             value={draft}
@@ -114,7 +114,7 @@ export function AgentChat({
             <button
               onClick={submit}
               disabled={!draft.trim()}
-              className="shrink-0 rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+              className="shrink-0 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
             >
               Send
             </button>
@@ -157,7 +157,7 @@ function Turn({
   if (turn.role === "user") {
     return (
       <div className="animate-rise flex justify-end">
-        <div className="max-w-[85%] rounded-2xl rounded-br-md bg-veil-500/20 px-3.5 py-2.5 text-[13px] leading-relaxed text-white/90">
+        <div className="max-w-[85%] rounded-2xl rounded-br-md bg-devox-500/20 px-3.5 py-2.5 text-[13px] leading-relaxed text-white/90">
           {deDash(turn.content)}
         </div>
       </div>
@@ -171,7 +171,7 @@ function Turn({
 
   return (
     <div className="animate-rise flex gap-2.5">
-      <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-veil-500 to-cy-500 text-[10px] font-bold text-white">
+      <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-devox-500 to-cy-500 text-[10px] font-bold text-white">
         {agentName.slice(0, 1)}
       </span>
 
@@ -240,7 +240,7 @@ function Turn({
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="size-1.5 animate-pulse-slow rounded-full bg-veil-400"
+                className="size-1.5 animate-pulse-slow rounded-full bg-devox-400"
                 style={{ animationDelay: i * 160 + "ms" }}
               />
             ))}
@@ -270,7 +270,7 @@ function Markdown({ text }: { text: string }) {
                 .filter((l) => l.trim())
                 .map((l, li) => (
                   <li key={li} className="flex gap-2">
-                    <span className="mt-[7px] size-1 shrink-0 rounded-full bg-veil-400/70" />
+                    <span className="mt-[7px] size-1 shrink-0 rounded-full bg-devox-400/70" />
                     <span>{inline(l.replace(/^\s*[-*•]\s+/, ""))}</span>
                   </li>
                 ))}
@@ -334,7 +334,7 @@ function Empty({
   return (
     <div className={compact ? "py-4" : "py-10"}>
       <div className="mb-3 flex items-center gap-2.5">
-        <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-veil-500 to-cy-500 text-sm font-bold text-white">
+        <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-devox-500 to-cy-500 text-sm font-bold text-white">
           {agentName.slice(0, 1)}
         </span>
         <div>
@@ -349,7 +349,7 @@ function Empty({
           <button
             key={s}
             onClick={() => onPick(s)}
-            className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-left text-[12px] text-white/65 transition hover:border-veil-400/40 hover:text-white"
+            className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-left text-[12px] text-white/65 transition hover:border-devox-400/40 hover:text-white"
           >
             {s}
           </button>

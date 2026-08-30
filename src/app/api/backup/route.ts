@@ -54,7 +54,7 @@ export async function GET() {
  * costs a write and an open endpoint would let anyone spend the bucket.
  */
 export async function POST(req: NextRequest) {
-  const presented = req.headers.get("x-veilpad-secret") ?? "";
+  const presented = req.headers.get("x-devoxpad-secret") ?? "";
   if (!safeEqual(presented, webhookSecret())) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }

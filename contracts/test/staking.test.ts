@@ -25,57 +25,57 @@ function near(actual: bigint, expected: bigint, tolerance = 10n ** 15n) {
 async function deployAll() {
   const [owner, alice, bob] = await ethers.getSigners();
 
-  const TokenFactory = await ethers.getContractFactory("VeilpadToken");
-  const veil = await TokenFactory.deploy("VEILPAD", "VEIL", "ipfs://meta", owner.address, e18(1_000_000_000));
-  await veil.waitForDeployment();
+  const TokenFactory = await ethers.getContractFactory("DevoxpadToken");
+  const devox = await TokenFactory.deploy("DEVOXPAD", "DEVOX", "ipfs://meta", owner.address, e18(1_000_000_000));
+  await devox.waitForDeployment();
 
-  const TreasuryFactory = await ethers.getContractFactory("VeilTreasury");
-  const treasury = await TreasuryFactory.deploy(await veil.getAddress(), owner.address);
+  const TreasuryFactory = await ethers.getContractFactory("DevoxTreasury");
+  const treasury = await TreasuryFactory.deploy(await devox.getAddress(), owner.address);
   await treasury.waitForDeployment();
 
-  const StakingFactory = await ethers.getContractFactory("VeilStaking");
+  const StakingFactory = await ethers.getContractFactory("DevoxStaking");
   const staking = await StakingFactory.deploy(
-    await veil.getAddress(),
+    await devox.getAddress(),
     await treasury.getAddress(),
     owner.address,
   );
   await staking.waitForDeployment();
 
   await treasury.setSpender(await staking.getAddress(), true, e18(100_000_000));
-  await veil.approve(await treasury.getAddress(), e18(100_000_000));
+  await devox.approve(await treasury.getAddress(), e18(100_000_000));
   await treasury.fund(e18(100_000_000));
 
-  return { owner, alice, bob, veil, treasury, staking };
+  return { owner, alice, bob, devox, treasury, staking };
 }
 
-describe("VeilpadToken", () => {
+describe("DevoxpadToken", () => {
   it("mints the whole supply once and can never mint again", async () => {
-    const { veil, owner } = await deployAll();
+    const { devox, owner } = await deployAll();
 
-    expect(await veil.totalSupply()).to.equal(e18(1_000_000_000));
-    expect(await veil.balanceOf(owner.address)).to.equal(e18(900_000_000)); // 100M went to the treasury
-    expect(await veil.initialSupply()).to.equal(e18(1_000_000_000));
+    expect(await devox.totalSupply()).to.equal(e18(1_000_000_000));
+    expect(await devox.balanceOf(owner.address)).to.equal(e18(900_000_000)); // 100M went to the treasury
+    expect(await devox.initialSupply()).to.equal(e18(1_000_000_000));
 
     // There is no mint function in the ABI at all - that is the guarantee.
-    expect(veil.interface.fragments.some((f) => (f as { name?: string }).name === "mint")).to.equal(false);
+    expect(devox.interface.fragments.some((f) => (f as { name?: string }).name === "mint")).to.equal(false);
   });
 
   it("burning lowers supply and cannot be undone", async () => {
-    const { veil, owner } = await deployAll();
-    const before = await veil.totalSupply();
-    await veil.burn(e18(1_000));
-    expect(await veil.totalSupply()).to.equal(before - e18(1_000));
+    const { devox, owner } = await deployAll();
+    const before = await devox.totalSupply();
+    await devox.burn(e18(1_000));
+    expect(await devox.totalSupply()).to.equal(before - e18(1_000));
   });
 });
 
-describe("VeilpadTokenDeployer", () => {
+describe("DevoxpadTokenDeployer", () => {
   it("predicts the address CREATE2 actually produces", async () => {
     const [owner] = await ethers.getSigners();
-    const DeployerFactory = await ethers.getContractFactory("VeilpadTokenDeployer");
+    const DeployerFactory = await ethers.getContractFactory("DevoxpadTokenDeployer");
     const deployer = await DeployerFactory.deploy();
     await deployer.waitForDeployment();
 
-    const args = ["VEILPAD", "VEIL", "ipfs://meta", owner.address, e18(1_000_000_000)] as const;
+    const args = ["DEVOXPAD", "DEVOX", "ipfs://meta", owner.address, e18(1_000_000_000)] as const;
     const salt = ethers.hexlify(ethers.randomBytes(32));
 
     const predicted = await deployer.predict(salt, ...args);
@@ -89,17 +89,17 @@ describe("VeilpadTokenDeployer", () => {
     const code = await ethers.provider.getCode(predicted);
     expect(code).to.not.equal("0x");
 
-    const token = await ethers.getContractAt("VeilpadToken", predicted);
-    expect(await token.symbol()).to.equal("VEIL");
+    const token = await ethers.getContractAt("DevoxpadToken", predicted);
+    expect(await token.symbol()).to.equal("DEVOX");
   });
 
   it("mines a real 8888 address and deploys to it", async () => {
     const [owner] = await ethers.getSigners();
-    const DeployerFactory = await ethers.getContractFactory("VeilpadTokenDeployer");
+    const DeployerFactory = await ethers.getContractFactory("DevoxpadTokenDeployer");
     const deployer = await DeployerFactory.deploy();
     await deployer.waitForDeployment();
 
-    const args = ["VEILPAD", "VEIL", "ipfs://meta", owner.address, e18(1_000_000_000)] as const;
+    const args = ["DEVOXPAD", "DEVOX", "ipfs://meta", owner.address, e18(1_000_000_000)] as const;
     const hash = await deployer.initCodeHash(...args);
     const at = await deployer.getAddress();
 
@@ -122,31 +122,31 @@ describe("VeilpadTokenDeployer", () => {
   });
 });
 
-describe("VeilStaking", () => {
+describe("DevoxStaking", () => {
   it("pays exactly the stated APY over a year", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false); // 10%
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false); // 10%
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
 
     await time.increase(YEAR);
 
     near(await staking.pendingReward(0, alice.address), e18(100));
 
-    const before = await veil.balanceOf(alice.address);
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
-    near((await veil.balanceOf(alice.address)) - before, e18(100));
+    near((await devox.balanceOf(alice.address)) - before, e18(100));
   });
 
   it("does not dilute an existing staker when someone else joins", async () => {
-    const { staking, veil, alice, bob } = await deployAll();
+    const { staking, devox, alice, bob } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
     for (const who of [alice, bob]) {
-      await veil.transfer(who.address, e18(1_000));
-      await veil.connect(who).approve(await staking.getAddress(), e18(1_000));
+      await devox.transfer(who.address, e18(1_000));
+      await devox.connect(who).approve(await staking.getAddress(), e18(1_000));
     }
 
     await staking.connect(alice).stake(0, e18(1_000));
@@ -161,24 +161,24 @@ describe("VeilStaking", () => {
   });
 
   it("credits nothing for time before the stake", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
     await time.increase(YEAR * 5); // pool sits idle
 
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
 
     near(await staking.pendingReward(0, alice.address), 0n, 10n ** 14n);
   });
 
   it("prices past accrual at the old rate when the APY changes", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
 
     await time.increase(YEAR);
@@ -190,52 +190,52 @@ describe("VeilStaking", () => {
   });
 
   it("keeps the reward owed when the treasury is short, and pays it once refilled", async () => {
-    const { staking, veil, treasury, owner, alice } = await deployAll();
+    const { staking, devox, treasury, owner, alice } = await deployAll();
 
     // Drain the reserve down to less than one year of Alice's reward.
-    await treasury.withdraw(await veil.getAddress(), owner.address, (await treasury.balance()) - e18(30));
+    await treasury.withdraw(await devox.getAddress(), owner.address, (await treasury.balance()) - e18(30));
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
 
     await time.increase(YEAR);
 
-    const before = await veil.balanceOf(alice.address);
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
 
     // Paid what was there, and still owes the rest.
-    near((await veil.balanceOf(alice.address)) - before, e18(30));
+    near((await devox.balanceOf(alice.address)) - before, e18(30));
     near(await staking.pendingReward(0, alice.address), e18(70));
 
-    await veil.approve(await treasury.getAddress(), e18(1_000));
+    await devox.approve(await treasury.getAddress(), e18(1_000));
     await treasury.fund(e18(1_000));
     await staking.connect(alice).claim(0);
     near(await staking.pendingReward(0, alice.address), 0n, 10n ** 15n);
   });
 
   it("returns principal through emergencyUnstake even with no treasury at all", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
     await staking.setTreasury(ethers.ZeroAddress);
 
     await staking.connect(alice).emergencyUnstake(0);
-    expect(await veil.balanceOf(alice.address)).to.equal(e18(1_000));
+    expect(await devox.balanceOf(alice.address)).to.equal(e18(1_000));
   });
 
   it("lets a closed pool be exited but not entered", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(500));
 
     await staking.setPool(0, 1000, e18(10_000_000), 0, false);
@@ -245,18 +245,18 @@ describe("VeilStaking", () => {
   });
 
   it("enforces the cap that bounds the treasury's liability", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(1_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(2_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(2_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(1_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(2_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(2_000));
 
     await staking.connect(alice).stake(0, e18(1_000));
     await expect(staking.connect(alice).stake(0, e18(1))).to.be.revertedWithCustomError(staking, "CapReached");
   });
 
-  it("stakes native COTI and pays VEILPAD on it", async () => {
-    const { staking, veil, alice } = await deployAll();
+  it("stakes native COTI and pays DEVOXPAD on it", async () => {
+    const { staking, devox, alice } = await deployAll();
 
     await staking.addPool(ethers.ZeroAddress, 1000, e18(1_000_000), 0, 0, false);
     await staking.connect(alice).stake(0, e18(100), { value: e18(100) });
@@ -264,9 +264,9 @@ describe("VeilStaking", () => {
     await time.increase(YEAR);
     near(await staking.pendingReward(0, alice.address), e18(10));
 
-    const before = await veil.balanceOf(alice.address);
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
-    near((await veil.balanceOf(alice.address)) - before, e18(10));
+    near((await devox.balanceOf(alice.address)) - before, e18(10));
   });
 
   it("refuses a native stake whose value does not match the amount", async () => {
@@ -279,10 +279,10 @@ describe("VeilStaking", () => {
   });
 
   it("refuses native sent alongside an ERC20 stake", async () => {
-    const { staking, veil, alice } = await deployAll();
-    await staking.addPool(await veil.getAddress(), 1000, e18(1_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(10));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(10));
+    const { staking, devox, alice } = await deployAll();
+    await staking.addPool(await devox.getAddress(), 1000, e18(1_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(10));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(10));
 
     await expect(
       staking.connect(alice).stake(0, e18(10), { value: 1n }),
@@ -290,7 +290,7 @@ describe("VeilStaking", () => {
   });
 
   it("gives a 6-decimal token the same percentage as an 18-decimal one", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
     const Six = await ethers.getContractFactory("MockDecimalsToken");
     const six = await Six.deploy("Six", "SIX", 6);
@@ -303,28 +303,28 @@ describe("VeilStaking", () => {
 
     await time.increase(YEAR);
 
-    // 1000 units of a 6-decimal token at 10% must still be 100 VEILPAD, not 1e-10 of one.
+    // 1000 units of a 6-decimal token at 10% must still be 100 DEVOXPAD, not 1e-10 of one.
     near(await staking.pendingReward(0, alice.address), e18(100));
 
-    const before = await veil.balanceOf(alice.address);
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
-    near((await veil.balanceOf(alice.address)) - before, e18(100));
+    near((await devox.balanceOf(alice.address)) - before, e18(100));
   });
 
   it("does not let a claim be replayed for the same period", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
     await staking.connect(alice).claim(0);
-    const after = await veil.balanceOf(alice.address);
+    const after = await devox.balanceOf(alice.address);
 
     await staking.connect(alice).claim(0); // immediately again
-    near((await veil.balanceOf(alice.address)) - after, 0n, 10n ** 15n);
+    near((await devox.balanceOf(alice.address)) - after, 0n, 10n ** 15n);
   });
 
   it("refuses bare native transfers so nothing sits outside the books", async () => {
@@ -335,13 +335,13 @@ describe("VeilStaking", () => {
   });
 });
 
-describe("VeilStaking under a hostile treasury", () => {
+describe("DevoxStaking under a hostile treasury", () => {
   it("does not let a lying treasury destroy what was earned", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
@@ -349,21 +349,21 @@ describe("VeilStaking under a hostile treasury", () => {
     const lying = await Lying.deploy();
     await staking.setTreasury(await lying.getAddress());
 
-    const before = await veil.balanceOf(alice.address);
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
 
-    // It claimed to have paid 100 VEIL and sent nothing. The debt must survive,
+    // It claimed to have paid 100 DEVOX and sent nothing. The debt must survive,
     // because the credit is the measured balance change, not the report.
-    expect(await veil.balanceOf(alice.address)).to.equal(before);
+    expect(await devox.balanceOf(alice.address)).to.equal(before);
     near(await staking.pendingReward(0, alice.address), e18(100));
   });
 
   it("still returns principal when the treasury reverts", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
@@ -374,22 +374,22 @@ describe("VeilStaking under a hostile treasury", () => {
     // The unstake must complete regardless: a reward that cannot be paid is a
     // delay, a principal that cannot be returned would be a loss.
     await staking.connect(alice).unstake(0, e18(1_000));
-    expect(await veil.balanceOf(alice.address)).to.equal(e18(1_000));
+    expect(await devox.balanceOf(alice.address)).to.equal(e18(1_000));
     near(await staking.pendingReward(0, alice.address), e18(100));
   });
 
   it("keeps the reward claimable after an emergency exit", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
     // Settle so the year is on the books, then take the emergency exit.
     await staking.connect(alice).claim(0);
-    await veil.connect(alice).transfer(await staking.getAddress(), 0); // no-op, keeps balances clear
+    await devox.connect(alice).transfer(await staking.getAddress(), 0); // no-op, keeps balances clear
     await staking.connect(alice).stake(0, 0n).catch(() => undefined);
 
     const owedBefore = await staking.pendingReward(0, alice.address);
@@ -406,24 +406,24 @@ describe("VeilStaking under a hostile treasury", () => {
   });
 });
 
-describe("VeilTreasury", () => {
+describe("DevoxTreasury", () => {
   it("bounds a spender to its budget", async () => {
-    const { staking, treasury, veil, alice } = await deployAll();
+    const { staking, treasury, devox, alice } = await deployAll();
 
-    // Cut the staking contract's budget to 5 VEIL, far under what it will owe.
+    // Cut the staking contract's budget to 5 DEVOX, far under what it will owe.
     await treasury.setSpender(await staking.getAddress(), true, e18(5));
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
-    const before = await veil.balanceOf(alice.address);
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
 
     // Paid the budget and no more, even though the reserve holds millions.
-    near((await veil.balanceOf(alice.address)) - before, e18(5));
+    near((await devox.balanceOf(alice.address)) - before, e18(5));
     expect(await treasury.spendLimit(await staking.getAddress())).to.equal(0n);
     near(await staking.pendingReward(0, alice.address), e18(95));
   });
@@ -436,14 +436,14 @@ describe("VeilTreasury", () => {
   });
 });
 
-describe("VeilStaking per-user cap", () => {
+describe("DevoxStaking per-user cap", () => {
   it("stops one address taking the whole pool", async () => {
-    const { staking, veil, alice, bob } = await deployAll();
+    const { staking, devox, alice, bob } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(1_000), 0, e18(600), false);
+    await staking.addPool(await devox.getAddress(), 1000, e18(1_000), 0, e18(600), false);
     for (const who of [alice, bob]) {
-      await veil.transfer(who.address, e18(1_000));
-      await veil.connect(who).approve(await staking.getAddress(), e18(1_000));
+      await devox.transfer(who.address, e18(1_000));
+      await devox.connect(who).approve(await staking.getAddress(), e18(1_000));
     }
 
     await staking.connect(alice).stake(0, e18(600));
@@ -457,14 +457,14 @@ describe("VeilStaking per-user cap", () => {
   });
 });
 
-describe("VeilpadTokenDeployer access", () => {
+describe("DevoxpadTokenDeployer access", () => {
   it("only lets its owner mint provenance", async () => {
     const [owner, alice] = await ethers.getSigners();
-    const DeployerFactory = await ethers.getContractFactory("VeilpadTokenDeployer");
+    const DeployerFactory = await ethers.getContractFactory("DevoxpadTokenDeployer");
     const deployer = await DeployerFactory.deploy();
     await deployer.waitForDeployment();
 
-    const args = ["VEILPAD", "VEIL", "ipfs://meta", owner.address, e18(1_000_000_000)] as const;
+    const args = ["DEVOXPAD", "DEVOX", "ipfs://meta", owner.address, e18(1_000_000_000)] as const;
     const salt = ethers.hexlify(ethers.randomBytes(32));
 
     await expect(
@@ -475,13 +475,13 @@ describe("VeilpadTokenDeployer access", () => {
   });
 });
 
-describe("VeilStaking escape hatch, corrected", () => {
+describe("DevoxStaking escape hatch, corrected", () => {
   it("keeps a passive staker's whole reward through an emergency exit", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1800, e18(20_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(10_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(10_000));
+    await staking.addPool(await devox.getAddress(), 1800, e18(20_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(10_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(10_000));
     await staking.connect(alice).stake(0, e18(10_000));
 
     await time.increase(YEAR);
@@ -493,21 +493,21 @@ describe("VeilStaking escape hatch, corrected", () => {
     await staking.connect(alice).emergencyUnstake(0);
 
     expect((await staking.stakeOf(0, alice.address)).amount).to.equal(0n);
-    expect(await veil.balanceOf(alice.address)).to.equal(e18(10_000)); // principal
+    expect(await devox.balanceOf(alice.address)).to.equal(e18(10_000)); // principal
     near(await staking.pendingReward(0, alice.address), e18(1_800));   // reward survives
 
     // And it is genuinely claimable afterwards.
-    const before = await veil.balanceOf(alice.address);
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
-    near((await veil.balanceOf(alice.address)) - before, e18(1_800));
+    near((await devox.balanceOf(alice.address)) - before, e18(1_800));
   });
 
   it("still unstakes when the treasury has been pointed at nothing", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
@@ -516,28 +516,28 @@ describe("VeilStaking escape hatch, corrected", () => {
     // A codeless callee is not caught by try/catch, so this is the case that
     // would otherwise revert and trap the principal.
     await staking.connect(alice).unstake(0, e18(1_000));
-    expect(await veil.balanceOf(alice.address)).to.equal(e18(1_000));
+    expect(await devox.balanceOf(alice.address)).to.equal(e18(1_000));
     near(await staking.pendingReward(0, alice.address), e18(100));
   });
 
   it("still unstakes when the treasury is an EOA", async () => {
-    const { staking, veil, alice, bob } = await deployAll();
+    const { staking, devox, alice, bob } = await deployAll();
 
-    await staking.addPool(await veil.getAddress(), 1000, e18(10_000_000), 0, 0, false);
-    await veil.transfer(alice.address, e18(1_000));
-    await veil.connect(alice).approve(await staking.getAddress(), e18(1_000));
+    await staking.addPool(await devox.getAddress(), 1000, e18(10_000_000), 0, 0, false);
+    await devox.transfer(alice.address, e18(1_000));
+    await devox.connect(alice).approve(await staking.getAddress(), e18(1_000));
     await staking.connect(alice).stake(0, e18(1_000));
     await time.increase(YEAR);
 
     await staking.setTreasury(bob.address);
     await staking.connect(alice).unstake(0, e18(1_000));
-    expect(await veil.balanceOf(alice.address)).to.equal(e18(1_000));
+    expect(await devox.balanceOf(alice.address)).to.equal(e18(1_000));
   });
 });
 
-describe("VeilStaking with a private stake token", () => {
+describe("DevoxStaking with a private stake token", () => {
   it("credits the amount instead of measuring a ciphertext balance", async () => {
-    const { staking, veil, alice } = await deployAll();
+    const { staking, devox, alice } = await deployAll();
 
     const Priv = await ethers.getContractFactory("MockPrivateToken");
     const p = await Priv.deploy();
@@ -555,10 +555,10 @@ describe("VeilStaking with a private stake token", () => {
     await time.increase(YEAR);
     near(await staking.pendingReward(0, alice.address), e18(100));
 
-    // Reward is public VEIL even though the stake is private.
-    const before = await veil.balanceOf(alice.address);
+    // Reward is public DEVOX even though the stake is private.
+    const before = await devox.balanceOf(alice.address);
     await staking.connect(alice).claim(0);
-    near((await veil.balanceOf(alice.address)) - before, e18(100));
+    near((await devox.balanceOf(alice.address)) - before, e18(100));
 
     // And the principal comes back in full.
     await staking.connect(alice).unstake(0, e18(1_000));

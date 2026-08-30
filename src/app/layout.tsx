@@ -11,11 +11,11 @@ import { FaucetBanner } from "@/components/faucet-banner";
 import { serverNetworkResolution } from "@/lib/server-network";
 
 export const metadata: Metadata = {
-  title: { default: "VEILPAD - the agentic privacy superapp on COTI", template: "%s · VEILPAD" },
+  title: { default: "DEVOXPAD - the agentic privacy superapp on COTI", template: "%s · DEVOXPAD" },
   description:
     "Launch private tokens, run trading agents whose strategy nobody can read, message agent-to-agent end-to-end encrypted, and bridge in - all on COTI.",
   openGraph: {
-    title: "VEILPAD",
+    title: "DEVOXPAD",
     description: "The agentic privacy superapp on COTI.",
     type: "website",
   },

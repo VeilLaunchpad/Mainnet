@@ -16,7 +16,7 @@ const ZERO = ethers.ZeroAddress;
 
 function params(over: Partial<Record<string, unknown>> = {}) {
   return {
-    name: "Veil Art",
+    name: "Devox Art",
     symbol: "VART",
     previewURI: "ipfs://preview/",
     maxSupply: 10_000n,
@@ -32,26 +32,26 @@ function params(over: Partial<Record<string, unknown>> = {}) {
 async function setup() {
   const [owner, alice, bob, fee] = await ethers.getSigners();
 
-  const Factory = await ethers.getContractFactory("VeilNFTFactory");
+  const Factory = await ethers.getContractFactory("DevoxNFTFactory");
   const factory = await Factory.deploy(owner.address, fee.address, e18("0.01"));
   await factory.waitForDeployment();
 
-  const Market = await ethers.getContractFactory("VeilNFTMarket");
+  const Market = await ethers.getContractFactory("DevoxNFTMarket");
   const market = await Market.deploy(owner.address, fee.address, 250); // 2.5%
   await market.waitForDeployment();
 
-  const Token = await ethers.getContractFactory("VeilpadToken");
-  const veil = await Token.deploy("VEILPAD", "VEIL", "", owner.address, e18(1_000_000_000));
-  await veil.waitForDeployment();
+  const Token = await ethers.getContractFactory("DevoxpadToken");
+  const devox = await Token.deploy("DEVOXPAD", "DEVOX", "", owner.address, e18(1_000_000_000));
+  await devox.waitForDeployment();
 
   const Nft = await ethers.getContractFactory("MockERC721");
   const nft = await Nft.deploy("Art", "ART");
   await nft.waitForDeployment();
 
-  return { owner, alice, bob, fee, factory, market, veil, nft };
+  return { owner, alice, bob, fee, factory, market, devox, nft };
 }
 
-describe("VeilNFTFactory", () => {
+describe("DevoxNFTFactory", () => {
   it("deploys a collection the creator owns, not the factory", async () => {
     const { alice, factory } = await setup();
 
@@ -59,7 +59,7 @@ describe("VeilNFTFactory", () => {
     const predicted = await factory.predictDrop(ethers.ZeroHash, p, alice.address);
     await factory.connect(alice).createDrop(ethers.ZeroHash, p, predicted, { value: e18("0.01") });
 
-    const drop = await ethers.getContractAt("VeilNFTDrop", predicted);
+    const drop = await ethers.getContractAt("DevoxNFTDrop", predicted);
     expect(await drop.owner()).to.equal(alice.address);
     expect(await drop.maxSupply()).to.equal(10_000n);
     expect(await drop.mintPrice()).to.equal(0n); // a free mint is a real setting
@@ -148,7 +148,7 @@ describe("VeilNFTFactory", () => {
   });
 });
 
-describe("VeilNFTMarket", () => {
+describe("DevoxNFTMarket", () => {
   it("sells for native COTI, splitting fee and royalty", async () => {
     const { owner, alice, bob, fee, market, nft } = await setup();
 
@@ -172,18 +172,18 @@ describe("VeilNFTMarket", () => {
   });
 
   it("sells for an ERC-20", async () => {
-    const { owner, alice, bob, fee, market, nft, veil } = await setup();
+    const { owner, alice, bob, fee, market, nft, devox } = await setup();
     await nft.mint(alice.address, 1);
     await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
-    await market.connect(alice).list(await nft.getAddress(), 1, await veil.getAddress(), e18(1000));
+    await market.connect(alice).list(await nft.getAddress(), 1, await devox.getAddress(), e18(1000));
 
-    await veil.connect(owner).transfer(bob.address, e18(1000));
-    await veil.connect(bob).approve(await market.getAddress(), e18(1000));
+    await devox.connect(owner).transfer(bob.address, e18(1000));
+    await devox.connect(bob).approve(await market.getAddress(), e18(1000));
     await market.connect(bob).buy(0);
 
     expect(await nft.ownerOf(1)).to.equal(bob.address);
-    expect(await veil.balanceOf(fee.address)).to.equal(e18(25));   // 2.5%
-    expect(await veil.balanceOf(alice.address)).to.equal(e18(975));
+    expect(await devox.balanceOf(fee.address)).to.equal(e18(25));   // 2.5%
+    expect(await devox.balanceOf(alice.address)).to.equal(e18(975));
   });
 
   it("refuses a listing whose seller no longer holds the token", async () => {
@@ -233,43 +233,43 @@ describe("VeilNFTMarket", () => {
   });
 
   it("escrows an offer, and returns it if cancelled", async () => {
-    const { owner, bob, market, nft, veil } = await setup();
-    await veil.connect(owner).transfer(bob.address, e18(500));
-    await veil.connect(bob).approve(await market.getAddress(), e18(500));
+    const { owner, bob, market, nft, devox } = await setup();
+    await devox.connect(owner).transfer(bob.address, e18(500));
+    await devox.connect(bob).approve(await market.getAddress(), e18(500));
 
-    await market.connect(bob).makeOffer(await nft.getAddress(), 1, await veil.getAddress(), e18(500));
+    await market.connect(bob).makeOffer(await nft.getAddress(), 1, await devox.getAddress(), e18(500));
     // The money is held here, so a seller can rely on the bid being funded.
-    expect(await veil.balanceOf(await market.getAddress())).to.equal(e18(500));
+    expect(await devox.balanceOf(await market.getAddress())).to.equal(e18(500));
 
     await market.connect(bob).cancelOffer(0);
-    expect(await veil.balanceOf(bob.address)).to.equal(e18(500));
+    expect(await devox.balanceOf(bob.address)).to.equal(e18(500));
   });
 
   it("accepts an offer, paying from the escrow", async () => {
-    const { owner, alice, bob, fee, market, nft, veil } = await setup();
+    const { owner, alice, bob, fee, market, nft, devox } = await setup();
     await nft.mint(alice.address, 1);
     await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
 
-    await veil.connect(owner).transfer(bob.address, e18(400));
-    await veil.connect(bob).approve(await market.getAddress(), e18(400));
-    await market.connect(bob).makeOffer(await nft.getAddress(), 1, await veil.getAddress(), e18(400));
+    await devox.connect(owner).transfer(bob.address, e18(400));
+    await devox.connect(bob).approve(await market.getAddress(), e18(400));
+    await market.connect(bob).makeOffer(await nft.getAddress(), 1, await devox.getAddress(), e18(400));
 
     await market.connect(alice).acceptOffer(0);
 
     expect(await nft.ownerOf(1)).to.equal(bob.address);
-    expect(await veil.balanceOf(fee.address)).to.equal(e18(10));    // 2.5%
-    expect(await veil.balanceOf(alice.address)).to.equal(e18(390));
+    expect(await devox.balanceOf(fee.address)).to.equal(e18(10));    // 2.5%
+    expect(await devox.balanceOf(alice.address)).to.equal(e18(390));
   });
 
   it("closes a stale listing when an offer on the same token is accepted", async () => {
-    const { owner, alice, bob, market, nft, veil } = await setup();
+    const { owner, alice, bob, market, nft, devox } = await setup();
     await nft.mint(alice.address, 1);
     await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
     await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
 
-    await veil.connect(owner).transfer(bob.address, e18(400));
-    await veil.connect(bob).approve(await market.getAddress(), e18(400));
-    await market.connect(bob).makeOffer(await nft.getAddress(), 1, await veil.getAddress(), e18(400));
+    await devox.connect(owner).transfer(bob.address, e18(400));
+    await devox.connect(bob).approve(await market.getAddress(), e18(400));
+    await market.connect(bob).makeOffer(await nft.getAddress(), 1, await devox.getAddress(), e18(400));
     await market.connect(alice).acceptOffer(0);
 
     const [listed] = await market.listingOf(await nft.getAddress(), 1);

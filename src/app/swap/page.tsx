@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { parseEther, type Address } from "viem";
 import { Section, Badge, Avatar, Skeleton, Stat } from "@/components/ui";
-import { veilSwapRouterAbi, veilSwapFactoryAbi, erc20Abi } from "@/lib/abis";
+import { devoxSwapRouterAbi, devoxSwapFactoryAbi, erc20Abi } from "@/lib/abis";
 import { isDeployed, SWAP_FEE_BPS } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { fmtNum, fmtUnits, parseUnits, shortAddr, isAddress } from "@/lib/format";
@@ -25,12 +25,12 @@ interface PoolRow {
   decimals: number;
 }
 
-/** A token with no VeilSwap pool. Not an error here - just a different route. */
+/** A token with no DevoxSwap pool. Not an error here - just a different route. */
 const NO_PAIR = "0x0000000000000000000000000000000000000000" as Address;
 
 interface QuoteOk {
   ok: true;
-  venue: "veilswap" | "carbon";
+  venue: "devoxswap" | "carbon";
   venueLabel: string;
   side: "buy" | "sell";
   token: string;
@@ -81,7 +81,7 @@ function DefiInner() {
    *   ?token=0x…              the token itself
    *   ?base=0x…&quote=0x…     a pair, the way a market link is usually written
    *
-   * Every VeilSwap pair is against COTI, so a base/quote link is resolved to
+   * Every DevoxSwap pair is against COTI, so a base/quote link is resolved to
    * whichever side is not COTI - that is the token being traded, and the other
    * side is what it is priced in. A pair with COTI on neither side cannot be
    * routed here, and the page says so rather than silently picking one.
@@ -101,7 +101,7 @@ function DefiInner() {
 
   // A pasted address is a first-class option: any ERC-20 on COTI can be traded
   // here, whether or not the launchpad ever indexed it and whether or not
-  // VeilSwap has a pool for it. If VeilSwap cannot price it, the order book is
+  // DevoxSwap has a pool for it. If DevoxSwap cannot price it, the order book is
   // asked instead, so the requirement is only that the token exists.
   const all = useMemo(
     () => (customToken ? [...(pools ?? []), customToken] : (pools ?? [])),
@@ -116,7 +116,7 @@ function DefiInner() {
    * The selection does not only come from the dropdown. A market link -
    * /swap?base=…&quote=… - names a token the launchpad has never indexed, and a
    * <select> whose value matches none of its options silently renders the first
-   * one instead. That is not a cosmetic glitch: the picker read "VEIL" while
+   * one instead. That is not a cosmetic glitch: the picker read "DEVOX" while
    * the form was quoting and would have bought something else entirely. So the
    * selection is resolved the same way a pasted address is, and becomes a real
    * option in the list.
@@ -151,7 +151,7 @@ function DefiInner() {
           ? ((await publicClient
               .readContract({
                 address: addresses.swapFactory,
-                abi: veilSwapFactoryAbi,
+                abi: devoxSwapFactoryAbi,
                 functionName: "getPair",
                 args: [target as Address, addresses.wcoti],
               })
@@ -203,7 +203,7 @@ function DefiInner() {
   /**
    * Quotes come from the routing endpoint, which decides the venue.
    *
-   * VeilSwap when it has a pool, the order book when it does not. Both answers
+   * DevoxSwap when it has a pool, the order book when it does not. Both answers
    * come from the respective contract rather than a formula in this file, so
    * the number on screen is the number the trade will actually pay - and the
    * route it picked is carried back so the swap below fills the same orders
@@ -300,8 +300,8 @@ function DefiInner() {
     if (!address) return setErr("Connect a wallet first.");
     if (!selected || !amount) return;
     if (!route) return setErr("Waiting for a quote.");
-    if (route.venue === "veilswap" && !routerReady) {
-      return setErr("VeilSwap is not configured on this network.");
+    if (route.venue === "devoxswap" && !routerReady) {
+      return setErr("DevoxSwap is not configured on this network.");
     }
 
     setBusy(true);
@@ -318,7 +318,7 @@ function DefiInner() {
       } else if (side === "buy") {
         hash = await writeContractAsync({
           address: addresses.swapRouter,
-          abi: veilSwapRouterAbi,
+          abi: devoxSwapRouterAbi,
           functionName: "swapExactCotiForTokens",
           args: [selected as Address, 0n, address, deadline],
           value: parseEther(amount),
@@ -340,7 +340,7 @@ function DefiInner() {
 
         hash = await writeContractAsync({
           address: addresses.swapRouter,
-          abi: veilSwapRouterAbi,
+          abi: devoxSwapRouterAbi,
           functionName: "swapExactTokensForCoti",
           args: [selected as Address, amountIn, 0n, address, deadline],
           gas: 16_000_000n,
@@ -376,7 +376,7 @@ function DefiInner() {
     <div className="py-10">
       <Section
         kicker="Private DeFi"
-        title="VeilSwap - an AMM that can price an encrypted token"
+        title="DevoxSwap - an AMM that can price an encrypted token"
         sub="Graduated launches trade here against real reserves. The routing is public; what you end up holding is not."
       >
         <div className="grid gap-3 lg:grid-cols-5">
@@ -414,7 +414,7 @@ function DefiInner() {
                   setCustom("");
                   setSelected(e.target.value);
                 }}
-                className="mt-1 w-full rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-[13px] outline-none transition focus:border-veil-400/50"
+                className="mt-1 w-full rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-[13px] outline-none transition focus:border-devox-400/50"
               >
                 {all.length === 0 && <option value="">No pooled tokens yet</option>}
                 {all.map((p) => (
@@ -425,7 +425,7 @@ function DefiInner() {
               </select>
 
               <label className="mt-3 block text-[11px] font-semibold text-white/60">You pay</label>
-              <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-veil-400/50">
+              <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-devox-400/50">
                 <input
                   value={amount}
                   onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
@@ -464,8 +464,8 @@ function DefiInner() {
                 {route && (
                   <div className="mt-2 border-t border-white/[0.06] pt-2">
                     <div className="flex items-center justify-between gap-2">
-                      <Badge tone={route.venue === "veilswap" ? "veil" : "cy"}>
-                        {route.venue === "veilswap" ? "VeilSwap pool" : "Order book"}
+                      <Badge tone={route.venue === "devoxswap" ? "devox" : "cy"}>
+                        {route.venue === "devoxswap" ? "DevoxSwap pool" : "Order book"}
                       </Badge>
                       {route.venue === "carbon" && route.strategiesUsed ? (
                         <span className="mono text-[10px] text-white/30">
@@ -502,8 +502,8 @@ function DefiInner() {
                       ? "Found " +
                         customToken.symbol +
                         (isDeployed(customToken.pool)
-                          ? ". It has a VeilSwap pool."
-                          : ". No VeilSwap pool, so it routes through the order book.")
+                          ? ". It has a DevoxSwap pool."
+                          : ". No DevoxSwap pool, so it routes through the order book.")
                       : isAddress(custom)
                         ? "Nothing at that address answers like an ERC-20 on this network."
                         : "That is not a contract address."}
@@ -517,7 +517,7 @@ function DefiInner() {
                   "mt-3 w-full rounded-xl py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40 " +
                   (side === "buy"
                     ? "bg-gradient-to-r from-mint-400 to-cy-500"
-                    : "bg-gradient-to-r from-rose-400 to-veil-500")
+                    : "bg-gradient-to-r from-rose-400 to-devox-500")
                 }
               >
                 {busy
@@ -529,7 +529,7 @@ function DefiInner() {
 
               {!routerReady && (
                 <p className="mt-2 rounded-lg border border-amber-400/20 bg-amber-400/[0.05] px-2.5 py-2 text-[11px] leading-relaxed text-amber-300/80">
-                  VeilSwap is not configured on this network. Deploy it and set
+                  DevoxSwap is not configured on this network. Deploy it and set
                   NEXT_PUBLIC_SWAP_ROUTER_TESTNET.
                 </p>
               )}
@@ -547,7 +547,7 @@ function DefiInner() {
 
               <p className="mt-3 text-[10px] leading-relaxed text-white/25">
                 Selling needs two signatures: an approval, then the swap. That is the ERC-20 dance,
-                not something VEILPAD adds.
+                not something DEVOXPAD adds.
               </p>
             </div>
 
@@ -559,7 +559,7 @@ function DefiInner() {
 
           <div className="space-y-3 lg:col-span-3">
             <PoolList pools={pools} selected={selected} onSelect={setSelected} />
-            <WhyVeilSwap />
+            <WhyDevoxSwap />
           </div>
         </div>
       </Section>
@@ -613,7 +613,7 @@ function PoolList({
               className={
                 "flex items-center gap-3 rounded-xl border p-3 transition " +
                 (selected.toLowerCase() === p.address.toLowerCase()
-                  ? "border-veil-400/40 bg-veil-500/[0.06]"
+                  ? "border-devox-400/40 bg-devox-500/[0.06]"
                   : "border-white/[0.07]")
               }
             >
@@ -652,10 +652,10 @@ function PoolList({
   );
 }
 
-function WhyVeilSwap() {
+function WhyDevoxSwap() {
   return (
     <div className="card p-4">
-      <h3 className="text-[13px] font-semibold">Why VEILPAD ships its own AMM</h3>
+      <h3 className="text-[13px] font-semibold">Why DEVOXPAD ships its own AMM</h3>
       <p className="mt-2 text-[12px] leading-relaxed text-white/50">
         Uniswap V2 works out what it holds by calling{" "}
         <span className="mono text-cy-300">balanceOf(address(this))</span>. A COTI PrivateERC20
@@ -664,7 +664,7 @@ function WhyVeilSwap() {
         trade.
       </p>
       <p className="mt-2 text-[12px] leading-relaxed text-white/50">
-        A VeilSwap pair never reads a balance. It pulls tokens itself with{" "}
+        A DevoxSwap pair never reads a balance. It pulls tokens itself with{" "}
         <span className="mono text-cy-300">transferFrom</span> and credits its own reserves, so the
         amount is known because the pair moved it. Everything else is V2: x·y=k, 0.3% to LPs, and a
         minimum liquidity burned forever so the pool can never be emptied.

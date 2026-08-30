@@ -31,7 +31,7 @@ interface Status {
 /**
  * Indexer status.
  *
- * VEILPAD reads chain events on demand rather than running a background
+ * DEVOXPAD reads chain events on demand rather than running a background
  * crawler, so lag is zero by construction. That is stated openly rather than
  * dressed up as a sync percentage, and the numbers that can genuinely fail
  * (RPC reachability, the local index, the model pool) are the ones shown.
@@ -85,7 +85,7 @@ export default function StatusPage() {
       <Section
         kicker="Status"
         title="Indexer and services"
-        sub="Live health of everything VEILPAD reads from. Refreshes every fifteen seconds."
+        sub="Live health of everything DEVOXPAD reads from. Refreshes every fifteen seconds."
       >
         <div className="card flex flex-wrap items-center gap-4 p-5">
           <span
@@ -276,7 +276,7 @@ export default function StatusPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href="/docs/indexer"
-              className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold transition hover:border-veil-400/50"
+              className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold transition hover:border-devox-400/50"
             >
               Indexer API docs
             </Link>

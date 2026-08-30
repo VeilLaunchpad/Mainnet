@@ -15,7 +15,7 @@ export function DocsShell({ page, prev, next }: { page: DocPage; prev: DocPage |
       <Sidebar current={page.slug} />
 
       <article className="min-w-0">
-        <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-veil-400">
+        <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-devox-400">
           Documentation
         </div>
         <h1 className="text-3xl font-bold tracking-tight">{page.title}</h1>
@@ -79,7 +79,7 @@ function Sidebar({ current }: { current: string }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search docs"
-        className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[12px] outline-none transition placeholder:text-white/25 focus:border-veil-400/50"
+        className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[12px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
       />
 
       <nav className="mt-4 space-y-5">
@@ -99,7 +99,7 @@ function Sidebar({ current }: { current: string }) {
                       className={
                         "block rounded-lg px-2 py-1.5 text-[13px] transition " +
                         (current === p.slug
-                          ? "bg-veil-500/12 font-medium text-veil-200"
+                          ? "bg-devox-500/12 font-medium text-devox-200"
                           : "text-white/55 hover:bg-white/[0.04] hover:text-white")
                       }
                     >
@@ -139,7 +139,7 @@ function OnThisPage({ page }: { page: DocPage }) {
             <a
               href={"#" + a.id}
               className={
-                "-ml-px block border-l border-transparent py-0.5 text-[12px] leading-snug text-white/45 transition hover:border-veil-400 hover:text-white " +
+                "-ml-px block border-l border-transparent py-0.5 text-[12px] leading-snug text-white/45 transition hover:border-devox-400 hover:text-white " +
                 (a.sub ? "pl-5" : "pl-3")
               }
             >
@@ -172,9 +172,9 @@ function Block({ block: b }: { block: DocBlock }) {
         {b.items.map((item, i) => (
           <li key={i} className="flex gap-2.5 text-[14px] leading-[1.7] text-white/65">
             {b.ordered ? (
-              <span className="mono mt-0.5 shrink-0 text-[11px] text-veil-400">{i + 1}.</span>
+              <span className="mono mt-0.5 shrink-0 text-[11px] text-devox-400">{i + 1}.</span>
             ) : (
-              <span className="mt-[9px] size-1 shrink-0 rounded-full bg-veil-400/70" />
+              <span className="mt-[9px] size-1 shrink-0 rounded-full bg-devox-400/70" />
             )}
             <span>{item}</span>
           </li>
@@ -254,7 +254,7 @@ function Block({ block: b }: { block: DocBlock }) {
       <ol className="space-y-3">
         {b.items.map((s, i) => (
           <li key={i} className="flex gap-3">
-            <span className="mono mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-veil-400/30 bg-veil-500/10 text-[11px] font-semibold text-veil-300">
+            <span className="mono mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-devox-400/30 bg-devox-500/10 text-[11px] font-semibold text-devox-300">
               {i + 1}
             </span>
             <div>
@@ -272,7 +272,7 @@ function Block({ block: b }: { block: DocBlock }) {
       <dl className="divide-y divide-white/[0.05] rounded-xl border border-white/[0.08]">
         {b.rows.map((r) => (
           <div key={r.k} className="flex flex-wrap gap-x-4 gap-y-1 px-3.5 py-2.5">
-            <dt className="mono w-[150px] shrink-0 text-[12px] text-veil-300">{r.k}</dt>
+            <dt className="mono w-[150px] shrink-0 text-[12px] text-devox-300">{r.k}</dt>
             <dd className="min-w-0 flex-1 text-[13px] leading-relaxed text-white/60">{r.v}</dd>
           </div>
         ))}

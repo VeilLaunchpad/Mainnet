@@ -8,11 +8,11 @@ import * as path from "node:path";
  * from what the chain actually does.
  */
 async function main() {
-  const file = path.resolve(__dirname, "../../config/veilpad.testnet.json");
+  const file = path.resolve(__dirname, "../../config/devoxpad.testnet.json");
   const table = JSON.parse(fs.readFileSync(file, "utf8"));
-  const v = table.contracts.veilpad;
+  const v = table.contracts.devoxpad;
 
-  const factory = await ethers.getContractAt("VeilPadFactory", v.factory.address);
+  const factory = await ethers.getContractAt("DevoxPadFactory", v.factory.address);
   const profiles = await ethers.getContractAt("ProfileRegistry", v.profileRegistry.address);
   const agents = await ethers.getContractAt("AgentRegistry", v.agentRegistry.address);
 
@@ -56,7 +56,7 @@ async function main() {
       bps: read.swapFeeBps,
       percent: read.swapFeeBps / 100,
       paidTo: "liquidity providers",
-      when: "every swap against a VeilSwap pair",
+      when: "every swap against a DevoxSwap pair",
       note: "Retained in the pair's reserves, which is what makes an LP share appreciate.",
     },
     portal: {
@@ -93,7 +93,7 @@ async function main() {
   };
 
   fs.writeFileSync(file, JSON.stringify(table, null, 2) + "\n");
-  console.log("\nwrote fees into config/veilpad.testnet.json");
+  console.log("\nwrote fees into config/devoxpad.testnet.json");
 }
 
 main().catch((err) => {

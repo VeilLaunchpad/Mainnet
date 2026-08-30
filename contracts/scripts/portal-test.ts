@@ -11,7 +11,7 @@ const GAS = { wrap: 12_000_000n, unwrap: 14_000_000n, approve: 6_000_000n, depos
 
 function table() {
   return JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, "../../config/veilpad.testnet.json"), "utf8"),
+    fs.readFileSync(path.resolve(__dirname, "../../config/devoxpad.testnet.json"), "utf8"),
   );
 }
 
@@ -20,16 +20,16 @@ const fmt = (v: bigint, d = 18) =>
 
 async function main() {
   const [signer] = await ethers.getSigners();
-  const veilpad = table().contracts.veilpad;
-  const portalAddress = veilpad.portal.address;
-  const wcotiAddress = veilpad.wcoti.address;
+  const devoxpad = table().contracts.devoxpad;
+  const portalAddress = devoxpad.portal.address;
+  const wcotiAddress = devoxpad.wcoti.address;
 
   console.log("signer :", signer.address);
   console.log("portal :", portalAddress);
   console.log("balance:", fmt(await ethers.provider.getBalance(signer.address)), "COTI");
   console.log("");
 
-  const portal = await ethers.getContractAt("VeilPortal", portalAddress);
+  const portal = await ethers.getContractAt("DevoxPortal", portalAddress);
 
   // ── native COTI into privacy ────────────────────────────────────────────
   console.log("[1] wrapping 0.4 COTI into privacy");
@@ -40,7 +40,7 @@ async function main() {
   console.log("    gas ", wrapReceipt!.gasUsed.toString());
 
   const pCoti = await portal.twinOf(ethers.ZeroAddress);
-  const twin = await ethers.getContractAt("VeilPortalToken", pCoti);
+  const twin = await ethers.getContractAt("DevoxPortalToken", pCoti);
   console.log("    twin", pCoti);
   console.log("    name        ", await twin.name());
   console.log("    symbol      ", await twin.symbol());
@@ -91,7 +91,7 @@ async function main() {
   await wrap2.wait();
 
   const pWcoti = await portal.twinOf(wcotiAddress);
-  const twin2 = await ethers.getContractAt("VeilPortalToken", pWcoti);
+  const twin2 = await ethers.getContractAt("DevoxPortalToken", pWcoti);
   console.log("    tx  ", wrap2.hash);
   console.log("    twin", pWcoti);
   console.log("    name  ", await twin2.name(), "/", await twin2.symbol());

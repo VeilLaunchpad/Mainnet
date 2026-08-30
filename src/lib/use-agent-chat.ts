@@ -47,7 +47,7 @@ export function useAgentChat(agentSlug: string, address?: string | null) {
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const storageKey = "veilpad.thread." + agentSlug;
+  const storageKey = "devoxpad.thread." + agentSlug;
 
   useEffect(() => {
     try {

@@ -260,7 +260,7 @@ function Assets({
               <span className="relative">
                 <Avatar seed={h.symbol} size={34} rounded="rounded-full" />
                 {h.kind === "private" && (
-                  <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-veil-500 text-white">
+                  <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-devox-500 text-white">
                     <Lock small />
                   </span>
                 )}
@@ -269,7 +269,7 @@ function Assets({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-[14px] font-semibold">{h.symbol}</span>
-                  {h.kind === "private" && <Badge tone="veil">encrypted</Badge>}
+                  {h.kind === "private" && <Badge tone="devox">encrypted</Badge>}
                   {h.source === "portal" && <Badge tone="cy">portal</Badge>}
                 </div>
                 <div className="truncate text-[11px] text-white/35">{h.name}</div>
@@ -318,7 +318,7 @@ function Assets({
             <button
               onClick={onReveal}
               disabled={revealing}
-              className="shrink-0 rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+              className="shrink-0 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
             >
               {revealing ? stageLabel(coti.stage, coti.detail) : "Unlock balances"}
             </button>
@@ -425,7 +425,7 @@ function Send({
         <select
           value={asset}
           onChange={(e) => setAsset(e.target.value)}
-          className="mt-1.5 w-full rounded-xl border border-white/10 bg-ink-850 px-3.5 py-2.5 text-[13px] outline-none focus:border-veil-400/50"
+          className="mt-1.5 w-full rounded-xl border border-white/10 bg-ink-850 px-3.5 py-2.5 text-[13px] outline-none focus:border-devox-400/50"
         >
           {(holdings ?? []).map((h) => (
             <option key={h.address} value={h.address}>
@@ -440,7 +440,7 @@ function Send({
           value={to}
           onChange={(e) => setTo(e.target.value)}
           placeholder="0x address or @handle"
-          className="mono mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[13px] outline-none transition placeholder:text-white/20 focus:border-veil-400/50"
+          className="mono mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[13px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
         />
         {resolved && (
           <div className="mono mt-1.5 text-[11px] text-mint-400">
@@ -454,7 +454,7 @@ function Send({
         )}
 
         <label className="mt-4 block text-[12px] font-semibold text-white/70">Amount</label>
-        <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 focus-within:border-veil-400/50">
+        <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 focus-within:border-devox-400/50">
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
@@ -468,7 +468,7 @@ function Send({
         <button
           onClick={submit}
           disabled={busy || !amount || !destination}
-          className="mt-5 w-full rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+          className="mt-5 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
         >
           {busy ? step || "Sending…" : "Send " + (selected?.symbol ?? "")}
         </button>
@@ -519,7 +519,7 @@ function Send({
             </p>
             <Link
               href="/portal"
-              className="mt-3 inline-block rounded-xl border border-veil-400/30 bg-veil-500/10 px-4 py-2 text-[13px] font-semibold text-veil-300 transition hover:bg-veil-500/20"
+              className="mt-3 inline-block rounded-xl border border-devox-400/30 bg-devox-500/10 px-4 py-2 text-[13px] font-semibold text-devox-300 transition hover:bg-devox-500/20"
             >
               Open the portal
             </Link>
@@ -572,7 +572,7 @@ function Receive({ address }: { address: string }) {
         <div className="mt-3 flex gap-2">
           <button
             onClick={copy}
-            className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+            className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
           >
             {copied ? "Copied" : "Copy address"}
           </button>
@@ -580,7 +580,7 @@ function Receive({ address }: { address: string }) {
             href={explorerAddress(address, net)}
             target="_blank"
             rel="noreferrer"
-            className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold text-white/70 transition hover:border-veil-400/50 hover:text-white"
+            className="rounded-xl border border-white/12 px-4 py-2 text-[13px] font-semibold text-white/70 transition hover:border-devox-400/50 hover:text-white"
           >
             Block explorer
           </a>
@@ -597,14 +597,14 @@ function Receive({ address }: { address: string }) {
         <h3 className="mt-5 text-[13px] font-semibold">Before someone sends you a private token</h3>
         <ul className="mt-2 space-y-1.5 text-[12px] leading-relaxed text-white/45">
           <li className="flex gap-2">
-            <span className="mt-[7px] size-1 shrink-0 rounded-full bg-veil-400/70" />
+            <span className="mt-[7px] size-1 shrink-0 rounded-full bg-devox-400/70" />
             <span>
               You do not need to do anything first. The transfer lands whether or not you have ever
               derived your key.
             </span>
           </li>
           <li className="flex gap-2">
-            <span className="mt-[7px] size-1 shrink-0 rounded-full bg-veil-400/70" />
+            <span className="mt-[7px] size-1 shrink-0 rounded-full bg-devox-400/70" />
             <span>
               To read the balance afterwards you unlock once, here, and the number is decrypted in
               your browser.

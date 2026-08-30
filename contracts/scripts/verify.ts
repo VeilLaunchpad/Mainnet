@@ -12,14 +12,14 @@ import * as path from "node:path";
  * source drifting from what was compiled.
  *
  *   npx hardhat run scripts/verify.ts --network cotiTestnet
- *   VEIL_VERIFY=0x...            verify one address
- *   VEIL_CONTRACT=VeilToken      name it when autodetection cannot
- *   VEIL_ARGS=0x...              ABI-encoded constructor args, when a factory
+ *   DEVOX_VERIFY=0x...            verify one address
+ *   DEVOX_CONTRACT=DevoxToken      name it when autodetection cannot
+ *   DEVOX_ARGS=0x...              ABI-encoded constructor args, when a factory
  *                                deployed it and autodetection cannot find them
  */
 
 const EXPLORER =
-  process.env.VEIL_EXPLORER ||
+  process.env.DEVOX_EXPLORER ||
   (network.name === "cotiMainnet" ? "https://mainnet.cotiscan.io" : "https://testnet.cotiscan.io");
 
 const LICENSE = "mit";
@@ -69,9 +69,9 @@ async function verify(address: string, contractName: string): Promise<string> {
   form.append("contract_name", sourcePath + ":" + contractName);
   // Blockscout can usually work the constructor arguments out from the tail of
   // the creation bytecode, but it fails on contracts deployed through a factory
-  // with a struct argument - VeilNFTDrop being exactly that. Passing them
-  // explicitly is the fix, and VEIL_ARGS carries the ABI-encoded bytes.
-  const explicitArgs = process.env.VEIL_ARGS?.replace(/^0x/, "");
+  // with a struct argument - DevoxNFTDrop being exactly that. Passing them
+  // explicitly is the fix, and DEVOX_ARGS carries the ABI-encoded bytes.
+  const explicitArgs = process.env.DEVOX_ARGS?.replace(/^0x/, "");
   if (explicitArgs) {
     form.append("autodetect_constructor_args", "false");
     form.append("constructor_args", explicitArgs);
@@ -106,39 +106,39 @@ async function settle(address: string, tries = 12): Promise<boolean> {
 }
 
 async function main() {
-  const file = path.resolve(__dirname, "../../config/veilpad." + (network.name === "cotiMainnet" ? "mainnet" : "testnet") + ".json");
+  const file = path.resolve(__dirname, "../../config/devoxpad." + (network.name === "cotiMainnet" ? "mainnet" : "testnet") + ".json");
   const table = JSON.parse(fs.readFileSync(file, "utf8"));
-  const v = table.contracts.veilpad;
+  const v = table.contracts.devoxpad;
 
   console.log("explorer:", EXPLORER);
   console.log("");
 
-  const single = process.env.VEIL_VERIFY;
+  const single = process.env.DEVOX_VERIFY;
   const targets: [string, string][] = single
-    ? [[process.env.VEIL_CONTRACT || "VeilToken", single]]
+    ? [[process.env.DEVOX_CONTRACT || "DevoxToken", single]]
     : [
         ["WCOTI", v.wcoti?.address],
-        ["VeilSwapFactory", v.swapFactory?.address],
-        ["VeilSwapRouter", v.swapRouter?.address],
+        ["DevoxSwapFactory", v.swapFactory?.address],
+        ["DevoxSwapRouter", v.swapRouter?.address],
         ["PrivateTokenDeployer", v.privateTokenDeployer?.address],
         ["PublicTokenDeployer", v.publicTokenDeployer?.address],
-        ["VeilLocker", v.locker?.address],
-        ["VeilPadFactory", v.factory?.address],
+        ["DevoxLocker", v.locker?.address],
+        ["DevoxPadFactory", v.factory?.address],
         ["ProfileRegistry", v.profileRegistry?.address],
         ["AgentRegistry", v.agentRegistry?.address],
-        ["VeilPortal", v.portal?.address],
+        ["DevoxPortal", v.portal?.address],
         ["PortalTokenDeployer", v.portalTokenDeployer?.address],
-        ["VeilpadTokenDeployer", v.veilpadTokenDeployer?.address],
-        ["VeilpadToken", v.veilpadToken?.address],
-        ["VeilTreasury", v.veilTreasury?.address],
-        ["VeilStaking", v.veilStaking?.address],
-        // The NFT stack lives under its own key rather than contracts.veilpad,
+        ["DevoxpadTokenDeployer", v.devoxpadTokenDeployer?.address],
+        ["DevoxpadToken", v.devoxpadToken?.address],
+        ["DevoxTreasury", v.devoxTreasury?.address],
+        ["DevoxStaking", v.devoxStaking?.address],
+        // The NFT stack lives under its own key rather than contracts.devoxpad,
         // because it was deployed separately and has its own official entry.
-        ["VeilNFTFactory", table.nft?.factory],
-        ["VeilNFTEditionsFactory", table.nft?.editionsFactory],
-        ["VeilNFTMarket", table.nft?.market],
-        ["VeilNFTStaking", table.nft?.staking],
-        ["VeilNFTDrop", table.nft?.official?.genesis?.address],
+        ["DevoxNFTFactory", table.nft?.factory],
+        ["DevoxNFTEditionsFactory", table.nft?.editionsFactory],
+        ["DevoxNFTMarket", table.nft?.market],
+        ["DevoxNFTStaking", table.nft?.staking],
+        ["DevoxNFTDrop", table.nft?.official?.genesis?.address],
       ].filter((t): t is [string, string] => !!t[1] && t[1] !== ethers.ZeroAddress);
 
   const submitted: string[] = [];

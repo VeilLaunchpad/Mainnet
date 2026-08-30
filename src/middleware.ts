@@ -22,7 +22,7 @@ export function middleware(req: NextRequest) {
    */
   const pin = req.nextUrl.searchParams.get(NETWORK_PIN_PARAM);
   const forwarded = new Headers(req.headers);
-  if (isNetworkName(pin)) forwarded.set("x-veil-network-pin", pin);
+  if (isNetworkName(pin)) forwarded.set("x-devox-network-pin", pin);
 
   const res = NextResponse.next({ request: { headers: forwarded } });
 

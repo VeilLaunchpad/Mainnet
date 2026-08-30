@@ -6,7 +6,7 @@ import * as path from "node:path";
  * The full lifecycle, end to end on a live chain:
  *
  *   launch -> buy on the curve -> sell back -> fill the curve -> graduate
- *   -> pair created on VeilSwap -> swap COTI for the token and back again
+ *   -> pair created on DevoxSwap -> swap COTI for the token and back again
  *
  * Explicit gas limits throughout: COTI's RPC rejects the `pending` block tag
  * during estimation, and MPC operations on a PrivateERC20 cost far more than
@@ -29,7 +29,7 @@ const DESCRIPTION =
 
 function table() {
   return JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, "../../config/veilpad.testnet.json"), "utf8"),
+    fs.readFileSync(path.resolve(__dirname, "../../config/devoxpad.testnet.json"), "utf8"),
   );
 }
 
@@ -40,12 +40,12 @@ function fmt(v: bigint, d = 18) {
 async function main() {
   const [signer] = await ethers.getSigners();
   const t = table();
-  const veilpad = t.contracts.veilpad;
+  const devoxpad = t.contracts.devoxpad;
 
-  const factoryAddress = veilpad.factory.address;
-  const swapFactoryAddress = veilpad.swapFactory.address;
-  const routerAddress = veilpad.swapRouter.address;
-  const wcotiAddress = veilpad.wcoti.address;
+  const factoryAddress = devoxpad.factory.address;
+  const swapFactoryAddress = devoxpad.swapFactory.address;
+  const routerAddress = devoxpad.swapRouter.address;
+  const wcotiAddress = devoxpad.wcoti.address;
 
   console.log("network :", network.name);
   console.log("signer  :", signer.address);
@@ -55,9 +55,9 @@ async function main() {
   console.log("router  :", routerAddress);
   console.log("");
 
-  const factory = await ethers.getContractAt("VeilPadFactory", factoryAddress);
-  const swapFactory = await ethers.getContractAt("VeilSwapFactory", swapFactoryAddress);
-  const router = await ethers.getContractAt("VeilSwapRouter", routerAddress);
+  const factory = await ethers.getContractAt("DevoxPadFactory", factoryAddress);
+  const swapFactory = await ethers.getContractAt("DevoxSwapFactory", swapFactoryAddress);
+  const router = await ethers.getContractAt("DevoxSwapRouter", routerAddress);
 
   const launchFee = await factory.launchFee();
   const target = await factory.graduationTarget();
@@ -96,8 +96,8 @@ async function main() {
   console.log("    curve ", curveAddress);
   console.log("");
 
-  const curve = await ethers.getContractAt("VeilCurve", curveAddress);
-  const erc = await ethers.getContractAt("VeilToken", token);
+  const curve = await ethers.getContractAt("DevoxCurve", curveAddress);
+  const erc = await ethers.getContractAt("DevoxToken", token);
 
   // ── 2. buy, then sell part back, to leave a real trade history ──────────
   console.log("[2] trading on the bonding curve");
@@ -138,7 +138,7 @@ async function main() {
   console.log("");
 
   // ── 4. graduate ─────────────────────────────────────────────────────────
-  console.log("[4] graduating into VeilSwap");
+  console.log("[4] graduating into DevoxSwap");
   const gradTx = await curve.graduate(swapFactoryAddress, wcotiAddress, {
     gasLimit: GAS.graduate,
   });
@@ -151,7 +151,7 @@ async function main() {
   console.log("    pair ", pairAddress);
   if (pairAddress === ethers.ZeroAddress) throw new Error("graduation produced no pair");
 
-  const pair = await ethers.getContractAt("VeilSwapPair", pairAddress);
+  const pair = await ethers.getContractAt("DevoxSwapPair", pairAddress);
   const [r0, r1] = await pair.getReserves();
   const token0 = await pair.token0();
   const isTokenFirst = token0.toLowerCase() === token.toLowerCase();
@@ -161,7 +161,7 @@ async function main() {
   console.log("");
 
   // ── 5. trade on the DEX ─────────────────────────────────────────────────
-  console.log("[5] swapping on VeilSwap");
+  console.log("[5] swapping on DevoxSwap");
 
   const swapIn = ethers.parseEther("0.2");
   const expected = await router.quoteBuyWithCoti(token, swapIn);
@@ -200,7 +200,7 @@ async function main() {
   console.log("    price now   :", ethers.formatEther(await router.priceInCoti(token)), "COTI per", SYMBOL);
   console.log("");
 
-  console.log("pairs on VeilSwap:", (await swapFactory.allPairsLength()).toString());
+  console.log("pairs on DevoxSwap:", (await swapFactory.allPairsLength()).toString());
   console.log("explorer:", "https://testnet.cotiscan.io/address/" + token);
   console.log("app     :", "http://localhost:3000/coti/" + token);
 

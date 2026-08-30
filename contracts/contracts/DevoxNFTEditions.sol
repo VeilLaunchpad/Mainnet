@@ -22,7 +22,7 @@ struct EditionsConfig {
 }
 
 /**
- * @title VeilNFTEditions - an open collection whose editions stay private per holder.
+ * @title DevoxNFTEditions - an open collection whose editions stay private per holder.
  *
  * The other half of the studio. A scheduled drop is one fixed run of unique
  * tokens; an open collection is a set of editions a creator keeps adding to,
@@ -51,7 +51,7 @@ struct EditionsConfig {
  * honest case where somebody sells one of three copies. Access is recorded as
  * "has held this edition", which is what it honestly is.
  */
-contract VeilNFTEditions is Ownable, ReentrancyGuard {
+contract DevoxNFTEditions is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     address public constant NATIVE = address(0);

@@ -7,7 +7,7 @@ import { explorerAddress } from "@/lib/chain";
 import { useNetwork } from "@/components/network-provider";
 
 /**
- * Every VEILPAD contract, with a way to go and read it.
+ * Every DEVOXPAD contract, with a way to go and read it.
  *
  * This used to be a cramped list in the dashboard sidebar showing "not set"
  * beside half its rows, which told a visitor nothing except that something was
@@ -31,28 +31,28 @@ interface StatusPayload {
  * is better than hiding a deployed contract because a table was not updated.
  */
 const CATALOGUE: Record<string, { name: string; role: string; group: string }> = {
-  veilFactory: {
-    name: "VeilPadFactory",
+  devoxFactory: {
+    name: "DevoxPadFactory",
     role: "Deploys every launch: the token, its bonding curve, and the vanity address ending in 8888.",
     group: "Launchpad",
   },
-  veilCurve: {
-    name: "VeilCurve",
+  devoxCurve: {
+    name: "DevoxCurve",
     role: "The bonding curve a token trades on until it graduates.",
     group: "Launchpad",
   },
   locker: {
-    name: "VeilLocker",
+    name: "DevoxLocker",
     role: "Timelocks a creator's own tokens. No owner, no early release.",
     group: "Launchpad",
   },
   swapFactory: {
-    name: "VeilSwapFactory",
+    name: "DevoxSwapFactory",
     role: "Creates the pair a token graduates into.",
     group: "Trading",
   },
   swapRouter: {
-    name: "VeilSwapRouter",
+    name: "DevoxSwapRouter",
     role: "Routes swaps. Reserves are tracked internally because a private balance cannot be read.",
     group: "Trading",
   },
@@ -62,7 +62,7 @@ const CATALOGUE: Record<string, { name: string; role: string; group: string }> =
     group: "Trading",
   },
   portal: {
-    name: "VeilPortal",
+    name: "DevoxPortal",
     role: "Wraps a public token into its encrypted twin, and back again.",
     group: "Privacy",
   },
@@ -125,7 +125,7 @@ export default function ContractsPage() {
     <div className="py-10">
       <div className="mx-auto max-w-[1400px] px-4 text-center sm:px-6">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          VEILPAD <span className="text-grad">Contracts</span>
+          DEVOXPAD <span className="text-grad">Contracts</span>
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-[15px] text-white/55">
           Everything this app is wired to on {chain.name}. Open any of them on CotiScan and
@@ -151,7 +151,7 @@ export default function ContractsPage() {
           <div className="space-y-4">
             {grouped.map(({ group, items }) => (
               <div key={group}>
-                <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-veil-400">
+                <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-devox-400">
                   {group}
                 </h2>
 

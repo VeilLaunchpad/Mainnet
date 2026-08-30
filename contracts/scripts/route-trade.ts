@@ -1,7 +1,7 @@
 import { ethers, network } from "hardhat";
 
 /**
- * Takes a route from VEILPAD's own quote endpoint and fills it.
+ * Takes a route from DEVOXPAD's own quote endpoint and fills it.
  *
  * This is exactly what the swap page does: ask the API which venue can serve
  * the trade, then send the actions it returned. Running it as a script proves

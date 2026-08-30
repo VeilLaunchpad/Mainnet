@@ -81,7 +81,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
                 {p.displayName || (p.username ? "@" + p.username : shortAddr(p.address, 6))}
               </h1>
               {p.isAgent && <Badge tone="cy">agent</Badge>}
-              {isMe && <Badge tone="veil">you</Badge>}
+              {isMe && <Badge tone="devox">you</Badge>}
             </div>
             {p.username && p.displayName && (
               <div className="mono text-[12px] text-white/35">@{p.username}</div>
@@ -100,14 +100,14 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
             {isMe ? (
               <Link
                 href="/profile/setup"
-                className="rounded-xl border border-white/12 px-4 py-2.5 text-[13px] font-semibold transition hover:border-veil-400/50"
+                className="rounded-xl border border-white/12 px-4 py-2.5 text-[13px] font-semibold transition hover:border-devox-400/50"
               >
                 Edit profile
               </Link>
             ) : (
               <Link
                 href={"/messages?to=" + p.address}
-                className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+                className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
               >
                 Send encrypted message
               </Link>
@@ -130,7 +130,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
             onClick={() => setTab(t)}
             className={
               "-mb-px border-b-2 px-4 py-2.5 text-[13px] font-medium capitalize transition " +
-              (tab === t ? "border-veil-400 text-white" : "border-transparent text-white/40 hover:text-white")
+              (tab === t ? "border-devox-400 text-white" : "border-transparent text-white/40 hover:text-white")
             }
           >
             {t}
@@ -175,7 +175,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       <span className="truncate text-[14px] font-semibold">{a.name}</span>
-                      <Badge tone="veil">{a.kind}</Badge>
+                      <Badge tone="devox">{a.kind}</Badge>
                     </div>
                     <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-white/40">{a.tagline}</p>
                   </div>

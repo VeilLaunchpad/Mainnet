@@ -22,7 +22,7 @@ function near(actual: bigint, expected: bigint, tolerance = 10n ** 15n) {
 async function setup() {
   const [owner, alice, bob] = await ethers.getSigners();
 
-  const Token = await ethers.getContractFactory("VeilpadToken");
+  const Token = await ethers.getContractFactory("DevoxpadToken");
   const reward = await Token.deploy("Reward", "RWD", "", owner.address, e18(1_000_000_000));
   await reward.waitForDeployment();
 
@@ -32,14 +32,14 @@ async function setup() {
   const nft = await Nft.deploy("Art", "ART");
   await nft.waitForDeployment();
 
-  const Staking = await ethers.getContractFactory("VeilNFTStaking");
+  const Staking = await ethers.getContractFactory("DevoxNFTStaking");
   const staking = await Staking.deploy(owner.address);
   await staking.waitForDeployment();
 
   return { owner, alice, bob, reward, nft, staking };
 }
 
-describe("VeilNFTStaking", () => {
+describe("DevoxNFTStaking", () => {
   it("pays the stated rate per NFT over a year", async () => {
     const { owner, alice, reward, nft, staking } = await setup();
 

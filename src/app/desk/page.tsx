@@ -63,7 +63,7 @@ export default function TradePage() {
           {
             icon: "📈",
             title: "Curve first, pool after",
-            body: "A new token trades on its bonding curve until the curve fills, then graduates into a VeilSwap pair.",
+            body: "A new token trades on its bonding curve until the curve fills, then graduates into a DevoxSwap pair.",
           },
           {
             icon: "🤖",
@@ -124,7 +124,7 @@ export default function TradePage() {
             <div className="card p-4">
               <h2 className="text-[13px] font-semibold">Closest to graduation</h2>
               <p className="mt-1 text-[11px] text-white/35">
-                The curve fills, then its whole reserve seeds a VeilSwap pair.
+                The curve fills, then its whole reserve seeds a DevoxSwap pair.
               </p>
 
               <div className="mt-3 space-y-2">
@@ -142,7 +142,7 @@ export default function TradePage() {
                     <Link
                       key={t.address}
                       href={"/coti/" + t.address}
-                      className="block rounded-xl border border-white/[0.07] p-2.5 transition hover:border-veil-400/40"
+                      className="block rounded-xl border border-white/[0.07] p-2.5 transition hover:border-devox-400/40"
                     >
                       <div className="flex items-center gap-2.5">
                         <Avatar src={t.image} seed={t.symbol} size={28} rounded="rounded-lg" />

@@ -101,7 +101,7 @@ export function brainAvailable(): boolean {
  * Health of the reasoning pool, without naming what is inside it.
  *
  * Which model or vendor answers a turn is an implementation detail, and
- * publishing it invites people to treat VEILPAD as a thin wrapper over someone
+ * publishing it invites people to treat DEVOXPAD as a thin wrapper over someone
  * else's product. Capacity and health are what an operator actually needs.
  */
 export function brainStatus() {

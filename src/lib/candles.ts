@@ -135,7 +135,7 @@ export interface CandleResponse {
   token: string;
   timeframe: Timeframe;
   decimals: number;
-  venue: "curve" | "veilswap" | "none";
+  venue: "curve" | "devoxswap" | "none";
   candles: Candle[];
   spotCoti: number | null;
   change: { pct: number; abs: number } | null;
@@ -183,7 +183,7 @@ export async function candlesFor(
     token,
     timeframe,
     decimals,
-    venue: poolState ? "veilswap" : curveState ? "curve" : "none",
+    venue: poolState ? "devoxswap" : curveState ? "curve" : "none",
     candles,
     spotCoti,
     change:

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAccount, useWriteContract } from "wagmi";
 import { parseEther, type Address } from "viem";
 import { mineVanitySalt, randomSalt } from "@/lib/vanity";
-import { veilCurveAbi, veilFactoryAbi, erc20Abi, privateMessagingAbi } from "@/lib/abis";
+import { devoxCurveAbi, devoxFactoryAbi, erc20Abi, privateMessagingAbi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "./network-provider";
 import { explorerTx } from "@/lib/chain";
@@ -44,7 +44,7 @@ export function ActionCard({
     if (p.side === "buy") {
       return writeContractAsync({
         address: curve,
-        abi: veilCurveAbi,
+        abi: devoxCurveAbi,
         functionName: "buy",
         args: [0n],
         value: parseEther(String(p.amount)),
@@ -65,7 +65,7 @@ export function ActionCard({
     });
     return writeContractAsync({
       address: curve,
-      abi: veilCurveAbi,
+      abi: devoxCurveAbi,
       functionName: "sell",
       args: [amount, 0n],
     });
@@ -78,8 +78,8 @@ export function ActionCard({
    */
   async function runLaunch(): Promise<`0x${string}`> {
     if (!address || !publicClient) throw new Error("no wallet");
-    if (!isDeployed(addresses.veilFactory)) {
-      throw new Error("VEILPAD factory is not deployed on this network yet.");
+    if (!isDeployed(addresses.devoxFactory)) {
+      throw new Error("DEVOXPAD factory is not deployed on this network yet.");
     }
 
     const name = String(p.name);
@@ -93,30 +93,30 @@ export function ActionCard({
 
     const [launchFee, curveSalt] = [
       (await publicClient.readContract({
-        address: addresses.veilFactory,
-        abi: veilFactoryAbi,
+        address: addresses.devoxFactory,
+        abi: devoxFactoryAbi,
         functionName: "launchFee",
       })) as bigint,
       randomSalt(),
     ];
 
     const curveAddress = (await publicClient.readContract({
-      address: addresses.veilFactory,
-      abi: veilFactoryAbi,
+      address: addresses.devoxFactory,
+      abi: devoxFactoryAbi,
       functionName: "predictCurve",
       args: [address, curveSalt],
     })) as Address;
 
     const [deployerAddress, initCodeHash] = (await Promise.all([
       publicClient.readContract({
-        address: addresses.veilFactory,
-        abi: veilFactoryAbi,
+        address: addresses.devoxFactory,
+        abi: devoxFactoryAbi,
         functionName: "deployerFor",
         args: [privateBalances],
       }),
       publicClient.readContract({
-        address: addresses.veilFactory,
-        abi: veilFactoryAbi,
+        address: addresses.devoxFactory,
+        abi: devoxFactoryAbi,
         functionName: "tokenInitCodeHash",
         args: [privateBalances, name, symbol, metadataURI, address, curveAddress],
       }),
@@ -128,8 +128,8 @@ export function ActionCard({
     const devBuy = p.devBuy ? parseEther(String(p.devBuy)) : 0n;
 
     return writeContractAsync({
-      address: addresses.veilFactory,
-      abi: veilFactoryAbi,
+      address: addresses.devoxFactory,
+      abi: devoxFactoryAbi,
       functionName: "launch",
       args: [
         {
@@ -228,7 +228,7 @@ export function ActionCard({
       ? "border-mint-400/40 bg-mint-400/[0.06]"
       : state === "failed"
         ? "border-rose-400/40 bg-rose-400/[0.06]"
-        : "border-veil-400/35 bg-veil-500/[0.07]";
+        : "border-devox-400/35 bg-devox-500/[0.07]";
 
   if (state === "dismissed") return null;
 
@@ -269,7 +269,7 @@ export function ActionCard({
               <button
                 onClick={execute}
                 disabled={busy || state === "sent"}
-                className="rounded-lg bg-gradient-to-r from-veil-500 to-cy-500 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                className="rounded-lg bg-gradient-to-r from-devox-500 to-cy-500 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
               >
                 {busy || state === "sent" ? "Signing…" : state === "failed" ? "Retry" : "Execute"}
               </button>
@@ -324,7 +324,7 @@ function ActionIcon({ kind }: { kind: string }) {
   const glyph =
     kind === "trade" ? "⇄" : kind === "launch" ? "◈" : kind === "message" ? "✉" : kind === "bridge" ? "⇥" : "•";
   return (
-    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-[13px] text-veil-300">
+    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-[13px] text-devox-300">
       {glyph}
     </span>
   );

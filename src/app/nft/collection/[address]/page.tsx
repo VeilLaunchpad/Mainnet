@@ -13,7 +13,7 @@ import { useResult } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { useCotiSession } from "@/lib/coti-client";
-import { veilNFTDropAbi, veilNFTEditionsAbi, veilNFTMarketAbi } from "@/lib/nft-abis";
+import { devoxNFTDropAbi, devoxNFTEditionsAbi, devoxNFTMarketAbi } from "@/lib/nft-abis";
 import { addressesFor } from "@/lib/addresses";
 import { explorerAddress } from "@/lib/chain";
 import { shortAddr, fmtUnits } from "@/lib/format";
@@ -30,7 +30,7 @@ import { PreviewArt, priceLabel, NATIVE, type Collection } from "@/components/nf
  *
  * Which is why "Unlock" asks for a signature the first time and then feels
  * instant: the AES key is cached per account per network, and the same key
- * opens every private thing in VEILPAD.
+ * opens every private thing in DEVOXPAD.
  */
 
 type OwnedDrop = { tokenId: bigint; secret?: string };
@@ -88,13 +88,13 @@ export default function CollectionPage() {
         c.kind === "drop"
           ? await client.readContract({
               address,
-              abi: veilNFTDropAbi,
+              abi: devoxNFTDropAbi,
               functionName: "mintState",
               args: [who as Address],
             })
           : await client.readContract({
               address,
-              abi: veilNFTEditionsAbi,
+              abi: devoxNFTEditionsAbi,
               functionName: "mintState",
               args: [BigInt(editionId), who as Address],
             });
@@ -120,7 +120,7 @@ export default function CollectionPage() {
       const bal = (await client
         .readContract({
           address,
-          abi: veilNFTEditionsAbi,
+          abi: devoxNFTEditionsAbi,
           functionName: "balanceOf",
           args: [me, BigInt(editionId)],
         })
@@ -168,7 +168,7 @@ export default function CollectionPage() {
       const res = await client.multicall({
         contracts: Array.from({ length: scan }, (_, i) => ({
           address,
-          abi: veilNFTDropAbi,
+          abi: devoxNFTDropAbi,
           functionName: "ownerOf" as const,
           args: [BigInt(i + 1)],
         })),
@@ -202,7 +202,7 @@ export default function CollectionPage() {
       .multicall({
         contracts: Array.from({ length: n }, (_, i) => ({
           address,
-          abi: veilNFTEditionsAbi,
+          abi: devoxNFTEditionsAbi,
           functionName: "editions" as const,
           args: [BigInt(i + 1)],
         })),
@@ -246,7 +246,7 @@ export default function CollectionPage() {
         c.kind === "drop"
           ? await writeContractAsync({
               address,
-              abi: veilNFTDropAbi,
+              abi: devoxNFTDropAbi,
               functionName: "mint",
               args: [BigInt(qty)],
               value,
@@ -254,7 +254,7 @@ export default function CollectionPage() {
             })
           : await writeContractAsync({
               address,
-              abi: veilNFTEditionsAbi,
+              abi: devoxNFTEditionsAbi,
               functionName: "mint",
               args: [BigInt(editionId), BigInt(qty)],
               value,
@@ -293,7 +293,7 @@ export default function CollectionPage() {
 
       const c721 = new Contract(
         address,
-        (c?.kind === "drop" ? veilNFTDropAbi : veilNFTEditionsAbi) as never,
+        (c?.kind === "drop" ? devoxNFTDropAbi : devoxNFTEditionsAbi) as never,
         session.signer,
       );
 
@@ -337,7 +337,7 @@ export default function CollectionPage() {
     try {
       const approved = (await client!.readContract({
         address,
-        abi: veilNFTDropAbi,
+        abi: devoxNFTDropAbi,
         functionName: "isApprovedForAll",
         args: [me as Address, a.nftMarket],
       })) as boolean;
@@ -345,7 +345,7 @@ export default function CollectionPage() {
       if (!approved) {
         const h = await writeContractAsync({
           address,
-          abi: veilNFTDropAbi,
+          abi: devoxNFTDropAbi,
           functionName: "setApprovalForAll",
           args: [a.nftMarket, true],
           gas: 1_000_000n,
@@ -361,7 +361,7 @@ export default function CollectionPage() {
 
       const hash = await writeContractAsync({
         address: a.nftMarket,
-        abi: veilNFTMarketAbi,
+        abi: devoxNFTMarketAbi,
         functionName: "list",
         args: [address, tokenId, NATIVE, parseEther(listPrice)],
         gas: 1_000_000n,
@@ -387,13 +387,13 @@ export default function CollectionPage() {
   /* ── render ──────────────────────────────────────────────────────────── */
   if (missing) {
     return (
-      <Section title="Not a VEILPAD collection">
+      <Section title="Not a DEVOXPAD collection">
         <Empty
           title="Nothing here on this network"
           body={
             "No collection at " +
             shortAddr(address) +
-            " was deployed by the VEILPAD studio on " +
+            " was deployed by the DEVOXPAD studio on " +
             net +
             ". It may live on the other network, or be a plain NFT contract."
           }
@@ -428,10 +428,10 @@ export default function CollectionPage() {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight">{c.name}</h1>
-                <Badge tone={c.kind === "drop" ? "veil" : "cy"}>
+                <Badge tone={c.kind === "drop" ? "devox" : "cy"}>
                   {c.kind === "drop" ? "Scheduled drop" : "Open collection"}
                 </Badge>
-                {c.official && <Badge tone="veil">Official</Badge>}
+                {c.official && <Badge tone="devox">Official</Badge>}
                 {c.paired ? <Badge tone="mint">Paired</Badge> : <Badge tone="muted">Solo</Badge>}
               </div>
 
@@ -512,7 +512,7 @@ export default function CollectionPage() {
                     className={
                       "rounded-lg border px-3 py-1.5 text-[12px] font-medium transition " +
                       (editionId === e.id
-                        ? "border-veil-400/40 bg-veil-500/10 text-veil-200"
+                        ? "border-devox-400/40 bg-devox-500/10 text-devox-200"
                         : "border-white/10 text-white/50 hover:text-white/80")
                     }
                   >
@@ -575,7 +575,7 @@ export default function CollectionPage() {
               <button
                 onClick={mint}
                 disabled={minting}
-                className="ml-auto rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-5 py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                className="ml-auto rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-5 py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
               >
                 {minting ? <Spinner /> : "Mint"}
               </button>
@@ -607,7 +607,7 @@ export default function CollectionPage() {
                 <button
                   onClick={() => unlock()}
                   disabled={unlocking !== null}
-                  className="rounded-xl border border-veil-400/30 bg-veil-500/10 px-4 py-2 text-[13px] font-semibold text-veil-200 transition hover:bg-veil-500/20 disabled:opacity-50"
+                  className="rounded-xl border border-devox-400/30 bg-devox-500/10 px-4 py-2 text-[13px] font-semibold text-devox-200 transition hover:bg-devox-500/20 disabled:opacity-50"
                 >
                   {unlocking ? <Spinner /> : editionSecret ? "Unlocked" : "Unlock"}
                 </button>
@@ -631,7 +631,7 @@ export default function CollectionPage() {
                 onChange={(e) => setListPrice(e.target.value)}
                 placeholder="Price in COTI"
                 inputMode="decimal"
-                className="mono w-40 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-veil-400/40"
+                className="mono w-40 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
               />
               <span className="text-[12px] text-white/35">
                 sets the asking price for the List buttons below
@@ -660,7 +660,7 @@ export default function CollectionPage() {
                     <button
                       onClick={() => unlock(o.tokenId)}
                       disabled={unlocking === o.tokenId.toString() || !!o.secret}
-                      className="flex-1 rounded-lg border border-veil-400/30 bg-veil-500/10 px-3 py-1.5 text-[12px] font-semibold text-veil-200 transition hover:bg-veil-500/20 disabled:opacity-40"
+                      className="flex-1 rounded-lg border border-devox-400/30 bg-devox-500/10 px-3 py-1.5 text-[12px] font-semibold text-devox-200 transition hover:bg-devox-500/20 disabled:opacity-40"
                     >
                       {unlocking === o.tokenId.toString() ? <Spinner /> : o.secret ? "Unlocked" : "Unlock"}
                     </button>
@@ -692,7 +692,7 @@ export default function CollectionPage() {
                 the launcher. Stake yours and it earns while you hold it.
               </p>
             </div>
-            <span className="shrink-0 text-[13px] font-semibold text-veil-300">Stake →</span>
+            <span className="shrink-0 text-[13px] font-semibold text-devox-300">Stake →</span>
           </Link>
         </Section>
       )}

@@ -22,7 +22,7 @@ export function Section({
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             {kicker && (
-              <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-veil-400">
+              <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-devox-400">
                 {kicker}
               </div>
             )}
@@ -60,13 +60,13 @@ export function Stat({
 
 export function Badge({
   children,
-  tone = "veil",
+  tone = "devox",
 }: {
   children: ReactNode;
-  tone?: "veil" | "cy" | "mint" | "rose" | "amber" | "muted";
+  tone?: "devox" | "cy" | "mint" | "rose" | "amber" | "muted";
 }) {
   const tones: Record<string, string> = {
-    veil: "border-veil-400/30 bg-veil-500/10 text-veil-300",
+    devox: "border-devox-400/30 bg-devox-500/10 text-devox-300",
     cy: "border-cy-400/30 bg-cy-500/10 text-cy-300",
     mint: "border-mint-400/30 bg-mint-400/10 text-mint-400",
     rose: "border-rose-400/30 bg-rose-400/10 text-rose-400",
@@ -91,7 +91,7 @@ export function Progress({ pct, label }: { pct: number; label?: string }) {
     <div>
       <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-veil-500 to-cy-400 transition-[width] duration-500"
+          className="h-full rounded-full bg-gradient-to-r from-devox-500 to-cy-400 transition-[width] duration-500"
           style={{ width: clamped + "%" }}
         />
       </div>
@@ -126,7 +126,7 @@ export function Empty({
       {action && (
         <Link
           href={action.href}
-          className="mt-4 rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+          className="mt-4 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
         >
           {action.label}
         </Link>

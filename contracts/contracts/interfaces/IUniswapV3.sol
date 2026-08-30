@@ -42,7 +42,7 @@ interface IWCOTI {
     function transfer(address, uint256) external returns (bool);
 }
 
-interface IVeilMintable {
+interface IDevoxMintable {
     function mint(address to, uint256 amount) external;
     function burn(uint256 amount) external;
     function transferFrom(address from, address to, uint256 amount) external;

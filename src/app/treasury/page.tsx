@@ -6,13 +6,13 @@ import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { Section, Stat, Badge, Progress, Empty, Skeleton } from "@/components/ui";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
-import { veilTreasuryAbi, veilStakingAbi, veilpadTokenAbi, erc20Abi } from "@/lib/abis";
+import { devoxTreasuryAbi, devoxStakingAbi, devoxpadTokenAbi, erc20Abi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
 import { explorerAddress, OFFICIAL_MAINNET_TOKEN } from "@/lib/chain";
 import { shortAddr } from "@/lib/format";
 
 /**
- * The VEIL treasury, in public.
+ * The DEVOX treasury, in public.
  *
  * Staking pays a fixed percentage, which is only a promise worth anything if the
  * reserve behind it can be checked. So this reads the chain rather than a stored
@@ -45,18 +45,18 @@ export default function TreasuryPage() {
   const [budget, setBudget] = useState<bigint | null>(null);
   const [pools, setPools] = useState<PoolLiability[] | null>(null);
 
-  const treasury = addresses.veilTreasury;
-  const staking = addresses.veilStaking;
-  const token = addresses.veilToken;
+  const treasury = addresses.devoxTreasury;
+  const staking = addresses.devoxStaking;
+  const token = addresses.devoxToken;
   const ready = isDeployed(treasury) && isDeployed(token);
 
   const load = useCallback(async () => {
     if (!publicClient || !ready) return;
 
     const [bal, paid, total] = await Promise.all([
-      publicClient.readContract({ address: treasury, abi: veilTreasuryAbi, functionName: "balance" }).catch(() => 0n),
-      publicClient.readContract({ address: treasury, abi: veilTreasuryAbi, functionName: "paidOut" }).catch(() => 0n),
-      publicClient.readContract({ address: token, abi: veilpadTokenAbi, functionName: "totalSupply" }).catch(() => 0n),
+      publicClient.readContract({ address: treasury, abi: devoxTreasuryAbi, functionName: "balance" }).catch(() => 0n),
+      publicClient.readContract({ address: treasury, abi: devoxTreasuryAbi, functionName: "paidOut" }).catch(() => 0n),
+      publicClient.readContract({ address: token, abi: devoxpadTokenAbi, functionName: "totalSupply" }).catch(() => 0n),
     ]);
     setReserve(bal as bigint);
     setPaidOut(paid as bigint);
@@ -69,14 +69,14 @@ export default function TreasuryPage() {
 
     const count = Number(
       await publicClient
-        .readContract({ address: staking, abi: veilStakingAbi, functionName: "poolCount" })
+        .readContract({ address: staking, abi: devoxStakingAbi, functionName: "poolCount" })
         .catch(() => 0n),
     );
 
     const out: PoolLiability[] = [];
     for (let pid = 0; pid < count; pid++) {
       const v = (await publicClient
-        .readContract({ address: staking, abi: veilStakingAbi, functionName: "poolView", args: [BigInt(pid)] })
+        .readContract({ address: staking, abi: devoxStakingAbi, functionName: "poolView", args: [BigInt(pid)] })
         .catch(() => null)) as
         | readonly [Address, number, boolean, bigint, bigint, bigint, bigint, boolean, bigint]
         | null;
@@ -110,7 +110,7 @@ export default function TreasuryPage() {
 
   if (!ready) {
     return (
-      <Section className="py-10" kicker="Treasury" title="The VEIL treasury">
+      <Section className="py-10" kicker="Treasury" title="The DEVOX treasury">
         <Empty
           title="Not deployed on this network yet"
           body="No treasury is configured here. Switch networks, or check the contracts page for what is live."
@@ -131,16 +131,16 @@ export default function TreasuryPage() {
     <Section
       className="py-10"
       kicker="Treasury"
-      title="The VEIL treasury"
+      title="The DEVOX treasury"
       sub="The reserve that pays staking. No staked principal is ever held here, so what you see is only what is available to pay rewards."
     >
       {!isCanonical && (
         <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-400/25 bg-amber-400/[0.05] px-4 py-3">
           <span className="mt-0.5 shrink-0 text-[15px]">🟡</span>
           <p className="text-[12.5px] leading-relaxed text-amber-100/80">
-            <b className="text-amber-200">VEILPAD official token launched on Mainnet.</b> This is the
+            <b className="text-amber-200">DEVOXPAD official token launched on Mainnet.</b> This is the
             testnet treasury, holding a token that is worth nothing.{" "}
-            <a href="https://veilpad-mainnet.vercel.app/treasury" className="text-cy-300 hover:underline">
+            <a href="https://devoxpad-mainnet.vercel.app/treasury" className="text-cy-300 hover:underline">
               The real one is here
             </a>
             .
@@ -151,17 +151,17 @@ export default function TreasuryPage() {
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           label="Reserve"
-          value={reserve === null ? "…" : fmt(reserveN, 0) + " VEIL"}
+          value={reserve === null ? "…" : fmt(reserveN, 0) + " DEVOX"}
           sub={pctOfSupply > 0 ? pctOfSupply.toFixed(0) + "% of total supply" : "of the fixed supply"}
         />
         <Stat
           label="Paid out"
-          value={paidOut === null ? "…" : fmt(Number(formatUnits(paidOut, 18)), 6) + " VEIL"}
+          value={paidOut === null ? "…" : fmt(Number(formatUnits(paidOut, 18)), 6) + " DEVOX"}
           sub="Lifetime staking rewards"
         />
         <Stat
           label="Owed per year"
-          value={pools === null ? "…" : fmt(liability, 0) + " VEIL"}
+          value={pools === null ? "…" : fmt(liability, 0) + " DEVOX"}
           sub="If every pool were full"
         />
         <Stat
@@ -204,7 +204,7 @@ export default function TreasuryPage() {
                     />
                   </div>
                   <div className="mt-1.5 text-[11px] text-white/35">
-                    up to {fmt(p.annual, 0)} VEIL a year at the cap
+                    up to {fmt(p.annual, 0)} DEVOX a year at the cap
                   </div>
                 </div>
               ))}
@@ -249,7 +249,7 @@ export default function TreasuryPage() {
 
           <dl className="mt-4 divide-y divide-white/[0.05] rounded-xl border border-white/[0.08]">
             <Row k="Treasury" v={shortAddr(treasury, 6)} href={explorerAddress(treasury, net)} />
-            <Row k="VEIL" v={shortAddr(token, 6)} href={explorerAddress(token, net)} />
+            <Row k="DEVOX" v={shortAddr(token, 6)} href={explorerAddress(token, net)} />
             {isDeployed(staking) && (
               <Row k="Staking" v={shortAddr(staking, 6)} href={explorerAddress(staking, net)} />
             )}
@@ -258,12 +258,12 @@ export default function TreasuryPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href="/stake"
-              className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+              className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
             >
-              Stake and earn VEIL
+              Stake and earn DEVOX
             </Link>
             <Link
-              href="/veil-contracts"
+              href="/devox-contracts"
               className="rounded-xl border border-white/12 px-4 py-2.5 text-[13px] font-medium text-white/65 transition hover:border-white/25 hover:text-white"
             >
               Every address

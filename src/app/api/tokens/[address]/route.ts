@@ -128,7 +128,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ addr
     pool: pool
       ? {
           address: pool.pair,
-          venue: "VeilSwap",
+          venue: "DevoxSwap",
           feeBps: pool.feeBps,
           reserveToken: fmtUnits(pool.reserveToken, decimals, 4),
           reserveCoti: fmtUnits(pool.reserveCoti, 18, 6),

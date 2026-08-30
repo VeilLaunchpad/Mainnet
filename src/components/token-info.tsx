@@ -95,7 +95,7 @@ export function TokenInfo({ token: data }: { token: TokenPayload }) {
       </div>
 
       <dl className="mt-3 divide-y divide-white/[0.05] border-t border-white/[0.05]">
-        <Row k="Venue" v={p ? "VeilSwap, " + p.feeBps / 100 + "% fee" : "Bonding curve"} />
+        <Row k="Venue" v={p ? "DevoxSwap, " + p.feeBps / 100 + "% fee" : "Bonding curve"} />
         {p ? (
           <>
             <Row k="Pool liquidity" v={p.reserveCoti + " COTI"} />
@@ -135,7 +135,7 @@ export function TokenInfo({ token: data }: { token: TokenPayload }) {
             <span className="text-white/35">Creator</span>
             <Link
               href={"/profile/" + (t.creatorProfile?.username ?? t.creator)}
-              className="mono text-white/60 transition hover:text-veil-300"
+              className="mono text-white/60 transition hover:text-devox-300"
             >
               {t.creatorProfile ? "@" + t.creatorProfile.username : shortAddr(t.creator, 5)}
             </Link>

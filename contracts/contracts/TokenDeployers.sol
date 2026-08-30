@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {VeilToken, VeilPublicToken} from "./VeilToken.sol";
+import {DevoxToken, DevoxPublicToken} from "./DevoxToken.sol";
 
 /**
  * Token creation code lives here, not in the factory.
@@ -11,7 +11,7 @@ import {VeilToken, VeilPublicToken} from "./VeilToken.sol";
  * Splitting them out keeps the factory deployable and lets either token type
  * change independently without touching the factory's state.
  *
- * Deployment is CREATE2 so an address can be mined before it exists. VEILPAD
+ * Deployment is CREATE2 so an address can be mined before it exists. DEVOXPAD
  * uses that to give every launch an address ending in 8888: a recognisable mark
  * that says the token came from this launchpad and not from a lookalike. The
  * salt is found off-chain and passed in; the chain only checks the result.
@@ -28,7 +28,7 @@ contract PrivateTokenDeployer {
         address creator,
         address minter
     ) external returns (address token) {
-        VeilToken t = new VeilToken{salt: salt}(name, symbol, metadataURI, creator, minter);
+        DevoxToken t = new DevoxToken{salt: salt}(name, symbol, metadataURI, creator, minter);
         t.renounceRole(0x00, address(this)); // DEFAULT_ADMIN_ROLE
         token = address(t);
     }
@@ -50,7 +50,7 @@ contract PrivateTokenDeployer {
         return
             keccak256(
                 abi.encodePacked(
-                    type(VeilToken).creationCode,
+                    type(DevoxToken).creationCode,
                     abi.encode(name, symbol, metadataURI, creator, minter)
                 )
             );
@@ -66,7 +66,7 @@ contract PublicTokenDeployer {
         address creator,
         address minter
     ) external returns (address token) {
-        VeilPublicToken t = new VeilPublicToken{salt: salt}(
+        DevoxPublicToken t = new DevoxPublicToken{salt: salt}(
             name,
             symbol,
             metadataURI,
@@ -87,7 +87,7 @@ contract PublicTokenDeployer {
         return
             keccak256(
                 abi.encodePacked(
-                    type(VeilPublicToken).creationCode,
+                    type(DevoxPublicToken).creationCode,
                     abi.encode(name, symbol, metadataURI, creator, minter)
                 )
             );

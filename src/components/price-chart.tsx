@@ -29,7 +29,7 @@ interface Candle {
 }
 
 interface CandleResponse {
-  venue: "curve" | "veilswap" | "none";
+  venue: "curve" | "devoxswap" | "none";
   timeframe: Timeframe;
   candles: Candle[];
   spotCoti: number | null;
@@ -333,7 +333,7 @@ export function PriceChart({
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className="size-1.5 animate-pulse-slow rounded-full bg-veil-400"
+                    className="size-1.5 animate-pulse-slow rounded-full bg-devox-400"
                     style={{ animationDelay: i * 160 + "ms" }}
                   />
                 ))}
@@ -394,7 +394,7 @@ function Toolbar({
             disabled={m === "mcap" && !hasMcap}
             className={
               "rounded px-2 py-1 text-[11px] font-semibold uppercase transition disabled:opacity-30 " +
-              (metric === m ? "bg-veil-500/30 text-veil-200" : "text-white/45 hover:text-white")
+              (metric === m ? "bg-devox-500/30 text-devox-200" : "text-white/45 hover:text-white")
             }
           >
             {m === "price" ? "Price" : "MCap"}
@@ -505,10 +505,10 @@ function Footer({
       <span
         className={
           "rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider " +
-          (data?.venue === "veilswap" ? "bg-cy-500/15 text-cy-300" : "bg-veil-500/15 text-veil-300")
+          (data?.venue === "devoxswap" ? "bg-cy-500/15 text-cy-300" : "bg-devox-500/15 text-devox-300")
         }
       >
-        {data?.venue === "veilswap" ? "VeilSwap" : "Bonding curve"}
+        {data?.venue === "devoxswap" ? "DevoxSwap" : "Bonding curve"}
       </span>
 
       {data && data.stats.trades > 0 && (
@@ -539,7 +539,7 @@ function Footer({
           onClick={() => setLogScale(!logScale)}
           className={
             "rounded px-1.5 py-0.5 text-[10px] font-semibold transition " +
-            (logScale ? "bg-veil-500/25 text-veil-200" : "text-white/30 hover:text-white")
+            (logScale ? "bg-devox-500/25 text-devox-200" : "text-white/30 hover:text-white")
           }
         >
           log

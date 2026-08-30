@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 import { db, rows } from "./db";
 import { publicClient } from "./rpc";
-import { veilFactoryAbi } from "./abis";
+import { devoxFactoryAbi } from "./abis";
 import { addressesFor, isDeployed } from "./addresses";
 import { DEFAULT_NETWORK, type CotiNetworkName } from "./chain";
 
@@ -64,15 +64,15 @@ export async function backfillLaunches(
   net: CotiNetworkName = DEFAULT_NETWORK,
 ): Promise<BackfillResult> {
   const addresses = addressesFor(net);
-  if (!isDeployed(addresses.veilFactory)) {
+  if (!isDeployed(addresses.devoxFactory)) {
     return { ok: false, found: 0, inserted: 0, reason: "factory not configured" };
   }
 
   let logs: LaunchedLog[];
   try {
     logs = (await publicClient(net).getContractEvents({
-      address: addresses.veilFactory,
-      abi: veilFactoryAbi,
+      address: addresses.devoxFactory,
+      abi: devoxFactoryAbi,
       eventName: "Launched",
       fromBlock: 0n,
       toBlock: "latest",

@@ -3,7 +3,7 @@ import { parseUnits, type Address } from "viem";
 import { networkFrom } from "@/lib/network";
 import { publicClient } from "@/lib/rpc";
 import { addressesFor, isDeployed } from "@/lib/addresses";
-import { erc20Abi, veilSwapFactoryAbi, veilSwapRouterAbi } from "@/lib/abis";
+import { erc20Abi, devoxSwapFactoryAbi, devoxSwapRouterAbi } from "@/lib/abis";
 import { routeCarbon } from "@/lib/carbon-route";
 import { isAddress } from "@/lib/format";
 
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 /**
  * One quote endpoint, two venues.
  *
- * VeilSwap is preferred when it has a pair, because it is a constant-product
+ * DevoxSwap is preferred when it has a pair, because it is a constant-product
  * pool: the price is continuous, the route is one hop, and the gas is
  * predictable. When it does not - which is every token this launchpad did not
  * create - the order book is asked instead, and if it has depth the swap works
@@ -59,12 +59,12 @@ export async function GET(req: NextRequest) {
   }
   if (amountIn <= 0n) return Response.json({ ok: false, error: "amount is zero" }, { status: 400 });
 
-  /* ── VeilSwap first ───────────────────────────────────────────────────── */
+  /* ── DevoxSwap first ───────────────────────────────────────────────────── */
   if (isDeployed(a.swapFactory) && isDeployed(a.swapRouter)) {
     const pair = (await client
       .readContract({
         address: a.swapFactory,
-        abi: veilSwapFactoryAbi,
+        abi: devoxSwapFactoryAbi,
         functionName: "getPair",
         args: [token as Address, a.wcoti],
       })
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
       const out = (await client
         .readContract({
           address: a.swapRouter,
-          abi: veilSwapRouterAbi,
+          abi: devoxSwapRouterAbi,
           functionName: side === "buy" ? "quoteBuyWithCoti" : "quoteSellForCoti",
           args: [token as Address, amountIn],
         })
@@ -83,8 +83,8 @@ export async function GET(req: NextRequest) {
       if (out !== null && out > 0n) {
         return Response.json({
           ok: true,
-          venue: "veilswap",
-          venueLabel: "VeilSwap",
+          venue: "devoxswap",
+          venueLabel: "DevoxSwap",
           network: net,
           side,
           token,
@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
           amountOut: out.toString(),
           partial: false,
           pair,
-          note: "A VeilSwap pool. One hop, continuous pricing.",
+          note: "A DevoxSwap pool. One hop, continuous pricing.",
         });
       }
     }
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
       ok: false,
       error: "no-route",
       message:
-        "Neither VeilSwap nor the order book can fill this. VeilSwap has no pair for this token, and nobody has posted an order for it against COTI.",
+        "Neither DevoxSwap nor the order book can fill this. DevoxSwap has no pair for this token, and nobody has posted an order for it against COTI.",
       network: net,
       token,
     });

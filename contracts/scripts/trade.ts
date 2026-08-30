@@ -5,14 +5,14 @@ import * as path from "node:path";
 /**
  * Fires a few swaps against a graduated token so the chart has real candles.
  *
- *   VEIL_TOKEN=0x... npx hardhat run scripts/trade.ts --network cotiTestnet
+ *   DEVOX_TOKEN=0x... npx hardhat run scripts/trade.ts --network cotiTestnet
  */
 
 const GAS = { approve: 6_000_000n, swap: 16_000_000n };
 
 function table() {
   return JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, "../../config/veilpad.testnet.json"), "utf8"),
+    fs.readFileSync(path.resolve(__dirname, "../../config/devoxpad.testnet.json"), "utf8"),
   );
 }
 
@@ -22,15 +22,15 @@ const fmt = (v: bigint, d = 18) =>
 async function main() {
   const [signer] = await ethers.getSigners();
   const t = table();
-  const routerAddress = t.contracts.veilpad.swapRouter.address;
-  const token = process.env.VEIL_TOKEN;
-  if (!token) throw new Error("set VEIL_TOKEN");
+  const routerAddress = t.contracts.devoxpad.swapRouter.address;
+  const token = process.env.DEVOX_TOKEN;
+  if (!token) throw new Error("set DEVOX_TOKEN");
 
-  const router = await ethers.getContractAt("VeilSwapRouter", routerAddress);
-  const erc = await ethers.getContractAt("VeilToken", token);
+  const router = await ethers.getContractAt("DevoxSwapRouter", routerAddress);
+  const erc = await ethers.getContractAt("DevoxToken", token);
   const symbol = await erc.symbol();
 
-  console.log("trading", symbol, "on VeilSwap");
+  console.log("trading", symbol, "on DevoxSwap");
   console.log("balance:", fmt(await ethers.provider.getBalance(signer.address)), "COTI\n");
 
   // Alternating sides so the candles have both colours and a real high/low.

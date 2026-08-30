@@ -532,7 +532,7 @@ export default function BridgePage() {
                   onClick={flip}
                   disabled={!from || !to}
                   title="Swap direction"
-                  className="rounded-lg border border-white/10 bg-[#0e1018] p-1.5 text-white/40 transition hover:border-veil-400/40 hover:text-veil-300 disabled:opacity-30"
+                  className="rounded-lg border border-white/10 bg-[#0e1018] p-1.5 text-white/40 transition hover:border-devox-400/40 hover:text-devox-300 disabled:opacity-30"
                 >
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                     <path
@@ -592,7 +592,7 @@ export default function BridgePage() {
                   className={
                     "flex items-center gap-2 rounded-xl border px-3.5 py-3 transition " +
                     (chosen
-                      ? "border-white/10 bg-white/[0.03] focus-within:border-veil-400/50"
+                      ? "border-white/10 bg-white/[0.03] focus-within:border-devox-400/50"
                       : "border-white/[0.06] bg-white/[0.02] opacity-50")
                   }
                 >
@@ -645,7 +645,7 @@ export default function BridgePage() {
               <button
                 onClick={go}
                 disabled={!canRun}
-                className="mt-4 w-full rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                className="mt-4 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
                 {!isConnected
                   ? "Connect a wallet"
@@ -704,7 +704,7 @@ export default function BridgePage() {
 function RouteNote({ kind, data }: { kind: RouteKind; data: AssetsPayload }) {
   if (kind === "privacy-deposit")
     return (
-      <Note tone="veil">
+      <Note tone="devox">
         Your token is locked in COTI&apos;s bridge and an encrypted twin is minted to you. Only your
         key can read the balance after that.
       </Note>
@@ -725,9 +725,9 @@ function RouteNote({ kind, data }: { kind: RouteKind; data: AssetsPayload }) {
   );
 }
 
-function Note({ tone, children }: { tone: "veil" | "cy" | "amber"; children: React.ReactNode }) {
+function Note({ tone, children }: { tone: "devox" | "cy" | "amber"; children: React.ReactNode }) {
   const c = {
-    veil: "border-veil-400/25 bg-veil-500/[0.07] text-veil-200/80",
+    devox: "border-devox-400/25 bg-devox-500/[0.07] text-devox-200/80",
     cy: "border-cy-400/25 bg-cy-500/[0.06] text-cy-200/80",
     amber: "border-amber-400/25 bg-amber-400/[0.06] text-amber-200/85",
   }[tone];
@@ -801,7 +801,7 @@ function RouteHelp({ data }: { data: AssetsPayload }) {
         <li>
           <span className="mono text-white/70">{eth} to COTI</span> carries{" "}
           {data.crossChain.assets.map((a) => a.symbol).join(" and ") || "nothing on this network"}.
-          VEILPAD switches your wallet and builds the transfer.
+          DEVOXPAD switches your wallet and builds the transfer.
         </li>
       </ul>
     </div>
@@ -888,7 +888,7 @@ function CotiIcon() {
 
 function PrivateIcon() {
   return (
-    <span className="flex size-6 items-center justify-center rounded-full bg-veil-500/20">
+    <span className="flex size-6 items-center justify-center rounded-full bg-devox-500/20">
       <svg width="11" height="11" viewBox="0 0 14 16" fill="none">
         <rect x="1.5" y="6.5" width="11" height="8" rx="2" stroke="#a78bfa" strokeWidth="1.6" />
         <path d="M4.5 6.5V4.75a2.5 2.5 0 0 1 5 0V6.5" stroke="#a78bfa" strokeWidth="1.6" strokeLinecap="round" />

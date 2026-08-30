@@ -17,10 +17,10 @@ import {
   isNetworkName,
   type CotiNetworkName,
 } from "@/lib/chain";
-import { addressesFor, type VeilAddresses } from "@/lib/addresses";
+import { addressesFor, type DevoxAddresses } from "@/lib/addresses";
 
 /**
- * Which VEILPAD you are looking at.
+ * Which DEVOXPAD you are looking at.
  *
  * The app is one product deployed on two chains, so the network is a choice a
  * person makes at runtime rather than something baked into the build. Holding
@@ -43,7 +43,7 @@ interface NetworkContextValue {
   /** Records the answer without a reload, for the chooser. */
   choose: (net: CotiNetworkName) => void;
   chain: (typeof chainByNetwork)[CotiNetworkName];
-  addresses: VeilAddresses;
+  addresses: DevoxAddresses;
   isMainnet: boolean;
   /** False until the stored preference has been read, so nothing flashes. */
   ready: boolean;
@@ -51,7 +51,7 @@ interface NetworkContextValue {
 
 const NetworkContext = createContext<NetworkContextValue | null>(null);
 
-const STORAGE_KEY = "veilpad.network";
+const STORAGE_KEY = "devoxpad.network";
 
 export function NetworkProvider({
   initial,

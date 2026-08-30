@@ -8,7 +8,7 @@ import { db, row, now } from "./db";
  * The testnet faucet.
  *
  * COTI's own faucet lives behind a Discord server, which is a wall between
- * someone who wants to try VEILPAD and actually trying it. This hands out a
+ * someone who wants to try DEVOXPAD and actually trying it. This hands out a
  * small amount from the project's own treasury so the first launch can happen
  * in the same tab as everything else.
  *
@@ -106,7 +106,7 @@ export async function faucetStatus(
       remaining: 0,
       open: false,
       reason:
-        "The faucet only funds VEILPAD Testnet. Mainnet COTI has to be bought or bridged - nobody gives it away.",
+        "The faucet only funds DEVOXPAD Testnet. Mainnet COTI has to be bought or bridged - nobody gives it away.",
       claimedTotal,
     };
   }
@@ -199,7 +199,7 @@ export async function sendClaim(
     return {
       ok: false,
       reason:
-        "The faucet only funds VEILPAD Testnet. Switch networks if you want test COTI.",
+        "The faucet only funds DEVOXPAD Testnet. Switch networks if you want test COTI.",
     } as ClaimResult;
   }
   const activeChain = chainByNetwork[net];

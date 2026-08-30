@@ -24,7 +24,7 @@ export const nftPage: DocPage = {
         },
         {
           type: "p",
-          text: "On COTI it is arithmetic. Every VEILPAD collection carries two halves: a public preview that any marketplace can render, and private metadata held on-chain as a ciphertext. The private half is sealed to the current owner's key, and re-sealed to the new owner every time the token moves. Nobody who does not hold it can read it - not the creator, not the marketplace, not an indexer, not us.",
+          text: "On COTI it is arithmetic. Every DEVOXPAD collection carries two halves: a public preview that any marketplace can render, and private metadata held on-chain as a ciphertext. The private half is sealed to the current owner's key, and re-sealed to the new owner every time the token moves. Nobody who does not hold it can read it - not the creator, not the marketplace, not an indexer, not us.",
         },
         {
           type: "note",
@@ -136,13 +136,13 @@ export const nftPage: DocPage = {
           type: "note",
           tone: "warn",
           title: "A free mint has no percentage",
-          text: "If the notional is zero - which is the honest setting for a free mint, because there is no cost basis to be a percentage of - apyBps returns 0 and the interface shows the absolute rate instead, e.g. '500 VEIL per NFT per year'. Inventing a notional so a percentage could be displayed would be inventing the percentage.",
+          text: "If the notional is zero - which is the honest setting for a free mint, because there is no cost basis to be a percentage of - apyBps returns 0 and the interface shows the absolute rate instead, e.g. '500 DEVOX per NFT per year'. Inventing a notional so a percentage could be displayed would be inventing the percentage.",
         },
       ],
     },
     {
       id: "genesis",
-      title: "VEILPAD Genesis",
+      title: "DEVOXPAD Genesis",
       blocks: [
         {
           type: "p",
@@ -154,15 +154,15 @@ export const nftPage: DocPage = {
             { k: "Supply", v: "10,000" },
             { k: "Price", v: "Free mint" },
             { k: "Per wallet", v: "10" },
-            { k: "Launch method", v: "Paired with $VEIL" },
-            { k: "Reward", v: "500 VEIL per NFT per year" },
-            { k: "Escrowed up front", v: "5,000,000 VEIL" },
+            { k: "Launch method", v: "Paired with $DEVOX" },
+            { k: "Reward", v: "500 DEVOX per NFT per year" },
+            { k: "Escrowed up front", v: "5,000,000 DEVOX" },
             { k: "Royalty", v: "5% to the creator" },
           ],
         },
         {
           type: "p",
-          text: "Its address was mined with CREATE2 to end in 8888, like every VEILPAD launch, and it carries the official badge on the marketplace. The badge is set by the marketplace owner and cannot be set by a collection about itself, which is what makes it worth anything.",
+          text: "Its address was mined with CREATE2 to end in 8888, like every DEVOXPAD launch, and it carries the official badge on the marketplace. The badge is set by the marketplace owner and cannot be set by a collection about itself, which is what makes it worth anything.",
         },
       ],
     },
@@ -239,11 +239,11 @@ export const nftPage: DocPage = {
         {
           type: "kv",
           rows: [
-            { k: "VeilNFTFactory", v: "0xa2a2f45fA83eDD2f6FB8E4Cf59D55B044eb03Bb9" },
-            { k: "VeilNFTEditionsFactory", v: "0x4550a1DCc8850AED6534168fE21CA0814200F1dD" },
-            { k: "VeilNFTMarket", v: "0x93604ce0a1DD3f3A136a759E52f86b09218E0Fb8" },
-            { k: "VeilNFTStaking", v: "0x4CE6e04338bB15334c52290F145A50e1Cdc73546" },
-            { k: "VEILPAD Genesis", v: "0xD1F29a647CF56C0b13c1555794B5C383E0b08888" },
+            { k: "DevoxNFTFactory", v: "0xa2a2f45fA83eDD2f6FB8E4Cf59D55B044eb03Bb9" },
+            { k: "DevoxNFTEditionsFactory", v: "0x4550a1DCc8850AED6534168fE21CA0814200F1dD" },
+            { k: "DevoxNFTMarket", v: "0x93604ce0a1DD3f3A136a759E52f86b09218E0Fb8" },
+            { k: "DevoxNFTStaking", v: "0x4CE6e04338bB15334c52290F145A50e1Cdc73546" },
+            { k: "DEVOXPAD Genesis", v: "0xD1F29a647CF56C0b13c1555794B5C383E0b08888" },
           ],
         },
         {

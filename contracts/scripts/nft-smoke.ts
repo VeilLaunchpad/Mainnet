@@ -22,13 +22,13 @@ async function main() {
   const genesis = env("NEXT_PUBLIC_NFT_GENESIS");
   const stakingAddr = env("NEXT_PUBLIC_NFT_STAKING");
   const marketAddr = env("NEXT_PUBLIC_NFT_MARKET");
-  const veilAddr = env("NEXT_PUBLIC_VEIL_TOKEN");
+  const devoxAddr = env("NEXT_PUBLIC_DEVOX_TOKEN");
   if (!genesis || !stakingAddr) throw new Error("NFT stack not deployed on " + network.name);
 
-  const drop = await ethers.getContractAt("VeilNFTDrop", genesis);
-  const staking = await ethers.getContractAt("VeilNFTStaking", stakingAddr);
-  const market = await ethers.getContractAt("VeilNFTMarket", marketAddr);
-  const veil = await ethers.getContractAt("VeilpadToken", veilAddr);
+  const drop = await ethers.getContractAt("DevoxNFTDrop", genesis);
+  const staking = await ethers.getContractAt("DevoxNFTStaking", stakingAddr);
+  const market = await ethers.getContractAt("DevoxNFTMarket", marketAddr);
+  const devox = await ethers.getContractAt("DevoxpadToken", devoxAddr);
 
   console.log("network :", network.name);
   console.log("wallet  :", signer.address);
@@ -68,7 +68,7 @@ async function main() {
     Array.isArray(v) ? "[" + v.slice(0, 2).map(String).join(", ") + ", …]" : String(v);
   console.log("    ciphertext on chain : " + show(sealed).slice(0, 60) + "…");
   console.log("    decrypted by holder : " + plain);
-  if (!plain.includes("VEILPAD")) {
+  if (!plain.includes("DEVOXPAD")) {
     throw new Error("the holder could not read their own token, got: " + plain);
   }
 
@@ -99,7 +99,7 @@ async function main() {
   }
   console.log("    -> sealed to the holder alone");
 
-  // ── 4. stake it, and earn $VEIL ─────────────────────────────────────────
+  // ── 4. stake it, and earn $DEVOX ─────────────────────────────────────────
   console.log("\n[4] staking it");
   const [paired, pid] = await staking.poolOf(genesis);
   if (!paired) throw new Error("Genesis is not paired");
@@ -117,13 +117,13 @@ async function main() {
     if (now > start + 3 || Date.now() - began > 90_000) break;
   }
   const pending = await staking.pendingReward(pid, signer.address);
-  console.log("    accrued " + ethers.formatUnits(pending, 18) + " VEIL");
+  console.log("    accrued " + ethers.formatUnits(pending, 18) + " DEVOX");
 
   // ── 6. claim, and take it back ──────────────────────────────────────────
   console.log("\n[6] claiming, then unstaking");
-  const veilBefore = await veil.balanceOf(signer.address);
+  const devoxBefore = await devox.balanceOf(signer.address);
   await (await staking.claim(pid, { gasLimit: 1_000_000 })).wait();
-  console.log("    received " + ethers.formatUnits((await veil.balanceOf(signer.address)) - veilBefore, 18) + " VEIL");
+  console.log("    received " + ethers.formatUnits((await devox.balanceOf(signer.address)) - devoxBefore, 18) + " DEVOX");
 
   await (await staking.unstake(pid, [tokenId], { gasLimit: 2_000_000 })).wait();
   console.log("    NFT back with " + (await drop.ownerOf(tokenId)));

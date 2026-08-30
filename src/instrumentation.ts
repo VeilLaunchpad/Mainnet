@@ -20,9 +20,9 @@ export async function register() {
   const { dataDir } = await import("./lib/db");
   const { appUrl } = await import("./lib/app-url");
 
-  console.log("[veilpad] booting");
-  console.log("[veilpad] public url : " + appUrl());
-  console.log("[veilpad] data dir   : " + dataDir());
+  console.log("[devoxpad] booting");
+  console.log("[devoxpad] public url : " + appUrl());
+  console.log("[devoxpad] data dir   : " + dataDir());
 
   // Before anything opens the database. A restore has to land on disk while
   // there is still no connection holding the old file.
@@ -52,14 +52,14 @@ async function startTelegram() {
   const { appUrl, isPubliclyReachable } = await import("./lib/app-url");
 
   if (!botConfigured()) {
-    console.log("[veilpad] telegram  : no token, skipping");
+    console.log("[devoxpad] telegram  : no token, skipping");
     return;
   }
 
   if (!isPubliclyReachable()) {
     // Telegram cannot call back into a laptop, so a local run keeps using
     // `npm run telegram` rather than pretending a webhook was set.
-    console.log("[veilpad] telegram  : not publicly reachable, webhook skipped");
+    console.log("[devoxpad] telegram  : not publicly reachable, webhook skipped");
     return;
   }
 
@@ -76,18 +76,18 @@ async function startTelegram() {
   });
 
   if (ok === null) {
-    console.warn("[veilpad] telegram  : webhook failed, " + telegramLastError());
+    console.warn("[devoxpad] telegram  : webhook failed, " + telegramLastError());
     return;
   }
 
-  console.log("[veilpad] telegram  : webhook -> " + url);
+  console.log("[devoxpad] telegram  : webhook -> " + url);
 
   // Name, bio, about and the command list live in the repo, so a deploy is
   // what publishes them. Failing here must not stop the bot working.
   const profile = await applyBotProfile().catch(() => null);
-  if (profile?.skipped) console.log("[veilpad] telegram  : profile unchanged");
-  else if (profile?.ok) console.log("[veilpad] telegram  : profile " + profile.applied.join(", "));
-  else if (profile) console.warn("[veilpad] telegram  : profile " + profile.problems.join("; "));
+  if (profile?.skipped) console.log("[devoxpad] telegram  : profile unchanged");
+  else if (profile?.ok) console.log("[devoxpad] telegram  : profile " + profile.applied.join(", "));
+  else if (profile) console.warn("[devoxpad] telegram  : profile " + profile.problems.join("; "));
 }
 
 /* ------------------------------------------------------------------ */
@@ -140,13 +140,13 @@ function startHeartbeats() {
       for (const agent of due) {
         try {
           const out = await heartbeatTick(agent);
-          if (out.spoke) console.log("[veilpad] heartbeat: " + agent.slug + " spoke");
+          if (out.spoke) console.log("[devoxpad] heartbeat: " + agent.slug + " spoke");
         } catch (err) {
-          console.warn("[veilpad] heartbeat: " + agent.slug + " failed, " + String(err).slice(0, 140));
+          console.warn("[devoxpad] heartbeat: " + agent.slug + " failed, " + String(err).slice(0, 140));
         }
       }
     } catch (err) {
-      console.warn("[veilpad] heartbeat sweep failed: " + String(err).slice(0, 160));
+      console.warn("[devoxpad] heartbeat sweep failed: " + String(err).slice(0, 160));
     } finally {
       running = false;
     }
@@ -157,7 +157,7 @@ function startHeartbeats() {
     setInterval(() => void sweep(), SWEEP_MS);
   }, FIRST_SWEEP_MS);
 
-  console.log("[veilpad] agents    : heartbeat sweep every " + SWEEP_MS / 1000 + "s");
+  console.log("[devoxpad] agents    : heartbeat sweep every " + SWEEP_MS / 1000 + "s");
 }
 
 /* ------------------------------------------------------------------ */
@@ -175,14 +175,14 @@ async function restoreFromBucket() {
   const { isManagedDeployment } = await import("./lib/app-url");
 
   if (!bucketConfigured()) {
-    console.log("[veilpad] bucket    : not configured");
+    console.log("[devoxpad] bucket    : not configured");
     return;
   }
 
   // A laptop sharing the same .env must not pull production's database down,
   // nor later push its own copy back up.
   if (!isManagedDeployment()) {
-    console.log("[veilpad] bucket    : local run, leaving the shared snapshots alone");
+    console.log("[devoxpad] bucket    : local run, leaving the shared snapshots alone");
     return;
   }
 
@@ -191,13 +191,13 @@ async function restoreFromBucket() {
     const out = await restoreIfEmpty();
     if (out.restored) {
       console.log(
-        "[veilpad] bucket    : restored " + out.key + " (" + Math.round(out.bytes / 1024) + "KB)",
+        "[devoxpad] bucket    : restored " + out.key + " (" + Math.round(out.bytes / 1024) + "KB)",
       );
     } else {
-      console.log("[veilpad] bucket    : " + out.reason);
+      console.log("[devoxpad] bucket    : " + out.reason);
     }
   } catch (err) {
-    console.warn("[veilpad] bucket    : restore failed, " + String(err).slice(0, 160));
+    console.warn("[devoxpad] bucket    : restore failed, " + String(err).slice(0, 160));
   }
 }
 
@@ -221,12 +221,12 @@ function startBackups() {
       const { backupNow } = await import("./lib/backup");
       const out = await backupNow();
       if (out.ok) {
-        console.log("[veilpad] backup    : " + out.key + " (" + Math.round((out.bytes ?? 0) / 1024) + "KB)");
+        console.log("[devoxpad] backup    : " + out.key + " (" + Math.round((out.bytes ?? 0) / 1024) + "KB)");
       } else {
-        console.warn("[veilpad] backup    : " + out.reason);
+        console.warn("[devoxpad] backup    : " + out.reason);
       }
     } catch (err) {
-      console.warn("[veilpad] backup    : " + String(err).slice(0, 160));
+      console.warn("[devoxpad] backup    : " + String(err).slice(0, 160));
     } finally {
       running = false;
     }
@@ -239,8 +239,8 @@ function startBackups() {
 
   console.log(
     process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID
-      ? "[veilpad] backup    : every " + BACKUP_MS / 60_000 + " minutes to the bucket"
-      : "[veilpad] backup    : off, this is not the managed deployment",
+      ? "[devoxpad] backup    : every " + BACKUP_MS / 60_000 + " minutes to the bucket"
+      : "[devoxpad] backup    : off, this is not the managed deployment",
   );
 }
 
@@ -263,10 +263,10 @@ async function seedAndBackfill() {
     const { seedHouseAgents } = await import("./lib/seed");
     const seeded = seedHouseAgents();
     console.log(
-      "[veilpad] agents    : " + seeded.created + " seeded, " + seeded.existing + " already there",
+      "[devoxpad] agents    : " + seeded.created + " seeded, " + seeded.existing + " already there",
     );
   } catch (err) {
-    console.warn("[veilpad] agents    : seed failed, " + String(err).slice(0, 140));
+    console.warn("[devoxpad] agents    : seed failed, " + String(err).slice(0, 140));
   }
 
   try {
@@ -275,7 +275,7 @@ async function seedAndBackfill() {
     const { seedOfficialTokens } = await import("./lib/official-token");
     const official = await seedOfficialTokens();
     console.log(
-      "[veilpad] token     : official pinned on " +
+      "[devoxpad] token     : official pinned on " +
         (official.seeded.join(", ") || "no network") +
         (official.skipped.length ? " (not deployed on " + official.skipped.join(", ") + ")" : ""),
     );
@@ -288,21 +288,21 @@ async function seedAndBackfill() {
     // with no factory deployed simply reports that and is skipped.
     for (const net of NETWORKS) {
       if (!indexIsEmpty(net)) {
-        console.log("[veilpad] launches  : " + net + " already populated");
+        console.log("[devoxpad] launches  : " + net + " already populated");
         continue;
       }
 
       const out = await backfillLaunches(net);
       if (out.ok) {
         console.log(
-          "[veilpad] launches  : " + net + " rebuilt from chain, " +
+          "[devoxpad] launches  : " + net + " rebuilt from chain, " +
             out.inserted + " of " + out.found + " events",
         );
       } else {
-        console.warn("[veilpad] launches  : " + net + " skipped, " + out.reason);
+        console.warn("[devoxpad] launches  : " + net + " skipped, " + out.reason);
       }
     }
   } catch (err) {
-    console.warn("[veilpad] launches  : backfill failed, " + String(err).slice(0, 160));
+    console.warn("[devoxpad] launches  : backfill failed, " + String(err).slice(0, 160));
   }
 }

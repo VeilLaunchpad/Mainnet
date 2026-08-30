@@ -5,10 +5,10 @@ import { addressesFor, isDeployed } from "./addresses";
 import { NETWORKS, OFFICIAL_MAINNET_TOKEN, type CotiNetworkName } from "./chain";
 
 /**
- * VEILPAD's own token, put into the index it does not come from.
+ * DEVOXPAD's own token, put into the index it does not come from.
  *
  * Every other row in `tokens` was written by a launch: the factory emitted an
- * event, the indexer read it. VEILPAD was deployed on its own, through CREATE2,
+ * event, the indexer read it. DEVOXPAD was deployed on its own, through CREATE2,
  * with no curve and no factory - so nothing would ever have indexed it, and the
  * launchpad would have listed a hundred tokens without listing the one the site
  * is named after.
@@ -33,8 +33,8 @@ export interface OfficialTokenFacts {
 
 function description(net: CotiNetworkName): string {
   return net === "mainnet"
-    ? "The VEILPAD protocol token. One billion, minted once in the constructor, with no mint function afterwards. Stake it, or wrap it through the portal for its private twin."
-    : "VEILPAD official token launched on Mainnet. This is the testnet rehearsal of it: the same contract at the same 8888 address shape, worth nothing, for trying staking and the portal before you use the real one.";
+    ? "The DEVOXPAD protocol token. One billion, minted once in the constructor, with no mint function afterwards. Stake it, or wrap it through the portal for its private twin."
+    : "DEVOXPAD official token launched on Mainnet. This is the testnet rehearsal of it: the same contract at the same 8888 address shape, worth nothing, for trying staking and the portal before you use the real one.";
 }
 
 /**
@@ -81,7 +81,7 @@ async function birthOf(address: Address, net: CotiNetworkName): Promise<number |
  * row deleted by hand.
  */
 export async function seedOfficialToken(net: CotiNetworkName): Promise<boolean> {
-  const address = addressesFor(net).veilToken;
+  const address = addressesFor(net).devoxToken;
   if (!isDeployed(address)) return false;
 
   const creator = process.env.NEXT_PUBLIC_DEPLOYER_ADDRESS || "";
@@ -101,11 +101,11 @@ export async function seedOfficialToken(net: CotiNetworkName): Promise<boolean> 
     .run(
       address,
       net,
-      "VEILPAD",
-      "VEIL",
+      "DEVOXPAD",
+      "DEVOX",
       18,
       description(net),
-      "/veil-token.svg",
+      "/devox-token.svg",
       "",
       creator,
       // A public ERC20, not a PrivateERC20: staking has to read a balance, and
@@ -117,10 +117,10 @@ export async function seedOfficialToken(net: CotiNetworkName): Promise<boolean> 
       0,
       "",
       JSON.stringify({
-        site: "https://veilpad-app.vercel.app",
-        stake: "https://veilpad-app.vercel.app/stake",
-        contracts: "https://veilpad-app.vercel.app/veil-contracts",
-        x: "https://x.com/LaunchOnVeil",
+        site: "https://devoxpad-app.vercel.app",
+        stake: "https://devoxpad-app.vercel.app/stake",
+        contracts: "https://devoxpad-app.vercel.app/devox-contracts",
+        x: "https://x.com/LaunchOnDevox",
       }),
       "",
       createdAt,
@@ -146,7 +146,7 @@ export async function seedOfficialTokens(): Promise<{
 
 /** What the UI needs to say which token is the real one. */
 export function officialTokenFacts(net: CotiNetworkName): OfficialTokenFacts | null {
-  const address = addressesFor(net).veilToken;
+  const address = addressesFor(net).devoxToken;
   if (!isDeployed(address)) return null;
 
   return {

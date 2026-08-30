@@ -5,7 +5,7 @@ import { publicClient, readToken, readCurve, readPool, findPair, chainInfo } fro
 import { chainDigest } from "./master";
 import { addresses, isDeployed, DEFAULT_FEE_TIER } from "./addresses";
 import { cotiQuote, webSearch, cotiCandles, dexPairs } from "./market";
-import { veilCurveAbi, veilSwapRouterAbi } from "./abis";
+import { devoxCurveAbi, devoxSwapRouterAbi } from "./abis";
 import { fmtUnits, isAddress } from "./format";
 import { appUrl } from "@/lib/app-url";
 
@@ -68,7 +68,7 @@ const bool = (description: string) => ({ type: "boolean", description });
 
 tool(
   "get_chain_info",
-  "Current COTI network: chain id, explorer, faucet, launch economics, and which VEILPAD contracts are actually deployed. Call this before promising an action that needs a contract.",
+  "Current COTI network: chain id, explorer, faucet, launch economics, and which DEVOXPAD contracts are actually deployed. Call this before promising an action that needs a contract.",
   obj({}),
   async () => {
     // The master table is the registry of record; chainInfo() is the live
@@ -80,7 +80,7 @@ tool(
 
 tool(
   "get_coti_market",
-  "Live COTI/USD price, 24h change, market cap and volume. This is the denominator for every price quoted on VEILPAD.",
+  "Live COTI/USD price, 24h change, market cap and volume. This is the denominator for every price quoted on DEVOXPAD.",
   obj({}),
   async () => {
     const q = await cotiQuote();
@@ -156,7 +156,7 @@ tool(
   },
 );
 
-/* ── READ: VEILPAD index ──────────────────────────────────────────────── */
+/* ── READ: DEVOXPAD index ──────────────────────────────────────────────── */
 
 interface TokenRow {
   address: string;
@@ -177,7 +177,7 @@ interface TokenRow {
 
 tool(
   "list_launches",
-  "List tokens launched on VEILPAD. Sort by 'new', 'progress' (closest to graduating into its VeilSwap pair) or 'graduated'.",
+  "List tokens launched on DEVOXPAD. Sort by 'new', 'progress' (closest to graduating into its DevoxSwap pair) or 'graduated'.",
   obj({
     sort: str("'new' | 'progress' | 'graduated'. Default 'new'."),
     limit: num("Max rows, default 10, cap 50."),
@@ -230,7 +230,7 @@ tool(
 
 tool(
   "get_token",
-  "Full detail on one VEILPAD token: metadata, bonding-curve state, graduation progress, VeilSwap pair and recent trades.",
+  "Full detail on one DEVOXPAD token: metadata, bonding-curve state, graduation progress, DevoxSwap pair and recent trades.",
   obj({ address: str("Token contract address.") }, ["address"]),
   async (a) => {
     const addr = String(a.address);
@@ -240,7 +240,7 @@ tool(
       db().prepare("SELECT * FROM tokens WHERE lower(address) = lower(?)").get(addr),
     );
     const onchain = await readToken(addr as Address);
-    if (!t && !onchain) return { ok: false, error: "token not found on VEILPAD or on-chain" };
+    if (!t && !onchain) return { ok: false, error: "token not found on DEVOXPAD or on-chain" };
 
     const curve = t && isDeployed(t.curve) ? await readCurve(t.curve as Address) : null;
     const poolAddr = curve?.pool || t?.pool || (await findPair(addr as Address)) || "";
@@ -281,7 +281,7 @@ tool(
       pool: pool
         ? {
             address: pool.pair,
-            venue: "VeilSwap",
+            venue: "DevoxSwap",
             feeBps: pool.feeBps,
             reserveToken: fmtUnits(pool.reserveToken, t?.decimals ?? 18, 4),
             reserveCoti: fmtUnits(pool.reserveCoti, 18, 6),
@@ -296,7 +296,7 @@ tool(
 
 tool(
   "quote_trade",
-  "Price a buy or sell before proposing it. Uses the bonding curve pre-graduation and the VeilSwap router once the token has a pair.",
+  "Price a buy or sell before proposing it. Uses the bonding curve pre-graduation and the DevoxSwap router once the token has a pair.",
   obj(
     {
       token: str("Token address."),
@@ -328,13 +328,13 @@ tool(
       const c = publicClient();
       const out = (await c.readContract({
         address: t!.curve as Address,
-        abi: veilCurveAbi,
+        abi: devoxCurveAbi,
         functionName: side === "buy" ? "quoteBuy" : "quoteSell",
         args: [amtWei],
       })) as bigint;
       return {
         ok: true,
-        venue: "VEILPAD bonding curve",
+        venue: "DEVOXPAD bonding curve",
         side,
         amountIn: String(a.amount),
         amountOut: fmtUnits(out, side === "buy" ? decimals : 18, 6),
@@ -343,20 +343,20 @@ tool(
       };
     }
 
-    // Post-graduation the venue is the VeilSwap pair, quoted through the
+    // Post-graduation the venue is the DevoxSwap pair, quoted through the
     // router so the number matches what a swap would actually pay.
     const poolAddr = curve?.pool || t?.pool || (await findPair(addr as Address)) || "";
     if (!isDeployed(poolAddr) || !isDeployed(addresses.swapRouter)) {
       return {
         ok: false,
-        error: "no bonding curve and no VeilSwap pair for this token yet",
+        error: "no bonding curve and no DevoxSwap pair for this token yet",
       };
     }
 
     try {
       const out = (await publicClient().readContract({
         address: addresses.swapRouter,
-        abi: veilSwapRouterAbi,
+        abi: devoxSwapRouterAbi,
         functionName: side === "buy" ? "quoteBuyWithCoti" : "quoteSellForCoti",
         args: [addr as Address, amtWei],
       })) as bigint;
@@ -365,7 +365,7 @@ tool(
 
       return {
         ok: true,
-        venue: "VeilSwap",
+        venue: "DevoxSwap",
         feeBps: 30,
         side,
         amountIn: String(a.amount),
@@ -381,7 +381,7 @@ tool(
 
 tool(
   "get_profile",
-  "Look up a VEILPAD profile by username or address. Returns their launches, agents and public activity.",
+  "Look up a DEVOXPAD profile by username or address. Returns their launches, agents and public activity.",
   obj({ handle: str("Username (without @) or 0x address.") }, ["handle"]),
   async (a) => {
     const h = String(a.handle).replace(/^@/, "").toLowerCase();
@@ -418,7 +418,7 @@ tool(
 
 tool(
   "list_agents",
-  "List agents registered on VEILPAD, optionally filtered by kind ('trader', 'social', 'research', 'ops').",
+  "List agents registered on DEVOXPAD, optionally filtered by kind ('trader', 'social', 'research', 'ops').",
   obj({ kind: str("Optional kind filter."), limit: num("Max rows, default 10.") }),
   async (a) => {
     const limit = Math.min(50, Number(a.limit) || 10);
@@ -499,7 +499,7 @@ tool(
  */
 tool(
   "get_bridge",
-  "Authoritative, live state of both VEILPAD bridges: which assets the privacy bridge carries between COTI and COTI Private, whether each is open, how much is escrowed, and which assets cross between Ethereum and COTI. Use this instead of searching the web for bridge facts.",
+  "Authoritative, live state of both DEVOXPAD bridges: which assets the privacy bridge carries between COTI and COTI Private, whether each is open, how much is escrowed, and which assets cross between Ethereum and COTI. Use this instead of searching the web for bridge facts.",
   obj({}),
   async () => {
     const base = appUrl();
@@ -521,7 +521,7 @@ tool(
       ok: true,
       network: d.network,
       privacyBridge: {
-        note: "Public token in, encrypted twin out. Verified contracts on COTI, signed in VEILPAD.",
+        note: "Public token in, encrypted twin out. Verified contracts on COTI, signed in DEVOXPAD.",
         assets: d.privacy.assets.map((a) => ({
           symbol: a.symbol,
           open: a.open,
@@ -544,9 +544,9 @@ tool(
 tool(
   "propose_launch",
   [
-    "Propose launching a new private token on VEILPAD. The user signs the launch transaction.",
+    "Propose launching a new private token on DEVOXPAD. The user signs the launch transaction.",
     "Supply is FIXED at 1,000,000,000 tokens for every launch. There is no supply choice, so never ask the user for one.",
-    "Every token starts on a bonding curve and graduates into a VeilSwap pair once the curve fills.",
+    "Every token starts on a bonding curve and graduates into a DevoxSwap pair once the curve fills.",
     "The only things you need from the user are a ticker, a name and a description. An image, socials and a dev buy are optional.",
     "Whether the dev's own tokens are kept, burned or locked is chosen on the launch page when they sign, not here.",
   ].join(" "),

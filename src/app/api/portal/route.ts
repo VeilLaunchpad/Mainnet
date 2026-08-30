@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 import { publicClient } from "@/lib/rpc";
-import { veilPortalAbi, veilPortalTokenAbi, erc20Abi } from "@/lib/abis";
+import { devoxPortalAbi, devoxPortalTokenAbi, erc20Abi } from "@/lib/abis";
 import { addressesFor, isDeployed } from "@/lib/addresses";
 import { db, rows } from "@/lib/db";
 import { fmtUnits } from "@/lib/format";
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
   try {
     twins = (await c.readContract({
       address: addresses.portal,
-      abi: veilPortalAbi,
+      abi: devoxPortalAbi,
       functionName: "allTwins",
     })) as Address[];
   } catch {
@@ -69,9 +69,9 @@ export async function GET(req: Request) {
   for (const twin of twins) {
     try {
       const [underlying, twinSymbol, decimals] = await Promise.all([
-        c.readContract({ address: twin, abi: veilPortalTokenAbi, functionName: "underlying" }),
-        c.readContract({ address: twin, abi: veilPortalTokenAbi, functionName: "symbol" }),
-        c.readContract({ address: twin, abi: veilPortalTokenAbi, functionName: "decimals" }),
+        c.readContract({ address: twin, abi: devoxPortalTokenAbi, functionName: "underlying" }),
+        c.readContract({ address: twin, abi: devoxPortalTokenAbi, functionName: "symbol" }),
+        c.readContract({ address: twin, abi: devoxPortalTokenAbi, functionName: "decimals" }),
       ]);
 
       const under = underlying as Address;
@@ -86,7 +86,7 @@ export async function GET(req: Request) {
 
       const locked = (await c.readContract({
         address: addresses.portal,
-        abi: veilPortalAbi,
+        abi: devoxPortalAbi,
         functionName: "locked",
         args: [under],
       })) as bigint;

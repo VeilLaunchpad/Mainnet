@@ -6,7 +6,7 @@ import type { CotiNetworkName } from "./chain";
 /**
  * Routing a swap through COTI's order book.
  *
- * VeilSwap only has pairs for tokens launched here, which left every other
+ * DevoxSwap only has pairs for tokens launched here, which left every other
  * token on the chain untradable in this app - the page could show you a market
  * and then had nowhere to send you. The order book has depth for all of them,
  * so this builds the route.

@@ -155,7 +155,7 @@ export function ResultProvider({ children }: { children: ReactNode }) {
                 className={
                   "flex-1 rounded-xl py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 " +
                   (spec.ok
-                    ? "bg-gradient-to-r from-veil-500 to-cy-500"
+                    ? "bg-gradient-to-r from-devox-500 to-cy-500"
                     : "border border-white/12 hover:border-white/25")
                 }
               >

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 /**
  * Indexer health.
  *
- * VEILPAD reads events on demand rather than running a background crawler, so
+ * DEVOXPAD reads events on demand rather than running a background crawler, so
  * "indexed" here is the head of the range the reader covers, and lag is
  * effectively zero by construction. The number is still reported honestly
  * rather than hardcoded, because a reader that cannot reach the RPC is a
@@ -66,8 +66,8 @@ export async function GET(req: Request) {
   }
 
   const contracts = [
-    ["veil-factory", addresses.veilFactory],
-    ["veil-swap", addresses.swapFactory],
+    ["devox-factory", addresses.devoxFactory],
+    ["devox-swap", addresses.swapFactory],
     ["portal", addresses.portal],
     ["private-messaging", addresses.privateMessaging],
   ] as const;
@@ -82,7 +82,7 @@ export async function GET(req: Request) {
 
   const brain = brainStatus();
   services.push({
-    name: "veilpad-intelligence",
+    name: "devoxpad-intelligence",
     ok: brain.healthy > 0,
     detail: brain.healthy + " of " + brain.capacity + " reasoning slots available",
   });

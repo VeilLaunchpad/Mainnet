@@ -162,7 +162,7 @@ function DashboardInner() {
               className={
                 "-mb-px shrink-0 border-b-2 px-4 py-2.5 text-[13px] font-medium capitalize transition " +
                 (tab === t
-                  ? "border-veil-400 text-white"
+                  ? "border-devox-400 text-white"
                   : "border-transparent text-white/40 hover:text-white")
               }
             >
@@ -219,7 +219,7 @@ function Overview({
                 <Link
                   key={t.address}
                   href={"/coti/" + t.address}
-                  className="rounded-xl border border-white/[0.07] p-3 transition hover:border-veil-400/40"
+                  className="rounded-xl border border-white/[0.07] p-3 transition hover:border-devox-400/40"
                 >
                   <div className="flex items-center gap-2.5">
                     <Avatar src={t.image} seed={t.symbol} size={32} rounded="rounded-lg" />
@@ -260,7 +260,7 @@ function Overview({
                 <Link
                   key={i}
                   href={"/agents/" + e.agent_slug}
-                  className="block border-l-2 border-veil-400/25 pl-3 transition hover:border-veil-400"
+                  className="block border-l-2 border-devox-400/25 pl-3 transition hover:border-devox-400"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-[12px] font-semibold text-white/80">{e.agent_name}</span>
@@ -298,8 +298,8 @@ function Overview({
             Every contract this app is wired to, with its source on CotiScan.
           </p>
           <Link
-            href="/veil-contracts"
-            className="mt-3 block rounded-xl border border-veil-400/30 bg-veil-500/10 px-4 py-2.5 text-center text-[12px] font-semibold text-veil-300 transition hover:bg-veil-500/20"
+            href="/devox-contracts"
+            className="mt-3 block rounded-xl border border-devox-400/30 bg-devox-500/10 px-4 py-2.5 text-center text-[12px] font-semibold text-devox-300 transition hover:bg-devox-500/20"
           >
             Open the contract list
           </Link>
@@ -320,7 +320,7 @@ function Agents({
   address?: string;
 }) {
   const house: [string, string, string][] = [
-    ["veil", "VEIL", "concierge"],
+    ["devox", "DEVOX", "concierge"],
     ["shade", "SHADE", "private trading"],
     ["forge", "FORGE", "launches"],
     ["relay", "RELAY", "encrypted comms"],
@@ -356,13 +356,13 @@ function Agents({
               <Link
                 key={a.id}
                 href={"/agents/" + a.slug}
-                className="flex gap-3 rounded-xl border border-white/[0.07] p-3 transition hover:border-veil-400/40"
+                className="flex gap-3 rounded-xl border border-white/[0.07] p-3 transition hover:border-devox-400/40"
               >
                 <Avatar src={a.avatar} seed={a.name} size={36} rounded="rounded-lg" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-[13px] font-semibold">{a.name}</span>
-                    <Badge tone="veil">{a.kind}</Badge>
+                    <Badge tone="devox">{a.kind}</Badge>
                   </div>
                   <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-white/40">
                     {a.tagline}
@@ -402,7 +402,7 @@ function Agents({
         </div>
 
         <div className="card p-4">
-          <h2 className="text-[15px] font-semibold">VEILPAD Intelligence</h2>
+          <h2 className="text-[15px] font-semibold">DEVOXPAD Intelligence</h2>
           <p className="mt-1 text-[11px] leading-relaxed text-white/35">
             The reasoning layer behind every agent, with automatic failover. A degraded slot steps
             aside and the next one takes over, so agents keep answering under load.
@@ -429,7 +429,7 @@ function Agents({
 
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-veil-500 to-cy-400 transition-[width] duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-devox-500 to-cy-400 transition-[width] duration-500"
                   style={{ width: Math.max(4, s.brain.availability * 100) + "%" }}
                 />
               </div>

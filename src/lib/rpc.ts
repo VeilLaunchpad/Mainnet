@@ -8,10 +8,10 @@ import {
 import {
   erc20Abi,
   privateErc20Abi,
-  veilCurveAbi,
-  veilSwapPairAbi,
-  veilSwapFactoryAbi,
-  veilPortalAbi,
+  devoxCurveAbi,
+  devoxSwapPairAbi,
+  devoxSwapFactoryAbi,
+  devoxPortalAbi,
 } from "./abis";
 import { addresses, addressesFor, isDeployed } from "./addresses";
 
@@ -94,13 +94,13 @@ export async function readCurve(curve: Address, net?: CotiNetworkName): Promise<
   const c = publicClient(net);
   try {
     const [token, reserve, sold, spotPrice, graduationTarget, graduated, pool] = await Promise.all([
-      c.readContract({ address: curve, abi: veilCurveAbi, functionName: "token" }),
-      c.readContract({ address: curve, abi: veilCurveAbi, functionName: "reserve" }),
-      c.readContract({ address: curve, abi: veilCurveAbi, functionName: "sold" }),
-      c.readContract({ address: curve, abi: veilCurveAbi, functionName: "spotPrice" }),
-      c.readContract({ address: curve, abi: veilCurveAbi, functionName: "graduationTarget" }),
-      c.readContract({ address: curve, abi: veilCurveAbi, functionName: "graduated" }),
-      c.readContract({ address: curve, abi: veilCurveAbi, functionName: "pool" }),
+      c.readContract({ address: curve, abi: devoxCurveAbi, functionName: "token" }),
+      c.readContract({ address: curve, abi: devoxCurveAbi, functionName: "reserve" }),
+      c.readContract({ address: curve, abi: devoxCurveAbi, functionName: "sold" }),
+      c.readContract({ address: curve, abi: devoxCurveAbi, functionName: "spotPrice" }),
+      c.readContract({ address: curve, abi: devoxCurveAbi, functionName: "graduationTarget" }),
+      c.readContract({ address: curve, abi: devoxCurveAbi, functionName: "graduated" }),
+      c.readContract({ address: curve, abi: devoxCurveAbi, functionName: "pool" }),
     ]);
     const target = graduationTarget as bigint;
     const res = reserve as bigint;
@@ -135,7 +135,7 @@ export interface PoolState {
 }
 
 /**
- * Reads a VeilSwap pair.
+ * Reads a DevoxSwap pair.
  *
  * Note what is *not* here: no `balanceOf` call. A pair's reserves live in its
  * own storage precisely because a COTI PrivateERC20 answers `balanceOf` with a
@@ -151,10 +151,10 @@ export async function readPool(
   const c = publicClient(net);
   try {
     const [reserves, token0, token1, totalSupply] = await Promise.all([
-      c.readContract({ address: pair, abi: veilSwapPairAbi, functionName: "getReserves" }),
-      c.readContract({ address: pair, abi: veilSwapPairAbi, functionName: "token0" }),
-      c.readContract({ address: pair, abi: veilSwapPairAbi, functionName: "token1" }),
-      c.readContract({ address: pair, abi: veilSwapPairAbi, functionName: "totalSupply" }),
+      c.readContract({ address: pair, abi: devoxSwapPairAbi, functionName: "getReserves" }),
+      c.readContract({ address: pair, abi: devoxSwapPairAbi, functionName: "token0" }),
+      c.readContract({ address: pair, abi: devoxSwapPairAbi, functionName: "token1" }),
+      c.readContract({ address: pair, abi: devoxSwapPairAbi, functionName: "totalSupply" }),
     ]);
 
     const [r0, r1] = reserves as readonly [bigint, bigint];
@@ -191,7 +191,7 @@ export async function findPair(token: Address, net?: CotiNetworkName): Promise<A
   try {
     const pair = (await publicClient(net).readContract({
       address: a.swapFactory,
-      abi: veilSwapFactoryAbi,
+      abi: devoxSwapFactoryAbi,
       functionName: "getPair",
       args: [token, a.wcoti],
     })) as Address;
@@ -227,7 +227,7 @@ export const chainInfo = (net: CotiNetworkName = DEFAULT_NETWORK) => {
 };
 
 export interface ChainTrade {
-  venue: "curve" | "veilswap";
+  venue: "curve" | "devoxswap";
   side: "buy" | "sell";
   trader: Address;
   cotiAmount: bigint;
@@ -342,7 +342,7 @@ export async function readTradeHistory(
     try {
       const logs = await client.getLogs({
         address: curve as Address,
-        event: veilCurveAbi.find((f) => f.type === "event" && f.name === "Traded") as never,
+        event: devoxCurveAbi.find((f) => f.type === "event" && f.name === "Traded") as never,
         fromBlock,
         toBlock: "latest",
       });
@@ -376,7 +376,7 @@ export async function readTradeHistory(
     try {
       const logs = await client.getLogs({
         address: pool as Address,
-        event: veilSwapPairAbi.find((f) => f.type === "event" && f.name === "Swap") as never,
+        event: devoxSwapPairAbi.find((f) => f.type === "event" && f.name === "Swap") as never,
         fromBlock,
         toBlock: "latest",
       });
@@ -394,7 +394,7 @@ export async function readTradeHistory(
         const coti = isBuy ? amountIn : amountOut;
         const tok = isBuy ? amountOut : amountIn;
         trades.push({
-          venue: "veilswap",
+          venue: "devoxswap",
           side: isBuy ? "buy" : "sell",
           // `sender` is whoever called the pair, which for a routed swap is the
           // router itself. `to` is the human the tokens actually went to.
@@ -469,7 +469,7 @@ export async function readPortalHistory(
     try {
       const logs = await client.getLogs({
         address: portal,
-        event: veilPortalAbi.find((f) => f.type === "event" && f.name === name) as never,
+        event: devoxPortalAbi.find((f) => f.type === "event" && f.name === name) as never,
         args: { account } as never,
         fromBlock,
         toBlock: "latest",

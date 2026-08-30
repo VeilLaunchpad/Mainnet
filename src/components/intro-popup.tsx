@@ -38,7 +38,7 @@ export function IntroPopup({
   points: IntroPoint[];
   footer?: string;
 }) {
-  const key = `veil.intro.${id}.v${version}`;
+  const key = `devox.intro.${id}.v${version}`;
 
   // Never render on the server: the answer depends on this browser's storage,
   // and guessing would flash the popup at people who dismissed it.
@@ -110,7 +110,7 @@ export function IntroPopup({
         <div className="flex flex-col gap-2 px-6 pb-6 sm:flex-row-reverse">
           <button
             onClick={() => close(false)}
-            className="rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-5 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 sm:flex-1"
+            className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-5 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 sm:flex-1"
           >
             OK
           </button>

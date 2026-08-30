@@ -21,7 +21,7 @@ async function main() {
   console.log("deployer:", deployer.address);
   console.log("balance :", ethers.formatEther(await ethers.provider.getBalance(deployer.address)), "COTI\n");
 
-  const factory = await ethers.getContractFactory("VeilNFTEditionsFactory");
+  const factory = await ethers.getContractFactory("DevoxNFTEditionsFactory");
   const args = [deployer.address, deployer.address, LAUNCH_FEE] as const;
   const tx = await factory.getDeployTransaction(...args);
   const estimate: string = await ethers.provider.send("eth_estimateGas", [
@@ -32,7 +32,7 @@ async function main() {
   await c.waitForDeployment();
   const addr = await c.getAddress();
 
-  console.log("  VeilNFTEditionsFactory  " + addr + "  gas " + BigInt(estimate).toLocaleString("en-US"));
+  console.log("  DevoxNFTEditionsFactory  " + addr + "  gas " + BigInt(estimate).toLocaleString("en-US"));
 
   const key = "NEXT_PUBLIC_NFT_EDITIONS_FACTORY_" + suffix;
   writeEnv({ [key]: addr });
@@ -41,7 +41,7 @@ async function main() {
 }
 
 function writeMasterTable(netKey: string, editionsFactory: string) {
-  const file = path.resolve(__dirname, "../../config/veilpad." + netKey + ".json");
+  const file = path.resolve(__dirname, "../../config/devoxpad." + netKey + ".json");
   if (!fs.existsSync(file)) return;
   const table = JSON.parse(fs.readFileSync(file, "utf8"));
   if (!table.nft) return;

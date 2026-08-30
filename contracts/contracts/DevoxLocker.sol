@@ -11,7 +11,7 @@ interface ILockedToken {
 }
 
 /**
- * @title VeilLocker - a timelock for a creator's own allocation.
+ * @title DevoxLocker - a timelock for a creator's own allocation.
  *
  * A launch can send the creator's dev-buy here instead of to their wallet. The
  * lock is recorded in plain storage on purpose: the whole point of locking is
@@ -21,7 +21,7 @@ interface ILockedToken {
  * There is no owner, no early-release path and no way to change an unlock date
  * once set. A lock that the deployer could undo would not be a lock.
  */
-contract VeilLocker is ReentrancyGuard {
+contract DevoxLocker is ReentrancyGuard {
     struct Lock {
         address token;
         address beneficiary;

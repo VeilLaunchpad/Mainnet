@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   const table = masterTable(net);
   if (!table) {
     return Response.json(
-      { error: "config/veilpad." + net + ".json not found" },
+      { error: "config/devoxpad." + net + ".json not found" },
       { status: 404 },
     );
   }

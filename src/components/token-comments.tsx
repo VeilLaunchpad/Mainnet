@@ -171,7 +171,7 @@ export function TokenComments({
             title={canGoPrivate ? undefined : "No creator address to message"}
             className={
               "flex-1 rounded px-3 py-1.5 text-[12px] font-semibold transition disabled:opacity-30 " +
-              (mode === "private" ? "bg-veil-500/25 text-veil-200" : "text-white/45 hover:text-white")
+              (mode === "private" ? "bg-devox-500/25 text-devox-200" : "text-white/45 hover:text-white")
             }
           >
             Encrypted to creator
@@ -188,7 +188,7 @@ export function TokenComments({
               ? "Say something about " + symbol + ". Signed by your wallet, visible to everyone."
               : "Encrypted before it leaves this browser. Only you and the creator can read it."
           }
-          className="mt-2.5 w-full resize-none rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/25 focus:border-veil-400/50"
+          className="mt-2.5 w-full resize-none rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
         />
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -198,8 +198,8 @@ export function TokenComments({
             className={
               "rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40 " +
               (mode === "private"
-                ? "bg-gradient-to-r from-veil-500 to-veil-600"
-                : "bg-gradient-to-r from-veil-500 to-cy-500")
+                ? "bg-gradient-to-r from-devox-500 to-devox-600"
+                : "bg-gradient-to-r from-devox-500 to-cy-500")
             }
           >
             {busy ? step || "Working…" : mode === "private" ? "Send encrypted" : "Post comment"}
@@ -207,7 +207,7 @@ export function TokenComments({
 
           <span className="text-[11px] text-white/35">
             {mode === "public"
-              ? "Stored in the VEILPAD index and signed, so nobody can post as you."
+              ? "Stored in the DEVOXPAD index and signed, so nobody can post as you."
               : "Sent through COTI PrivateMessaging. The body never touches our server."}
           </span>
         </div>
@@ -244,11 +244,11 @@ function CommentRow({ c }: { c: Comment }) {
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
           <Link
             href={"/profile/" + (c.profile?.username ?? c.author)}
-            className="text-[12px] font-semibold text-white/80 transition hover:text-veil-300"
+            className="text-[12px] font-semibold text-white/80 transition hover:text-devox-300"
           >
             {name}
           </Link>
-          {c.private && <Badge tone="veil">encrypted</Badge>}
+          {c.private && <Badge tone="devox">encrypted</Badge>}
           <span className="mono text-[10px] text-white/25">{timeAgo(c.createdAt)}</span>
         </div>
 

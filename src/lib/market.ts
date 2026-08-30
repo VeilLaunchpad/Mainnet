@@ -28,7 +28,7 @@ export interface CoinQuote {
   volume24h: number;
 }
 
-/** COTI's own market state - the denominator for every price on VEILPAD. */
+/** COTI's own market state - the denominator for every price on DEVOXPAD. */
 export async function cotiQuote(): Promise<CoinQuote | null> {
   return cached("coti-quote", 60_000, async () => {
     try {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { VeilMark } from "./nav";
+import { DevoxMark } from "./nav";
 import { chainByNetwork } from "@/lib/chain";
 import { serverNetwork } from "@/lib/server-network";
 
@@ -11,9 +11,9 @@ export async function Footer() {
       <div className="mx-auto grid max-w-[1400px] gap-8 px-4 py-12 sm:px-6 md:grid-cols-3 lg:grid-cols-5">
         <div>
           <div className="flex items-center gap-2">
-            <VeilMark size={18} />
+            <DevoxMark size={18} />
             <span className="text-sm font-bold">
-              VEIL<span className="text-veil-400">PAD</span>
+              DEVOX<span className="text-devox-400">PAD</span>
             </span>
           </div>
           <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-white/45">
@@ -22,13 +22,13 @@ export async function Footer() {
           </p>
 
           <a
-            href="https://x.com/LaunchOnVeil"
+            href="https://x.com/LaunchOnDevox"
             target="_blank"
             rel="noreferrer"
             className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-[12px] font-medium text-white/60 transition hover:border-cy-400/45 hover:text-white"
           >
             <XMark />
-            @LaunchOnVeil
+            @LaunchOnDevox
           </a>
         </div>
 
@@ -47,10 +47,10 @@ export async function Footer() {
           title="Network"
           links={[
             { href: "/status", label: "Network status" },
-            { href: "/veil-contracts", label: "Contracts" },
+            { href: "/devox-contracts", label: "Contracts" },
             { href: "/faucet", label: "Testnet faucet" },
-            { href: "/bridge", label: "VEIL Bridge" },
-            { href: "/skills", label: "VEIL Skills" },
+            { href: "/bridge", label: "DEVOX Bridge" },
+            { href: "/skills", label: "DEVOX Skills" },
             { href: "/portal", label: "Privacy portal" },
             {
               href: chain.blockExplorers.default.url,
@@ -66,7 +66,7 @@ export async function Footer() {
             { href: "/docs/sdk", label: "SDK" },
             { href: "/docs/api", label: "API reference" },
             { href: "/docs/indexer", label: "Indexer" },
-            { href: "/veil-contracts", label: "Contract addresses" },
+            { href: "/devox-contracts", label: "Contract addresses" },
           ]}
         />
         <FooterCol
@@ -97,13 +97,13 @@ export async function Footer() {
               Block explorer
             </a>
             <a
-              href="https://x.com/LaunchOnVeil"
+              href="https://x.com/LaunchOnDevox"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 transition hover:text-white/60"
             >
               <XMark />
-              @LaunchOnVeil
+              @LaunchOnDevox
             </a>
           </div>
         </div>
@@ -135,11 +135,11 @@ function FooterCol({
         {links.map((l) => (
           <li key={l.label}>
             {l.external ? (
-              <a href={l.href} target="_blank" rel="noreferrer" className="text-[13px] text-white/60 transition hover:text-veil-300">
+              <a href={l.href} target="_blank" rel="noreferrer" className="text-[13px] text-white/60 transition hover:text-devox-300">
                 {l.label}
               </a>
             ) : (
-              <Link href={l.href} className="text-[13px] text-white/60 transition hover:text-veil-300">
+              <Link href={l.href} className="text-[13px] text-white/60 transition hover:text-devox-300">
                 {l.label}
               </Link>
             )}

@@ -16,7 +16,7 @@ import { bucketConfigured, putObject, getObject, listObjects, deleteObject } fro
  * the part that cannot be rebuilt by resyncing.
  */
 
-const PREFIX = "veilpad/backups/";
+const PREFIX = "devoxpad/backups/";
 
 /** Keep a rolling window rather than growing forever. */
 const KEEP = 20;
@@ -92,7 +92,7 @@ export async function restoreIfEmpty(): Promise<
 > {
   if (!bucketConfigured()) return { restored: false, reason: "no bucket configured" };
 
-  const target = path.join(dataDir(), "veilpad.db");
+  const target = path.join(dataDir(), "devoxpad.db");
   if (fs.existsSync(target) && fs.statSync(target).size > 0) {
     return { restored: false, reason: "database already present" };
   }

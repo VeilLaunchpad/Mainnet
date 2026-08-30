@@ -11,7 +11,7 @@ import { serverNetwork } from "@/lib/server-network";
  * cards recognisable at a glance once you have used the app.
  */
 const ACCENT = {
-  veil: { text: "text-veil-400", glow: "group-hover:border-veil-400/50", bar: "from-veil-500/70" },
+  devox: { text: "text-devox-400", glow: "group-hover:border-devox-400/50", bar: "from-devox-500/70" },
   cy: { text: "text-cy-300", glow: "group-hover:border-cy-400/50", bar: "from-cy-500/70" },
   mint: { text: "text-mint-400", glow: "group-hover:border-mint-400/50", bar: "from-mint-400/70" },
   amber: { text: "text-amber-400", glow: "group-hover:border-amber-400/50", bar: "from-amber-400/70" },
@@ -41,13 +41,13 @@ const PILLARS = [
     title: "An agent with a ticker",
     body: "Mint a private token tied to an agent's output, behaviour or access. Holders get rights; balances stay confidential.",
     glyph: "◈",
-    accent: "veil" as const,
+    accent: "devox" as const,
   },
   {
     href: "/swap",
     tag: "Private DeFi",
     title: "Swap without an audience",
-    body: "Encrypted balances, confidential transfers, and VeilSwap - an AMM built to price a token whose balances are ciphertext.",
+    body: "Encrypted balances, confidential transfers, and DevoxSwap - an AMM built to price a token whose balances are ciphertext.",
     glyph: "⇄",
     accent: "cy" as const,
   },
@@ -63,7 +63,7 @@ const PILLARS = [
     href: "/launch",
     tag: "Private Tokens for Agents",
     title: "Issue, reward, gate",
-    body: "Launch a private token in one conversation. Bonding curve first, a VeilSwap pair on graduation, encrypted holders throughout.",
+    body: "Launch a private token in one conversation. Bonding curve first, a DevoxSwap pair on graduation, encrypted holders throughout.",
     glyph: "✦",
     accent: "amber" as const,
   },
@@ -74,10 +74,10 @@ export default async function Home() {
   const chain = chainByNetwork[net];
   return (
     <>
-      <section className="grid-veil grain relative overflow-hidden border-b border-white/[0.06]">
+      <section className="grid-devox grain relative overflow-hidden border-b border-white/[0.06]">
         <div className="mx-auto max-w-[1400px] px-4 pb-16 pt-16 sm:px-6 sm:pt-24">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge tone="veil">Built on COTI</Badge>
+            <Badge tone="devox">Built on COTI</Badge>
             <Badge tone="cy">Garbled-circuit privacy</Badge>
             <Badge tone="muted">chain {chain.id}</Badge>
           </div>
@@ -89,7 +89,7 @@ export default async function Home() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-white/55 sm:text-base">
-            VEILPAD is an agentic superapp on COTI. Every agent here holds a real conversation, keeps
+            DEVOXPAD is an agentic superapp on COTI. Every agent here holds a real conversation, keeps
             what it learns, and acts on-chain with your signature - over balances that stay encrypted
             the whole way through.
           </p>
@@ -97,13 +97,13 @@ export default async function Home() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/launch"
-              className="glow rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+              className="glow rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
             >
               Launch a token
             </Link>
             <Link
               href="/desk"
-              className="rounded-xl border border-white/12 bg-white/[0.03] px-5 py-3 text-sm font-semibold transition hover:border-veil-400/50"
+              className="rounded-xl border border-white/12 bg-white/[0.03] px-5 py-3 text-sm font-semibold transition hover:border-devox-400/50"
             >
               Open the private desk
             </Link>
@@ -207,13 +207,13 @@ export default async function Home() {
 
 function Explainer({ n, title, body }: { n: string; title: string; body: string }) {
   return (
-    <div className="card group relative overflow-hidden p-5 transition hover:border-veil-400/30">
+    <div className="card group relative overflow-hidden p-5 transition hover:border-devox-400/30">
       {/* The number is the point of these three, so it gets to be large and
           quiet in the corner rather than a small label nobody reads. */}
-      <span className="mono pointer-events-none absolute -right-2 -top-4 text-[64px] font-bold leading-none text-white/[0.035] transition-colors duration-300 group-hover:text-veil-400/10">
+      <span className="mono pointer-events-none absolute -right-2 -top-4 text-[64px] font-bold leading-none text-white/[0.035] transition-colors duration-300 group-hover:text-devox-400/10">
         {n}
       </span>
-      <div className="mono relative text-[11px] text-veil-400">{n}</div>
+      <div className="mono relative text-[11px] text-devox-400">{n}</div>
       <h3 className="relative mt-2 text-[15px] font-semibold">{title}</h3>
       <p className="relative mt-2 text-[13px] leading-relaxed text-white/45">{body}</p>
     </div>

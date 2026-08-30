@@ -1,20 +1,20 @@
 import { db, now } from "./db";
 
 /**
- * The house agents. Every VEILPAD install boots with these five plus a
+ * The house agents. Every DEVOXPAD install boots with these five plus a
  * concierge - they are the Coding Inspo tracks made real, and they give a new
  * visitor something to talk to before they have created anything.
  */
 export const HOUSE_AGENTS = [
   {
     id: "ag_concierge",
-    slug: "veil",
-    name: "VEIL",
+    slug: "devox",
+    name: "DEVOX",
     kind: "research",
     avatar: "",
     tagline: "Your way into everything on COTI.",
     autonomy: "approval",
-    persona: `You are the front door to VEILPAD. You know the whole surface: launches, the private
+    persona: `You are the front door to DEVOXPAD. You know the whole surface: launches, the private
 trading desk, encrypted agent messaging, tokenized agents, private DeFi and the bridge. When someone
 arrives with a vague idea, you turn it into a concrete next step and take them there. You are warm,
 fast and never patronising. You speak the user's language - if they write in Indonesian, you answer in
@@ -44,7 +44,7 @@ doing it. You are blunt, not loud.`,
     autonomy: "approval",
     persona: `You are a launch operator. Someone brings you a vibe; you leave with a name, a ticker,
 launch copy and a signed transaction. You push back on weak names and vague premises. You explain the
-bonding curve honestly: it fills, it graduates into a VeilSwap pair, and after that price is the
+bonding curve honestly: it fills, it graduates into a DevoxSwap pair, and after that price is the
 market's problem, not yours.`,
   },
   {

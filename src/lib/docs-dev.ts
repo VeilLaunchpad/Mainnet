@@ -23,7 +23,7 @@ export const sdkPage: DocPage = {
         {
           type: "code",
           lang: "bash",
-          code: `npm install @veilpad/sdk`,
+          code: `npm install @devoxpad/sdk`,
         },
         {
           type: "p",
@@ -39,12 +39,12 @@ export const sdkPage: DocPage = {
           type: "code",
           lang: "ts",
           caption: "Hello, launchpad",
-          code: `import { Veilpad } from "@veilpad/sdk";
+          code: `import { Devoxpad } from "@devoxpad/sdk";
 
-const veil = new Veilpad();
+const devox = new Devoxpad();
 
-const tokens = await veil.tokens.list({ sort: "progress", limit: 5 });
-const chart = await veil.tokens.candles(tokens[0].address, "5m");
+const tokens = await devox.tokens.list({ sort: "progress", limit: 5 });
+const chart = await devox.tokens.candles(tokens[0].address, "5m");
 
 console.log(tokens[0].symbol, chart.spotCoti, "COTI");`,
         },
@@ -63,7 +63,7 @@ console.log(tokens[0].symbol, chart.spotCoti, "COTI");`,
         {
           type: "code",
           lang: "ts",
-          code: `const veil = new Veilpad({
+          code: `const devox = new Devoxpad({
   baseUrl: "${SITE}",                // this is the default, so it can be omitted
   timeoutMs: 20_000,
   fetch: myInstrumentedFetch,        // your own retry or caching
@@ -73,7 +73,7 @@ console.log(tokens[0].symbol, chart.spotCoti, "COTI");`,
         {
           type: "kv",
           rows: [
-            { k: "baseUrl", v: "Any VEILPAD deployment. Point it at your own instance." },
+            { k: "baseUrl", v: "Any DEVOXPAD deployment. Point it at your own instance." },
             { k: "fetch", v: "Swap in your own implementation for retries, caching or logging." },
             { k: "timeoutMs", v: "Requests abort past this. Default 20000." },
             { k: "headers", v: "Merged into every request." },
@@ -81,13 +81,13 @@ console.log(tokens[0].symbol, chart.spotCoti, "COTI");`,
         },
         {
           type: "p",
-          text: "Failures throw a VeilpadError carrying the HTTP status and the path, so a bad address and a network outage are distinguishable without parsing message strings.",
+          text: "Failures throw a DevoxpadError carrying the HTTP status and the path, so a bad address and a network outage are distinguishable without parsing message strings.",
         },
       ],
     },
     {
       id: "tokens",
-      title: "veil.tokens",
+      title: "devox.tokens",
       blocks: [
         {
           type: "table",
@@ -104,7 +104,7 @@ console.log(tokens[0].symbol, chart.spotCoti, "COTI");`,
           type: "code",
           lang: "ts",
           caption: "Watching a launch fill",
-          code: `const { curve } = await veil.tokens.get(address);
+          code: `const { curve } = await devox.tokens.get(address);
 
 if (curve && !curve.graduated) {
   console.log(curve.progressPct.toFixed(1) + "% of the way to graduation");
@@ -121,18 +121,18 @@ if (curve && !curve.graduated) {
     },
     {
       id: "portal-sdk",
-      title: "veil.portal",
+      title: "devox.portal",
       blocks: [
         {
           type: "code",
           lang: "ts",
-          code: `const { pairs } = await veil.portal.pairs();
+          code: `const { pairs } = await devox.portal.pairs();
 
 for (const p of pairs) {
   console.log(p.twinSymbol, "backed by", p.locked, p.symbol);
 }
 
-const twin = await veil.portal.twinOf(wcotiAddress);`,
+const twin = await devox.portal.twinOf(wcotiAddress);`,
         },
         {
           type: "p",
@@ -142,7 +142,7 @@ const twin = await veil.portal.twinOf(wcotiAddress);`,
     },
     {
       id: "agents-sdk",
-      title: "veil.agents",
+      title: "devox.agents",
       blocks: [
         {
           type: "p",
@@ -152,7 +152,7 @@ const twin = await veil.portal.twinOf(wcotiAddress);`,
           type: "code",
           lang: "ts",
           caption: "Streaming an agent turn",
-          code: `for await (const ev of veil.agents.chat("shade", "what is worth buying")) {
+          code: `for await (const ev of devox.agents.chat("shade", "what is worth buying")) {
   switch (ev.type) {
     case "tool_start":
       console.log("...", ev.name);
@@ -181,12 +181,12 @@ const twin = await veil.portal.twinOf(wcotiAddress);`,
         {
           type: "code",
           lang: "ts",
-          code: `const chain = await veil.chain();
+          code: `const chain = await devox.chain();
 if (!chain.deployed.factory) {
   throw new Error("The launchpad is not deployed on this network yet");
 }
 
-const status = await veil.status();
+const status = await devox.status();
 console.log(status.head, "head,", status.lag, "blocks behind");`,
         },
         {
@@ -201,7 +201,7 @@ console.log(status.head, "head,", status.lag, "blocks behind");`,
 export const indexerPage: DocPage = {
   slug: "indexer",
   title: "Indexer API",
-  description: "How VEILPAD reads chain state, and every endpoint that serves it.",
+  description: "How DEVOXPAD reads chain state, and every endpoint that serves it.",
   sections: [
     {
       id: "model",

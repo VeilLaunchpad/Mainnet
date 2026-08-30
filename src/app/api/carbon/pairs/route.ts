@@ -1,5 +1,5 @@
 import { networkFrom } from "@/lib/network";
-import { veilCarbonPosition, CARBON_NATIVE } from "@/lib/carbon";
+import { devoxCarbonPosition, CARBON_NATIVE } from "@/lib/carbon";
 import { addressesFor } from "@/lib/addresses";
 
 export const runtime = "nodejs";
@@ -179,10 +179,10 @@ export async function GET(req: Request) {
    * merged over whatever the API said - the chain is the authority for the one
    * pair we can check directly.
    */
-  const veil = addressesFor(net).veilToken;
-  const position = await veilCarbonPosition(net);
+  const devox = addressesFor(net).devoxToken;
+  const position = await devoxCarbonPosition(net);
   if (position) {
-    const r = touch(veil, CARBON_NATIVE, "VEIL", "COTI");
+    const r = touch(devox, CARBON_NATIVE, "DEVOX", "COTI");
     r.strategies = Math.max(r.strategies, position.strategies);
     // No USD figure until the indexer catches up. The depth is real and is
     // reported in COTI below rather than invented in dollars here.

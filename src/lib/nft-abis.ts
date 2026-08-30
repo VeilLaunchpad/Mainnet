@@ -10,7 +10,7 @@
  * key will do it.
  */
 
-export const veilNFTDropAbi = [
+export const devoxNFTDropAbi = [
  {
   "anonymous": false,
   "inputs": [
@@ -572,7 +572,7 @@ export const veilNFTDropAbi = [
  }
 ] as const;
 
-export const veilNFTEditionsAbi = [
+export const devoxNFTEditionsAbi = [
  {
   "anonymous": false,
   "inputs": [
@@ -1204,7 +1204,7 @@ export const veilNFTEditionsAbi = [
  }
 ] as const;
 
-export const veilNFTFactoryAbi = [
+export const devoxNFTFactoryAbi = [
  {
   "anonymous": false,
   "inputs": [
@@ -1307,7 +1307,7 @@ export const veilNFTFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTFactory.Collection",
+    "internalType": "struct DevoxNFTFactory.Collection",
     "name": "",
     "type": "tuple"
    }
@@ -1402,7 +1402,7 @@ export const veilNFTFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTFactory.DropParams",
+    "internalType": "struct DevoxNFTFactory.DropParams",
     "name": "p",
     "type": "tuple"
    },
@@ -1473,7 +1473,7 @@ export const veilNFTFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTFactory.DropParams",
+    "internalType": "struct DevoxNFTFactory.DropParams",
     "name": "p",
     "type": "tuple"
    },
@@ -1565,7 +1565,7 @@ export const veilNFTFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTFactory.Collection",
+    "internalType": "struct DevoxNFTFactory.Collection",
     "name": "c",
     "type": "tuple"
    }
@@ -1644,7 +1644,7 @@ export const veilNFTFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTFactory.Collection[]",
+    "internalType": "struct DevoxNFTFactory.Collection[]",
     "name": "out",
     "type": "tuple[]"
    }
@@ -1707,7 +1707,7 @@ export const veilNFTFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTFactory.DropParams",
+    "internalType": "struct DevoxNFTFactory.DropParams",
     "name": "p",
     "type": "tuple"
    },
@@ -1730,7 +1730,7 @@ export const veilNFTFactoryAbi = [
  }
 ] as const;
 
-export const veilNFTEditionsFactoryAbi = [
+export const devoxNFTEditionsFactoryAbi = [
  {
   "anonymous": false,
   "inputs": [
@@ -1800,7 +1800,7 @@ export const veilNFTEditionsFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTEditionsFactory.Collection",
+    "internalType": "struct DevoxNFTEditionsFactory.Collection",
     "name": "",
     "type": "tuple"
    }
@@ -1865,7 +1865,7 @@ export const veilNFTEditionsFactoryAbi = [
       "type": "string"
      }
     ],
-    "internalType": "struct VeilNFTEditionsFactory.EditionsParams",
+    "internalType": "struct DevoxNFTEditionsFactory.EditionsParams",
     "name": "p",
     "type": "tuple"
    },
@@ -1906,7 +1906,7 @@ export const veilNFTEditionsFactoryAbi = [
       "type": "string"
      }
     ],
-    "internalType": "struct VeilNFTEditionsFactory.EditionsParams",
+    "internalType": "struct DevoxNFTEditionsFactory.EditionsParams",
     "name": "p",
     "type": "tuple"
    },
@@ -1970,7 +1970,7 @@ export const veilNFTEditionsFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTEditionsFactory.Collection",
+    "internalType": "struct DevoxNFTEditionsFactory.Collection",
     "name": "c",
     "type": "tuple"
    }
@@ -2034,7 +2034,7 @@ export const veilNFTEditionsFactoryAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTEditionsFactory.Collection[]",
+    "internalType": "struct DevoxNFTEditionsFactory.Collection[]",
     "name": "out",
     "type": "tuple[]"
    }
@@ -2067,7 +2067,7 @@ export const veilNFTEditionsFactoryAbi = [
       "type": "string"
      }
     ],
-    "internalType": "struct VeilNFTEditionsFactory.EditionsParams",
+    "internalType": "struct DevoxNFTEditionsFactory.EditionsParams",
     "name": "p",
     "type": "tuple"
    },
@@ -2090,7 +2090,7 @@ export const veilNFTEditionsFactoryAbi = [
  }
 ] as const;
 
-export const veilNFTMarketAbi = [
+export const devoxNFTMarketAbi = [
  {
   "anonymous": false,
   "inputs": [
@@ -2460,7 +2460,7 @@ export const veilNFTMarketAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTMarket.Listing",
+    "internalType": "struct DevoxNFTMarket.Listing",
     "name": "",
     "type": "tuple"
    }
@@ -2568,7 +2568,7 @@ export const veilNFTMarketAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTMarket.Listing",
+    "internalType": "struct DevoxNFTMarket.Listing",
     "name": "l",
     "type": "tuple"
    }
@@ -2658,7 +2658,7 @@ export const veilNFTMarketAbi = [
       "type": "uint64"
      }
     ],
-    "internalType": "struct VeilNFTMarket.Offer",
+    "internalType": "struct DevoxNFTMarket.Offer",
     "name": "",
     "type": "tuple"
    }
@@ -2779,7 +2779,7 @@ export const veilNFTMarketAbi = [
  }
 ] as const;
 
-export const veilNFTStakingAbi = [
+export const devoxNFTStakingAbi = [
  {
   "anonymous": false,
   "inputs": [
@@ -3097,7 +3097,7 @@ export const veilNFTStakingAbi = [
       "type": "uint256"
      }
     ],
-    "internalType": "struct VeilNFTStaking.Pool",
+    "internalType": "struct DevoxNFTStaking.Pool",
     "name": "",
     "type": "tuple"
    }
@@ -3235,7 +3235,7 @@ export const veilNFTStakingAbi = [
       "type": "uint256"
      }
     ],
-    "internalType": "struct VeilNFTStaking.Stake",
+    "internalType": "struct DevoxNFTStaking.Stake",
     "name": "",
     "type": "tuple"
    }

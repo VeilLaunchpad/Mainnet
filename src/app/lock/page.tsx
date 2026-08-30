@@ -10,7 +10,7 @@ import { Spinner } from "@/components/busy";
 import { useResult } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
-import { veilLockerAbi, erc20Abi } from "@/lib/abis";
+import { devoxLockerAbi, erc20Abi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
 import { explorerAddress } from "@/lib/chain";
 import { shortAddr } from "@/lib/format";
@@ -18,7 +18,7 @@ import { shortAddr } from "@/lib/format";
 /**
  * Locked allocations, and claiming one back.
  *
- * A creator can send their own dev-buy into VeilLocker instead of their wallet,
+ * A creator can send their own dev-buy into DevoxLocker instead of their wallet,
  * which is the credible version of "I am not dumping on you": the amount and the
  * unlock date are in plain storage, so a buyer can check them, and there is no
  * owner and no early-release path to undo it.
@@ -62,7 +62,7 @@ export default function LockPage() {
     const ids = (await publicClient
       .readContract({
         address: locker,
-        abi: veilLockerAbi,
+        abi: devoxLockerAbi,
         functionName: "locksForBeneficiary",
         args: [address],
       })
@@ -71,7 +71,7 @@ export default function LockPage() {
     const out: Lock[] = [];
     for (const id of ids) {
       const l = (await publicClient
-        .readContract({ address: locker, abi: veilLockerAbi, functionName: "lockAt", args: [id] })
+        .readContract({ address: locker, abi: devoxLockerAbi, functionName: "lockAt", args: [id] })
         .catch(() => null)) as readonly [Address, Address, bigint, bigint, boolean] | null;
       if (!l) continue;
 
@@ -118,7 +118,7 @@ export default function LockPage() {
           // there is no approval to sign first.
           const hash = await writeContractAsync({
             address: locker,
-            abi: veilLockerAbi,
+            abi: devoxLockerAbi,
             functionName: "claim",
             args: [BigInt(l.id)],
             gas: 1_500_000n,
@@ -138,7 +138,7 @@ export default function LockPage() {
       <Section className="py-10" kicker="Lock" title="Locked allocations">
         <Empty
           title="Not deployed on this network yet"
-          body="VeilLocker has no address configured here. Switch networks, or check the contracts page."
+          body="DevoxLocker has no address configured here. Switch networks, or check the contracts page."
         />
       </Section>
     );
@@ -202,7 +202,7 @@ export default function LockPage() {
       <p className="mt-8 max-w-3xl text-[12.5px] leading-relaxed text-white/40">
         The locker has no owner and no way to change an unlock date once set, because a lock the
         deployer could undo would not be a lock.{" "}
-        <Link href="/veil-contracts" className="text-cy-300 hover:underline">
+        <Link href="/devox-contracts" className="text-cy-300 hover:underline">
           Read it on the explorer
         </Link>{" "}
         rather than taking that on trust.
@@ -277,7 +277,7 @@ function LockCard({
           className={
             "mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-[13.5px] font-semibold transition disabled:opacity-45 " +
             (unlocked
-              ? "bg-gradient-to-r from-veil-500 to-cy-500 text-white hover:brightness-110"
+              ? "bg-gradient-to-r from-devox-500 to-cy-500 text-white hover:brightness-110"
               : "border border-white/10 text-white/40")
           }
         >

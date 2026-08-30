@@ -18,7 +18,7 @@ import { useResult } from "./result-modal";
  * in this browser, so clearing site data brings it back.
  */
 
-const DISMISS_KEY = "veil.faucet.dismissed.v1";
+const DISMISS_KEY = "devox.faucet.dismissed.v1";
 
 interface FaucetInfo {
   configured: boolean;
@@ -80,7 +80,7 @@ export function FaucetBanner() {
         result.show({
           ok: true,
           title: j.amount + " COTI is on the way",
-          detail: "Testnet COTI, sent from the VEILPAD treasury. It lands in a few seconds.",
+          detail: "Testnet COTI, sent from the DEVOXPAD treasury. It lands in a few seconds.",
           txHash: j.txHash,
         });
         // The offer is spent, so the banner has nothing left to say.
@@ -111,14 +111,14 @@ export function FaucetBanner() {
   if (info.you && !info.you.eligible) return null;
 
   return (
-    <div className="relative border-b border-veil-400/20 bg-gradient-to-r from-veil-500/[0.14] via-cy-500/[0.08] to-transparent">
+    <div className="relative border-b border-devox-400/20 bg-gradient-to-r from-devox-500/[0.14] via-cy-500/[0.08] to-transparent">
       <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 pr-10 sm:px-6 sm:pr-12">
-        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-veil-500/25 text-[11px]">
+        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-devox-500/25 text-[11px]">
           🚰
         </span>
 
         <p className="min-w-0 flex-1 text-[12.5px] leading-snug text-white/75">
-          <span className="font-semibold text-white">VEILPAD runs on COTI testnet.</span>{" "}
+          <span className="font-semibold text-white">DEVOXPAD runs on COTI testnet.</span>{" "}
           {info.open ? (
             <>
               Grab {info.amount} testnet COTI and launch something. No Discord, no forms.
@@ -134,7 +134,7 @@ export function FaucetBanner() {
               <button
                 onClick={claim}
                 disabled={claiming}
-                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-veil-500 to-cy-500 px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-devox-500 to-cy-500 px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
               >
                 {claiming && <Spinner size={12} />}
                 {claiming ? "Sending" : "Get " + info.amount + " COTI"}

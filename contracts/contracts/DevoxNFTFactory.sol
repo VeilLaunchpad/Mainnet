@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {VeilNFTDrop, DropConfig} from "./VeilNFTDrop.sol";
+import {DevoxNFTDrop, DropConfig} from "./DevoxNFTDrop.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title VeilNFTFactory - the studio. Deploys a collection, records it, steps back.
+ * @title DevoxNFTFactory - the studio. Deploys a collection, records it, steps back.
  *
  * Every collection gets its own contract, which is what makes a creator's terms
  * theirs: their supply, their price, their phases, their royalty. The factory
@@ -20,10 +20,10 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
  *
  * The registry exists because a marketplace needs to enumerate collections and
  * the chain has no index. It records what was deployed and by whom; it does not
- * curate, and being listed here is not an endorsement. `VeilNFTMarket.official`
+ * curate, and being listed here is not an endorsement. `DevoxNFTMarket.official`
  * is the flag that means "ours", and only the marketplace owner can set it.
  */
-contract VeilNFTFactory is Ownable, ReentrancyGuard {
+contract DevoxNFTFactory is Ownable, ReentrancyGuard {
     struct Collection {
         address addr;
         address creator;
@@ -157,11 +157,11 @@ contract VeilNFTFactory is Ownable, ReentrancyGuard {
     }
 
     function _deploy(bytes32 salt, DropParams memory p, address creator) internal returns (address) {
-        return address(new VeilNFTDrop{salt: salt}(_config(p, creator)));
+        return address(new DevoxNFTDrop{salt: salt}(_config(p, creator)));
     }
 
     function _initCode(DropParams memory p, address creator) internal pure returns (bytes memory) {
-        return abi.encodePacked(type(VeilNFTDrop).creationCode, abi.encode(_config(p, creator)));
+        return abi.encodePacked(type(DevoxNFTDrop).creationCode, abi.encode(_config(p, creator)));
     }
 
     /**

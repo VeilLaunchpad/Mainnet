@@ -12,7 +12,7 @@ const SUGGESTIONS = [
 ];
 
 /**
- * VEIL, the house concierge, docked on every page.
+ * DEVOX, the house concierge, docked on every page.
  *
  * Deliberately always-present: the whole product is agent-first, so the agent
  * should never be more than one click away from whatever the user is doing.
@@ -47,7 +47,7 @@ export function AgentDock() {
           <div className="mb-2 flex shrink-0 items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="size-2 rounded-full bg-mint-400 shadow-[0_0_8px] shadow-mint-400/70" />
-              <span className="text-[13px] font-semibold">VEIL</span>
+              <span className="text-[13px] font-semibold">DEVOX</span>
               <span className="text-[11px] text-white/35">concierge</span>
             </div>
             <button onClick={() => setOpen(false)} className="text-white/40 transition hover:text-white">
@@ -56,13 +56,13 @@ export function AgentDock() {
               </svg>
             </button>
           </div>
-          <AgentChat agentSlug="veil" agentName="VEIL" suggestions={SUGGESTIONS} compact className="min-h-0 flex-1" />
+          <AgentChat agentSlug="devox" agentName="DEVOX" suggestions={SUGGESTIONS} compact className="min-h-0 flex-1" />
         </div>
       )}
 
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-4 z-50 flex items-center gap-2 rounded-full bg-gradient-to-r from-veil-500 to-cy-500 px-4 py-3 text-[13px] font-semibold text-white shadow-lg shadow-veil-500/25 transition hover:brightness-110"
+        className="fixed bottom-5 right-4 z-50 flex items-center gap-2 rounded-full bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-3 text-[13px] font-semibold text-white shadow-lg shadow-devox-500/25 transition hover:brightness-110"
       >
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
           <path
@@ -72,7 +72,7 @@ export function AgentDock() {
             strokeLinejoin="round"
           />
         </svg>
-        {open ? "Close" : "Ask VEIL"}
+        {open ? "Close" : "Ask DEVOX"}
       </button>
     </>
   );

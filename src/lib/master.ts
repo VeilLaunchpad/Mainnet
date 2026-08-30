@@ -5,7 +5,7 @@ import { ACTIVE_NETWORK, type CotiNetworkName } from "./chain";
 /**
  * The master table.
  *
- * `config/veilpad.{network}.json` is the human- and agent-readable registry of
+ * `config/devoxpad.{network}.json` is the human- and agent-readable registry of
  * everything this deployment is: chain params, contract addresses, curve
  * tuning, routes, the agent roster and the tool catalog. It holds no secrets,
  * so it is safe to commit and safe to hand to an agent verbatim.
@@ -44,7 +44,7 @@ export interface MasterTable {
   deployer: { address: string; funded: boolean; envKey: string; note: string };
   contracts: {
     coti: Record<string, ContractEntry>;
-    veilpad: Record<string, ContractEntry>;
+    devoxpad: Record<string, ContractEntry>;
     uniswapV3: Record<string, unknown>;
   };
   launch: Record<string, unknown>;
@@ -68,7 +68,7 @@ const cache = new Map<CotiNetworkName, MasterTable | null>();
 export function masterTable(net: CotiNetworkName = ACTIVE_NETWORK): MasterTable | null {
   if (cache.has(net)) return cache.get(net) ?? null;
 
-  const file = path.join(process.cwd(), "config", "veilpad." + net + ".json");
+  const file = path.join(process.cwd(), "config", "devoxpad." + net + ".json");
   let table: MasterTable | null = null;
   if (existsSync(file)) {
     try {
@@ -93,7 +93,7 @@ export function invalidateMasterTable() {
  * without shipping a rewritten config file.
  */
 export function resolveAddress(
-  group: "coti" | "veilpad",
+  group: "coti" | "devoxpad",
   key: string,
   net: CotiNetworkName = ACTIVE_NETWORK,
 ): { address: string; status: string; source: "env" | "master" | "none" } {
@@ -122,7 +122,7 @@ export function chainDigest(net: CotiNetworkName = ACTIVE_NETWORK) {
   const deployed: Record<string, string> = {};
   const pending: string[] = [];
 
-  for (const group of ["coti", "veilpad"] as const) {
+  for (const group of ["coti", "devoxpad"] as const) {
     for (const key of Object.keys(t.contracts[group] || {})) {
       if (key.startsWith("_")) continue; // documentation keys, not contracts
       const r = resolveAddress(group, key, net);

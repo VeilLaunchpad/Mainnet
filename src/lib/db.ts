@@ -20,9 +20,9 @@ import fs from "node:fs";
  * configuration at all, and the local checkout still falls back to ./data.
  */
 const DATA_DIR =
-  process.env.VEILPAD_DATA_DIR ||
+  process.env.DEVOXPAD_DATA_DIR ||
   (process.env.RAILWAY_VOLUME_MOUNT_PATH
-    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "veilpad")
+    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "devoxpad")
     : path.join(process.cwd(), "data"));
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -34,7 +34,7 @@ let _db: DatabaseSync | null = null;
 
 export function db(): DatabaseSync {
   if (_db) return _db;
-  const conn = new DatabaseSync(path.join(DATA_DIR, "veilpad.db"));
+  const conn = new DatabaseSync(path.join(DATA_DIR, "devoxpad.db"));
   conn.exec("PRAGMA journal_mode = WAL");
   conn.exec("PRAGMA foreign_keys = ON");
   // Without this, a second connection that finds the file busy throws
@@ -214,7 +214,7 @@ function addColumns(c: DatabaseSync) {
     ["agents", "visibility", "TEXT NOT NULL DEFAULT 'private'"],
 
     /**
-     * Marks a token as VEILPAD's own rather than something the launchpad made.
+     * Marks a token as DEVOXPAD's own rather than something the launchpad made.
      *
      * A launchpad is exactly the place a fake protocol token gets listed and
      * mistaken for the real one, so the distinction has to live in the index

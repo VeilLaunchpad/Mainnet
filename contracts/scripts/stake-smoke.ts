@@ -18,19 +18,19 @@ const env = (k: string) => process.env[k + "_" + suffix()] || "";
 async function main() {
   const [signer] = await ethers.getSigners();
 
-  const stakingAddress = env("NEXT_PUBLIC_VEIL_STAKING");
-  const veilAddress = env("NEXT_PUBLIC_VEIL_TOKEN");
-  const treasuryAddress = env("NEXT_PUBLIC_VEIL_TREASURY");
-  if (!stakingAddress || !veilAddress) throw new Error("staking not deployed on " + network.name);
+  const stakingAddress = env("NEXT_PUBLIC_DEVOX_STAKING");
+  const devoxAddress = env("NEXT_PUBLIC_DEVOX_TOKEN");
+  const treasuryAddress = env("NEXT_PUBLIC_DEVOX_TREASURY");
+  if (!stakingAddress || !devoxAddress) throw new Error("staking not deployed on " + network.name);
 
-  const staking = await ethers.getContractAt("VeilStaking", stakingAddress);
-  const veil = await ethers.getContractAt("VeilpadToken", veilAddress);
-  const treasury = await ethers.getContractAt("VeilTreasury", treasuryAddress);
+  const staking = await ethers.getContractAt("DevoxStaking", stakingAddress);
+  const devox = await ethers.getContractAt("DevoxpadToken", devoxAddress);
+  const treasury = await ethers.getContractAt("DevoxTreasury", treasuryAddress);
 
   console.log("network :", network.name);
   console.log("staker  :", signer.address);
-  console.log("VEILPAD :", veilAddress);
-  console.log("reserve :", ethers.formatUnits(await treasury.balance(), 18), "VEIL\n");
+  console.log("DEVOXPAD :", devoxAddress);
+  console.log("reserve :", ethers.formatUnits(await treasury.balance(), 18), "DEVOX\n");
 
   const count = Number(await staking.poolCount());
   console.log("pools:");
@@ -64,17 +64,17 @@ async function main() {
   }
 
   const pending = await staking.pendingReward(0, signer.address);
-  console.log("    accrued " + ethers.formatUnits(pending, 18) + " VEIL");
+  console.log("    accrued " + ethers.formatUnits(pending, 18) + " DEVOX");
   if (pending === 0n) {
     console.log("    (a few seconds at 10% on 0.5 COTI rounds to dust; that is expected)");
   }
 
   // ── claim ────────────────────────────────────────────────────────────────
   console.log("\n[3] claiming");
-  const before = await veil.balanceOf(signer.address);
+  const before = await devox.balanceOf(signer.address);
   await (await staking.claim(0, { gasLimit: 500_000 })).wait();
-  const gained = (await veil.balanceOf(signer.address)) - before;
-  console.log("    received " + ethers.formatUnits(gained, 18) + " VEIL");
+  const gained = (await devox.balanceOf(signer.address)) - before;
+  console.log("    received " + ethers.formatUnits(gained, 18) + " DEVOX");
 
   // ── unstake ──────────────────────────────────────────────────────────────
   console.log("\n[4] unstaking the principal back");

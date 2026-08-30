@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {VeilNFTEditions, EditionsConfig} from "./VeilNFTEditions.sol";
+import {DevoxNFTEditions, EditionsConfig} from "./DevoxNFTEditions.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title VeilNFTEditionsFactory - the open-collection half of the studio.
+ * @title DevoxNFTEditionsFactory - the open-collection half of the studio.
  *
- * A sibling of `VeilNFTFactory` rather than an extension of it. The drop
+ * A sibling of `DevoxNFTFactory` rather than an extension of it. The drop
  * factory is already live with the official collection registered inside it,
  * and widening its `Collection` struct to carry a kind flag would have meant
  * redeploying, re-mining an 8888 address and re-sealing the metadata - throwing
@@ -18,7 +18,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
  * The registry shape is deliberately identical to the drop factory's so a
  * marketplace can page both with the same code.
  */
-contract VeilNFTEditionsFactory is Ownable, ReentrancyGuard {
+contract DevoxNFTEditionsFactory is Ownable, ReentrancyGuard {
     struct Collection {
         address addr;
         address creator;
@@ -95,11 +95,11 @@ contract VeilNFTEditionsFactory is Ownable, ReentrancyGuard {
     }
 
     function _deploy(bytes32 salt, EditionsParams memory p, address creator) internal returns (address) {
-        return address(new VeilNFTEditions{salt: salt}(_config(p, creator)));
+        return address(new DevoxNFTEditions{salt: salt}(_config(p, creator)));
     }
 
     function _initCode(EditionsParams memory p, address creator) internal pure returns (bytes memory) {
-        return abi.encodePacked(type(VeilNFTEditions).creationCode, abi.encode(_config(p, creator)));
+        return abi.encodePacked(type(DevoxNFTEditions).creationCode, abi.encode(_config(p, creator)));
     }
 
     function editionsInitCodeHash(EditionsParams memory p, address creator) external pure returns (bytes32) {

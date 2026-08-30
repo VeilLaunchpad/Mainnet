@@ -127,7 +127,7 @@ export function Spinner({ size = 20 }: { size?: number }) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      className="shrink-0 animate-spin text-veil-400"
+      className="shrink-0 animate-spin text-devox-400"
     >
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.18" strokeWidth="3" />
       <path

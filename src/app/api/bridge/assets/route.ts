@@ -140,14 +140,14 @@ export async function GET(req: Request) {
 
   return Response.json({
     network: net,
-    /** Public token in, private twin out. Runs entirely inside VEILPAD. */
+    /** Public token in, private twin out. Runs entirely inside DEVOXPAD. */
     privacy: {
       available: list.length > 0,
       assets: list,
       reason:
         list.length > 0
           ? null
-          : "The privacy bridge addresses for this network have not been verified on chain, so VEILPAD will not route through them.",
+          : "The privacy bridge addresses for this network have not been verified on chain, so DEVOXPAD will not route through them.",
     },
     /**
      * Ethereum and back. A transfer to a recipient COTI's relayer watches, so

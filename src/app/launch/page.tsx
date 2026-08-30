@@ -8,7 +8,7 @@ import { parseEther, decodeEventLog, formatEther, type Address, type Hex } from 
 import { Section, Badge, Avatar, Progress } from "@/components/ui";
 import { AgentChat } from "@/components/agent-chat";
 import { PriceText } from "@/components/price-chart";
-import { veilFactoryAbi } from "@/lib/abis";
+import { devoxFactoryAbi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { explorerTx, explorerAddress } from "@/lib/chain";
@@ -79,15 +79,15 @@ function LaunchInner() {
   const [tx, setTx] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  const factoryReady = isDeployed(addresses.veilFactory);
+  const factoryReady = isDeployed(addresses.devoxFactory);
   const devBuyWei = devBuy && Number(devBuy) > 0 ? parseEther(devBuy) : 0n;
 
   useEffect(() => {
     if (!publicClient || !factoryReady) return;
     const read = (fn: string) =>
       publicClient.readContract({
-        address: addresses.veilFactory,
-        abi: veilFactoryAbi,
+        address: addresses.devoxFactory,
+        abi: devoxFactoryAbi,
         functionName: fn as never,
       }) as Promise<bigint>;
 
@@ -166,8 +166,8 @@ function LaunchInner() {
       setStep("Reserving the curve address");
       const curveSalt = randomSalt();
       const curveAddress = (await publicClient.readContract({
-        address: addresses.veilFactory,
-        abi: veilFactoryAbi,
+        address: addresses.devoxFactory,
+        abi: devoxFactoryAbi,
         functionName: "predictCurve",
         args: [address, curveSalt],
       })) as Address;
@@ -176,14 +176,14 @@ function LaunchInner() {
       setStep("Mining an address ending in " + VANITY_SUFFIX);
       const [deployerAddress, initCodeHash] = (await Promise.all([
         publicClient.readContract({
-          address: addresses.veilFactory,
-          abi: veilFactoryAbi,
+          address: addresses.devoxFactory,
+          abi: devoxFactoryAbi,
           functionName: "deployerFor",
           args: [privateBalances],
         }),
         publicClient.readContract({
-          address: addresses.veilFactory,
-          abi: veilFactoryAbi,
+          address: addresses.devoxFactory,
+          abi: devoxFactoryAbi,
           functionName: "tokenInitCodeHash",
           args: [privateBalances, name, symbol.toUpperCase(), metadataURI, address, curveAddress],
         }),
@@ -197,8 +197,8 @@ function LaunchInner() {
       // 3. One confirmation for all of it.
       setStep("Confirm in your wallet");
       const hash = await writeContractAsync({
-        address: addresses.veilFactory,
-        abi: veilFactoryAbi,
+        address: addresses.devoxFactory,
+        abi: devoxFactoryAbi,
         functionName: "launch",
         args: [
           {
@@ -227,7 +227,7 @@ function LaunchInner() {
       let curve: Address | null = null;
       for (const log of receipt.logs) {
         try {
-          const parsed = decodeEventLog({ abi: veilFactoryAbi, data: log.data, topics: log.topics });
+          const parsed = decodeEventLog({ abi: devoxFactoryAbi, data: log.data, topics: log.topics });
           if (parsed.eventName === "Launched") {
             const a = parsed.args as unknown as { token: Address; curve: Address };
             token = a.token;
@@ -267,13 +267,13 @@ function LaunchInner() {
         fetch("/api/verify", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ address: token, contract: "VeilToken" }),
+          body: JSON.stringify({ address: token, contract: "DevoxToken" }),
         }).catch(() => undefined),
         curve
           ? fetch("/api/verify", {
               method: "POST",
               headers: { "content-type": "application/json" },
-              body: JSON.stringify({ address: curve, contract: "VeilCurve" }),
+              body: JSON.stringify({ address: curve, contract: "DevoxCurve" }),
             }).catch(() => undefined)
           : Promise.resolve(),
       ]);
@@ -424,7 +424,7 @@ function Field({
 }
 
 const input =
-  "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[14px] outline-none transition placeholder:text-white/20 focus:border-veil-400/50";
+  "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[14px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50";
 
 function Identity({
   symbol,
@@ -478,7 +478,7 @@ function Identity({
           ) : (
             <Avatar seed={symbol || "?"} size={56} rounded="rounded-xl" />
           )}
-          <label className="cursor-pointer rounded-xl border border-white/10 px-3.5 py-2 text-[12px] font-medium text-white/65 transition hover:border-veil-400/40">
+          <label className="cursor-pointer rounded-xl border border-white/10 px-3.5 py-2 text-[12px] font-medium text-white/65 transition hover:border-devox-400/40">
             {uploading ? "Pinning to IPFS..." : image ? "Replace" : "Upload image"}
             <input
               type="file"
@@ -525,7 +525,7 @@ function Identity({
               ["website", "yoursite.xyz"],
             ] as const
           ).map(([key, placeholder]) => (
-            <div key={key} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 focus-within:border-veil-400/50">
+            <div key={key} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 focus-within:border-devox-400/50">
               <span className="w-[62px] shrink-0 text-[11px] capitalize text-white/35">{key}</span>
               <input
                 value={socials[key]}
@@ -543,7 +543,7 @@ function Identity({
 
 function Step({ n }: { n: number }) {
   return (
-    <span className="mono flex size-5 items-center justify-center rounded-md border border-veil-400/30 bg-veil-500/10 text-[10px] font-semibold text-veil-300">
+    <span className="mono flex size-5 items-center justify-center rounded-md border border-devox-400/30 bg-devox-500/10 text-[10px] font-semibold text-devox-300">
       {n}
     </span>
   );
@@ -576,7 +576,7 @@ function DevBuy({
         Everyone can see you did it, and how much, because the buy is a public event.
       </p>
 
-      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 focus-within:border-veil-400/50">
+      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 focus-within:border-devox-400/50">
         <input
           value={devBuy}
           onChange={(e) => setDevBuy(e.target.value.replace(/[^0-9.]/g, ""))}
@@ -595,7 +595,7 @@ function DevBuy({
             className={
               "rounded-lg border px-2.5 py-1 text-[11px] transition " +
               (devBuy === v
-                ? "border-veil-400/50 bg-veil-500/12 text-veil-300"
+                ? "border-devox-400/50 bg-devox-500/12 text-devox-300"
                 : "border-white/10 text-white/45 hover:text-white")
             }
           >
@@ -625,7 +625,7 @@ function DevBuy({
           </div>
           <div className="mt-1 flex items-baseline justify-between text-[12px]">
             <span className="text-white/40">Share of total supply</span>
-            <span className="mono font-semibold text-veil-300">{share.percent.toFixed(2)}%</span>
+            <span className="mono font-semibold text-devox-300">{share.percent.toFixed(2)}%</span>
           </div>
           <div className="mt-2">
             <Progress pct={share.percent} />
@@ -712,7 +712,7 @@ function AllocationPicker({
               className={
                 "rounded-xl border p-3 text-left transition disabled:opacity-35 " +
                 (allocation === o.key
-                  ? "border-veil-400/50 bg-veil-500/[0.09]"
+                  ? "border-devox-400/50 bg-devox-500/[0.09]"
                   : "border-white/10 hover:border-white/25")
               }
             >
@@ -833,7 +833,7 @@ function Privacy({ value, onChange }: { value: boolean; onChange: (v: boolean) =
         <span
           className={
             "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border transition " +
-            (value ? "border-veil-400 bg-veil-500 text-white" : "border-white/20")
+            (value ? "border-devox-400 bg-devox-500 text-white" : "border-white/20")
           }
         >
           {value && (
@@ -924,7 +924,7 @@ function Preview({
               ) : (
                 <Badge tone="muted">public</Badge>
               )}
-              <Badge tone="veil">on curve</Badge>
+              <Badge tone="devox">on curve</Badge>
               <Badge tone="mint">verified</Badge>
             </div>
           </div>
@@ -934,9 +934,9 @@ function Preview({
           {description || "Your description shows here."}
         </p>
 
-        <div className="mono mt-3 truncate rounded-lg border border-dashed border-veil-400/25 bg-veil-500/[0.05] px-2.5 py-2 text-center text-[11px] text-veil-300">
+        <div className="mono mt-3 truncate rounded-lg border border-dashed border-devox-400/25 bg-devox-500/[0.05] px-2.5 py-2 text-center text-[11px] text-devox-300">
           0x{"?".repeat(36)}
-          <span className="font-semibold text-veil-200">{VANITY_SUFFIX}</span>
+          <span className="font-semibold text-devox-200">{VANITY_SUFFIX}</span>
         </div>
         <p className="mt-1 text-center text-[10px] text-white/25">
           The address is mined before it is deployed
@@ -1041,7 +1041,7 @@ function Confirm({
       <button
         onClick={onLaunch}
         disabled={!ready || busy}
-        className="mt-3 w-full rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+        className="mt-3 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
       >
         {busy ? step || "Working..." : "Launch " + (symbol || "token")}
       </button>
@@ -1083,7 +1083,7 @@ function Confirm({
 
       {!factoryReady && (
         <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/[0.05] px-2.5 py-2 text-[11px] leading-relaxed text-amber-300/80">
-          The VEILPAD factory is not deployed on this network yet.
+          The DEVOXPAD factory is not deployed on this network yet.
         </p>
       )}
       {!hasWallet && (

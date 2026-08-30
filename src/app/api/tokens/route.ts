@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
 
       /**
        * A token with a pool but no curve has a price the curve cannot tell us.
-       * VEILPAD is the case that matters: it was never sold on a curve, so
+       * DEVOXPAD is the case that matters: it was never sold on a curve, so
        * without this its card shows a live market and no price next to it.
        */
       const poolState =

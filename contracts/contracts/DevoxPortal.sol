@@ -21,7 +21,7 @@ interface IPortalMintable {
 }
 
 /**
- * @title VeilPortalToken - the private twin of a public token.
+ * @title DevoxPortalToken - the private twin of a public token.
  *
  * A one-to-one shielded representation. Decimals are copied from the source
  * rather than hardcoded, because a 6-decimal stablecoin wrapped into an
@@ -30,7 +30,7 @@ interface IPortalMintable {
  * Only the portal can mint or burn, and the portal is set at construction, so
  * the supply of a twin is always exactly what the portal has locked.
  */
-contract VeilPortalToken is PrivateERC20 {
+contract DevoxPortalToken is PrivateERC20 {
     uint8 private immutable _decimals;
 
     /// The public token held in escrow behind this twin. Zero means native COTI.
@@ -69,7 +69,7 @@ contract PortalTokenDeployer {
         address underlying,
         address portal
     ) external returns (address token) {
-        VeilPortalToken t = new VeilPortalToken(name, symbol, decimals_, underlying, portal);
+        DevoxPortalToken t = new DevoxPortalToken(name, symbol, decimals_, underlying, portal);
         t.renounceRole(0x00, address(this)); // DEFAULT_ADMIN_ROLE
         token = address(t);
     }
@@ -86,7 +86,7 @@ interface IPortalTokenDeployer {
 }
 
 /**
- * @title VeilPortal - move value between the public and the private side.
+ * @title DevoxPortal - move value between the public and the private side.
  *
  * Wrapping locks a public token here and mints its private twin one to one.
  * Unwrapping burns the twin and releases the escrow. The private side is a COTI
@@ -97,7 +97,7 @@ interface IPortalTokenDeployer {
  * is everything that happens while the value stays on the private side, and how
  * much of it any given address holds.
  */
-contract VeilPortal is ReentrancyGuard {
+contract DevoxPortal is ReentrancyGuard {
     IPortalTokenDeployer public immutable deployer;
 
     /// Public token to its private twin, and the reverse.

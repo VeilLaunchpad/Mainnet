@@ -27,8 +27,8 @@ export function botConfigured(): boolean {
 
 /** The secret the webhook must present, derived from the token. */
 export function webhookSecret(): string {
-  const token = botToken() ?? "veilpad";
-  return createHmac("sha256", token).update("veilpad-webhook").digest("hex").slice(0, 32);
+  const token = botToken() ?? "devoxpad";
+  return createHmac("sha256", token).update("devoxpad-webhook").digest("hex").slice(0, 32);
 }
 
 export function safeEqual(a: string, b: string): boolean {
@@ -267,7 +267,7 @@ export function ensureTables() {
       address    TEXT NOT NULL,
       username   TEXT NOT NULL DEFAULT '',
       first_name TEXT NOT NULL DEFAULT '',
-      agent      TEXT NOT NULL DEFAULT 'veil',
+      agent      TEXT NOT NULL DEFAULT 'devox',
       linked_at  INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_tg_address ON telegram_links(address);
@@ -324,7 +324,7 @@ export function redeemLinkCode(code: string, address: string): TelegramLink | nu
   db()
     .prepare(
       `INSERT INTO telegram_links (chat_id, address, username, first_name, agent, linked_at)
-       VALUES (?, ?, ?, ?, 'veil', ?)
+       VALUES (?, ?, ?, ?, 'devox', ?)
        ON CONFLICT(chat_id) DO UPDATE SET address = excluded.address, linked_at = excluded.linked_at`,
     )
     .run(pending.chat_id, address, pending.username, pending.first_name, now());
@@ -445,7 +445,7 @@ export function chatActivity(address: string, limit = 50) {
  */
 export const BOT_PROFILE = {
   /** Max 64 characters. */
-  name: "VEILPAD",
+  name: "DEVOXPAD",
 
   /** The bio on the profile card. Max 120 characters. */
   shortDescription:
@@ -453,7 +453,7 @@ export const BOT_PROFILE = {
 
   /** Fills an empty chat, above the Start button. Max 512 characters. */
   description: [
-    "🕶️ VEILPAD is an agentic privacy superapp on COTI.",
+    "🕶️ DEVOXPAD is an agentic privacy superapp on COTI.",
     "",
     "🚀 Launch tokens, 💱 trade them, 🌉 bridge in and out of privacy, and 🤖 talk to agents that read the chain for you.",
     "",
@@ -464,7 +464,7 @@ export const BOT_PROFILE = {
 
   /** Each description is capped at 256 characters. */
   commands: [
-    { command: "start", description: "🕶️ What VEILPAD is" },
+    { command: "start", description: "🕶️ What DEVOXPAD is" },
     { command: "link", description: "🔗 Connect a wallet to this chat" },
     { command: "me", description: "👤 Which wallet this chat speaks for" },
     { command: "balance", description: "💰 Your COTI balance" },

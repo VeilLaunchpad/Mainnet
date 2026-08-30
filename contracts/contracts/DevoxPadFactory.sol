@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {VeilCurve} from "./VeilCurve.sol";
+import {DevoxCurve} from "./DevoxCurve.sol";
 import {ITokenDeployer} from "./TokenDeployers.sol";
 
 interface ILaunchToken {
@@ -12,7 +12,7 @@ interface ILaunchToken {
     function burn(uint256 amount) external;
 }
 
-interface IVeilLocker {
+interface IDevoxLocker {
     function lock(
         address token,
         address beneficiary,
@@ -22,7 +22,7 @@ interface IVeilLocker {
 }
 
 /**
- * @title VeilPadFactory - one transaction turns an idea into a live market.
+ * @title DevoxPadFactory - one transaction turns an idea into a live market.
  *
  * A launch is a single call. It deploys the curve, deploys the token naming
  * that curve as its only minter, optionally buys on the creator's behalf, and
@@ -30,9 +30,9 @@ interface IVeilLocker {
  * burn part of it, or lock it for a fixed number of days.
  *
  * Both deployments use CREATE2, which is what lets an address be mined in
- * advance. Every VEILPAD launch lands on an address ending in 8888.
+ * advance. Every DEVOXPAD launch lands on an address ending in 8888.
  */
-contract VeilPadFactory {
+contract DevoxPadFactory {
     address public owner;
     address public treasury;
     address public locker;
@@ -138,7 +138,7 @@ contract VeilPadFactory {
         // minter in its own constructor, so there is never a moment where any
         // other address could create supply.
         curve = address(
-            new VeilCurve{salt: p.curveSalt}(
+            new DevoxCurve{salt: p.curveSalt}(
                 msg.sender,
                 virtualCoti,
                 curveSupply,
@@ -151,7 +151,7 @@ contract VeilPadFactory {
         ITokenDeployer deployer = p.privateBalances ? privateDeployer : publicDeployer;
         token = deployer.deploy(p.tokenSalt, p.name, p.symbol, p.metadataURI, msg.sender, curve);
 
-        VeilCurve(payable(curve)).initialize(token);
+        DevoxCurve(payable(curve)).initialize(token);
 
         _tokens.push(token);
         curveOf[token] = curve;
@@ -189,7 +189,7 @@ contract VeilPadFactory {
      * take delivery and then not burn.
      */
     function _devBuy(address token, address curve, LaunchParams calldata p) internal {
-        uint256 bought = VeilCurve(payable(curve)).buy{value: p.devBuy}(0);
+        uint256 bought = DevoxCurve(payable(curve)).buy{value: p.devBuy}(0);
         devBoughtOf[token] = bought;
         emit DevBuy(token, msg.sender, p.devBuy, bought);
 
@@ -208,7 +208,7 @@ contract VeilPadFactory {
         if (p.allocation == Allocation.Lock) {
             uint64 unlockAt = uint64(block.timestamp + uint256(p.lockDays) * 1 days);
             ILaunchToken(token).approve(locker, bought);
-            IVeilLocker(locker).lock(token, msg.sender, bought, unlockAt);
+            IDevoxLocker(locker).lock(token, msg.sender, bought, unlockAt);
             emit AllocationLocked(token, msg.sender, bought, unlockAt);
             return;
         }
@@ -226,7 +226,7 @@ contract VeilPadFactory {
     function predictCurve(address creator, bytes32 salt) public view returns (address) {
         bytes32 initCodeHash = keccak256(
             abi.encodePacked(
-                type(VeilCurve).creationCode,
+                type(DevoxCurve).creationCode,
                 abi.encode(creator, virtualCoti, curveSupply, poolSupply, graduationTarget, feeTier)
             )
         );
@@ -326,7 +326,7 @@ contract VeilPadFactory {
         address swapFactory,
         address wcoti
     ) external onlyOwner returns (address) {
-        return VeilCurve(payable(curve)).seedPool(swapFactory, wcoti);
+        return DevoxCurve(payable(curve)).seedPool(swapFactory, wcoti);
     }
 
     /// The curve pays the dev buy out to this contract, so it must accept COTI.

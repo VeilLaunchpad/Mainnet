@@ -22,7 +22,7 @@ import { Spinner, useBusy } from "./busy";
  * not they switch now.
  */
 
-const DISMISS_KEY = "veil.network.dismissed";
+const DISMISS_KEY = "devox.network.dismissed";
 
 interface Eip1193 {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -61,7 +61,7 @@ export function NetworkGuard() {
   /**
    * The bridge is the one place where being on Ethereum is correct rather
    * than a mistake: its outbound leg is signed there. Blocking it would make
-   * the crossing impossible from inside VEILPAD, which is the whole point.
+   * the crossing impossible from inside DEVOXPAD, which is the whole point.
    */
   const pathname = usePathname();
   const ethIsFine = pathname?.startsWith("/bridge") && chainId === ethChain.id;
@@ -177,7 +177,7 @@ export function NetworkGuard() {
           <div>
             <h2 className="text-[15px] font-semibold">Wrong network</h2>
             <p className="text-[12px] text-white/45">
-              Your wallet is on chain {chainId}. VEILPAD runs on {chain.name}.
+              Your wallet is on chain {chainId}. DEVOXPAD runs on {chain.name}.
             </p>
           </div>
         </div>
@@ -199,7 +199,7 @@ export function NetworkGuard() {
 
           <button
             onClick={addAndSwitch}
-            className="mt-4 w-full rounded-xl bg-gradient-to-r from-veil-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110"
+            className="mt-4 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110"
           >
             Add and switch to {chain.name}
           </button>
