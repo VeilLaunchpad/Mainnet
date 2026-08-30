@@ -27,6 +27,19 @@ const UPDATE_PRICE_SELECTOR = toFunctionSelector("updatePrice(uint256,uint256)")
 const supportCache = new Map<string, boolean>();
 
 /**
+ * Looks for a selector where a dispatch table actually puts one.
+ *
+ * Solidity compares selectors by pushing them, so every real entry is preceded
+ * by PUSH4 (0x63). Scanning for the bare four bytes would also match them
+ * sitting at an odd offset inside unrelated code - rare, but it would answer
+ * "yes" for a contract that cannot do the thing, and the call would revert.
+ */
+function hasSelector(code: string | undefined, selector: string): boolean {
+  if (!code || code.length < 10) return false;
+  return code.toLowerCase().includes("63" + selector.slice(2).toLowerCase());
+}
+
+/**
  * Whether the deployed marketplace can reprice in place.
  *
  * Read from the contract's own bytecode rather than by trying the call and
@@ -45,7 +58,7 @@ export async function marketCanReprice(
 
   try {
     const code = await client.getCode({ address: market });
-    const ok = !!code && code.includes(UPDATE_PRICE_SELECTOR.slice(2));
+    const ok = hasSelector(code, UPDATE_PRICE_SELECTOR);
     supportCache.set(key, ok);
     return ok;
   } catch {
@@ -263,7 +276,7 @@ export async function marketCanClearStale(
   if (hit !== undefined) return hit;
   try {
     const code = await client.getCode({ address: market });
-    const ok = !!code && code.includes(CLEAR_STALE_SELECTOR.slice(2));
+    const ok = hasSelector(code, CLEAR_STALE_SELECTOR);
     clearCache.set(key, ok);
     return ok;
   } catch {

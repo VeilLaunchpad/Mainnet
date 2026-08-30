@@ -21,6 +21,11 @@ import { ethers, network } from "hardhat";
  * because nothing is ever escrowed, the NFTs never leave the seller's wallet at
  * any stage.
  *
+ * Every write carries an explicit gasLimit. Without one, ethers estimates
+ * against the `pending` block, which COTI's RPC does not serve - the script
+ * would die on its first setOfficial having already deployed the contract.
+ * redeploy-staking.ts does the same thing for the same reason.
+ *
  *   npx hardhat run scripts/redeploy-market.ts --network cotiMainnet
  */
 
@@ -92,8 +97,39 @@ async function main() {
     );
   }
 
-  // Collection settings are per-market state and do not come along on their own.
-  const collections = [...new Set(live.map((l) => l.collection))];
+  /**
+   * Collection settings are per-market state and do not come along on their own.
+   *
+   * They are read from the factories rather than from the live listings.
+   * Sourcing them from listings looked equivalent - the only collection with
+   * settings today is also the only one listed - but the two lists are equal by
+   * coincidence, not by rule. If both listings sold or were delisted in the
+   * minutes before this ran, `live` would be empty, and the new market would
+   * open with the Genesis "official" badge gone and its 5% royalty silently
+   * switched off. Nobody would see an error; the money would just stop
+   * arriving.
+   */
+  const known = new Set<string>(live.map((l) => l.collection.toLowerCase()));
+  const registry = [
+    process.env["NEXT_PUBLIC_NFT_FACTORY_" + suffix],
+    process.env["NEXT_PUBLIC_NFT_EDITIONS_FACTORY_" + suffix],
+  ].filter(Boolean) as string[];
+
+  const PAGE_ABI = [
+    "function page(uint256 start, uint256 count) view returns (tuple(address addr, address creator, string name, string symbol, uint256 createdAt)[])",
+  ];
+  for (const f of registry) {
+    try {
+      const factory = new ethers.Contract(f, PAGE_ABI, deployer);
+      const rows = await factory.page(0n, 200n);
+      for (const r of rows) known.add(String(r.addr).toLowerCase());
+    } catch {
+      // An editions factory with a different page shape, or none deployed. The
+      // listed collections are still covered either way.
+    }
+  }
+
+  const collections = [...known].map((c) => ethers.getAddress(c));
   const settings = await Promise.all(
     collections.map(async (c) => ({
       collection: c,
@@ -101,6 +137,12 @@ async function main() {
       royaltyBps: await oldMarket.royaltyBps(c),
       royaltyRecipient: await oldMarket.royaltyRecipient(c),
     })),
+  );
+  console.log(
+    "collections to carry over:",
+    settings.filter((s) => s.official || s.royaltyBps > 0n).length,
+    "of",
+    collections.length,
   );
 
   const feeRecipient: string = await oldMarket.feeRecipient();
@@ -122,21 +164,27 @@ async function main() {
   const newAddr = await market.getAddress();
   console.log("  DevoxNFTMarket", newAddr, " gas", BigInt(estimate).toLocaleString("en-US"));
 
-  // Prove the new function is actually there before anything is migrated onto it.
-  const frag = market.interface.getFunction("updatePrice");
-  if (!frag || frag.inputs.length !== 2) throw new Error("updatePrice is missing from the deployment");
-  console.log("  updatePrice(uint256,uint256) present");
+  // Prove the new function is actually there before anything is migrated onto
+  // it. Read from the deployed bytecode, not from `market.interface` - that
+  // comes from the same local artifact that produced the bytecode, so it would
+  // agree with itself no matter what reached the chain.
+  const runtime = await ethers.provider.getCode(newAddr);
+  for (const sig of ["updatePrice(uint256,uint256)", "clearStaleListing(uint256)", "buy(uint256,uint256)"]) {
+    const selector = ethers.id(sig).slice(2, 10);
+    if (!runtime.includes(selector)) throw new Error(sig + " is missing from the deployed code");
+    console.log("  " + sig.padEnd(34) + "present");
+  }
 
   const newMarket = await ethers.getContractAt("DevoxNFTMarket", newAddr);
 
   // ── carry the collection settings over ──────────────────────────────────
   for (const s of settings) {
     if (s.official) {
-      await (await newMarket.setOfficial(s.collection, true)).wait();
+      await (await newMarket.setOfficial(s.collection, true, { gasLimit: 200_000 })).wait();
       console.log("  official  :", s.collection);
     }
     if (s.royaltyBps > 0n) {
-      await (await newMarket.setRoyalty(s.collection, s.royaltyRecipient, s.royaltyBps)).wait();
+      await (await newMarket.setRoyalty(s.collection, s.royaltyRecipient, s.royaltyBps, { gasLimit: 200_000 })).wait();
       console.log("  royalty   :", s.royaltyBps.toString(), "bps to", s.royaltyRecipient);
     }
   }
@@ -154,7 +202,7 @@ async function main() {
   for (const c of collections) {
     const nft = new ethers.Contract(c, ERC721_MIN, deployer);
     if (!(await nft.isApprovedForAll(deployer.address, newAddr))) {
-      await (await nft.setApprovalForAll(newAddr, true)).wait();
+      await (await nft.setApprovalForAll(newAddr, true, { gasLimit: 200_000 })).wait();
       console.log("  approved  :", c);
     } else {
       console.log("  approved  :", c, "(already)");
@@ -170,7 +218,9 @@ async function main() {
   }
 
   for (const l of live) {
-    const tx = await newMarket.list(l.collection, l.tokenId, l.payToken, l.price);
+    const tx = await newMarket.list(l.collection, l.tokenId, l.payToken, l.price, {
+      gasLimit: 600_000,
+    });
     await tx.wait();
     console.log(
       "  relisted  : #" + l.tokenId + " at " + ethers.formatEther(l.price) + " COTI",
@@ -179,7 +229,7 @@ async function main() {
 
   // Only now, with the token listed on the new market, is the old one released.
   for (const l of live) {
-    await (await oldMarket.delist(l.id)).wait();
+    await (await oldMarket.delist(l.id, { gasLimit: 300_000 })).wait();
     console.log("  delisted  : old listing " + l.id);
   }
 

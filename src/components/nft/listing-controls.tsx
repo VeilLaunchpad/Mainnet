@@ -95,6 +95,17 @@ export function ListingControls({
   const mine = !listing.seller || (!!address && address.toLowerCase() === listing.seller.toLowerCase());
   const stale = listing.live === false;
 
+  /**
+   * Already gone, rather than merely unfillable.
+   *
+   * `delist` reverts with NotActive on a listing that has sold or been taken
+   * down, and because these calls pass an explicit gas limit viem skips
+   * estimation - so it would broadcast and fail on chain rather than being
+   * caught first. The other stale reasons leave the listing active, and
+   * delisting those genuinely works.
+   */
+  const gone = /not listed/i.test(listing.reason || "");
+
   useEffect(() => {
     let alive = true;
     void Promise.all([
@@ -334,7 +345,9 @@ export function ListingControls({
         </button>
       )}
 
-      {confirmingDelist ? (
+      {gone ? (
+        <span className="text-[10px] text-white/30">already off the market</span>
+      ) : confirmingDelist ? (
         <>
           <button
             onClick={doDelist}
