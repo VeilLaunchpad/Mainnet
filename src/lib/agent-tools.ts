@@ -267,6 +267,34 @@ tool(
       creator: t?.creator || "",
       isPrivate: onchain?.isPrivate ?? t?.kind === "private",
       curve: t?.curve || null,
+
+      /**
+       * Why a curve is absent, rather than just `null`.
+       *
+       * A model handed `curveState: null` will reason its way to a confident
+       * answer anyway - the observed one was "the data is null, therefore the
+       * token has graduated and is fully tradable". That is sound for a token
+       * launched straight into a pool and completely wrong for a token whose
+       * curve simply could not be read, and the two are indistinguishable once
+       * the reason is thrown away. So the reason is kept.
+       */
+      curveStatus: !t?.curve
+        ? "none"
+        : !isDeployed(t.curve)
+          ? "none"
+          : curve
+            ? curve.graduated
+              ? "graduated"
+              : "bonding"
+            : "unreadable",
+      curveStatusNote: !t?.curve || !isDeployed(t.curve)
+        ? "This token has no bonding curve. It was not launched through the launchpad - it went straight to a pool - so there is no graduation to be pending. Do not describe it as having graduated."
+        : curve
+          ? curve.graduated
+            ? "The curve is finished and liquidity has moved to the pool."
+            : "Still on the curve. Graduation happens when the reserve reaches the target."
+          : "The curve address is known but could not be read just now. This is a failed read, NOT evidence that the token graduated - say the state is unknown rather than guessing.",
+
       curveState: curve
         ? {
             reserveCoti: fmtUnits(curve.reserve, 18, 6),

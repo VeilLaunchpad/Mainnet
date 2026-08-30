@@ -159,7 +159,7 @@ export function hostPin(host: string | null | undefined): CotiNetworkName | null
  * too - the testnet launchpad points at it by address - and that module reaches
  * for the database, which has no business in a browser bundle.
  */
-export const OFFICIAL_MAINNET_TOKEN = "0x11728cBe1734b437723D06Dd137549e05f358888";
+export const OFFICIAL_MAINNET_TOKEN = "0x17f23bdE4f3111777fD113390B7dAA3C49c28888";
 
 /** Where to send someone who wants the other network as a URL rather than a cookie. */
 export const NETWORK_HOST: Record<CotiNetworkName, string> = {

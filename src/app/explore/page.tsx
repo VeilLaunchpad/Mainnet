@@ -36,6 +36,8 @@ interface Pair {
   liquidityUsd: number;
   lastPrice: number | null;
   fromChain?: boolean;
+  official?: boolean;
+  venue?: string;
   tokenDepth?: string;
   nativeDepth?: string;
 }
@@ -65,6 +67,7 @@ export default function ExplorePage() {
   }, [net]);
 
   const isDevox = (p: Pair) =>
+    p.official === true ||
     [p.token0, p.token1].some((t) => t.toLowerCase() === OFFICIAL_MAINNET_TOKEN.toLowerCase());
 
   const filtered = (data?.pairs ?? []).filter((p) =>
@@ -170,8 +173,9 @@ export default function ExplorePage() {
                             {p.symbol0}/{p.symbol1}
                           </span>
                           {isDevox(p) && <Badge tone="amber">Official</Badge>}
-                          {p.fromChain && <Badge tone="cy">live on chain</Badge>}
-                          {p.strategies === 0 && <Badge tone="muted">no orders</Badge>}
+                          {p.venue && <Badge tone="devox">{p.venue}</Badge>}
+                          {p.fromChain && !p.venue && <Badge tone="cy">live on chain</Badge>}
+                          {p.strategies === 0 && !p.venue && <Badge tone="muted">no orders</Badge>}
                         </div>
                         <a
                           href={explorerAddress(p.token0, "mainnet")}

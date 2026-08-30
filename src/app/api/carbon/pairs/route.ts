@@ -1,6 +1,9 @@
 import { networkFrom } from "@/lib/network";
 import { devoxCarbonPosition, CARBON_NATIVE } from "@/lib/carbon";
-import { addressesFor } from "@/lib/addresses";
+import { addressesFor, isDeployed } from "@/lib/addresses";
+import { publicClient } from "@/lib/rpc";
+import { devoxSwapFactoryAbi, devoxSwapPairAbi } from "@/lib/abis";
+import type { Address } from "viem";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -122,6 +125,10 @@ export async function GET(req: Request) {
       lastPrice: number | null;
       /** True when the row came from the chain because the API had not indexed it. */
       fromChain?: boolean;
+      /** The protocol token's own row, pinned to the top of the table. */
+      official?: boolean;
+      /** Which venue the depth came from, when it is not the order book. */
+      venue?: string;
       /** Depth in token wei, when read from the chain rather than priced in USD. */
       tokenDepth?: string;
       nativeDepth?: string;
@@ -144,6 +151,8 @@ export async function GET(req: Request) {
       liquidityUsd: 0,
       lastPrice: null as number | null,
       fromChain: false,
+      official: false,
+      venue: undefined as string | undefined,
       tokenDepth: undefined as string | undefined,
       nativeDepth: undefined as string | undefined,
     };
@@ -193,7 +202,61 @@ export async function GET(req: Request) {
     r.fromChain = true;
   }
 
+  /**
+   * DEVOX's market is the DevoxSwap pool, not the order book.
+   *
+   * Nobody has posted an order-book strategy for it, so without this the
+   * protocol token would be missing from its own explore page while being
+   * perfectly tradable one click away. The row is built from the pool's real
+   * reserves - it is a market, just a different kind of one - and the depth
+   * columns say COTI rather than dollars because that is what was measured.
+   */
+  const addr = addressesFor(net);
+  if (isDeployed(addr.swapFactory) && isDeployed(devox) && isDeployed(addr.wcoti)) {
+    try {
+      const pair = (await publicClient(net).readContract({
+        address: addr.swapFactory,
+        abi: devoxSwapFactoryAbi,
+        functionName: "getPair",
+        args: [devox, addr.wcoti],
+      })) as Address;
+
+      if (isDeployed(pair)) {
+        const [r0, r1] = (await publicClient(net).readContract({
+          address: pair,
+          abi: devoxSwapPairAbi,
+          functionName: "getReserves",
+        })) as [bigint, bigint];
+
+        const token0 = (await publicClient(net).readContract({
+          address: pair,
+          abi: devoxSwapPairAbi,
+          functionName: "token0",
+        })) as Address;
+
+        const devoxIsToken0 = token0.toLowerCase() === devox.toLowerCase();
+        const devoxDepth = devoxIsToken0 ? r0 : r1;
+        const cotiDepth = devoxIsToken0 ? r1 : r0;
+
+        const row = touch(devox, CARBON_NATIVE, "DEVOX", "COTI");
+        row.fromChain = true;
+        row.official = true;
+        row.venue = "DevoxSwap";
+        row.tokenDepth = devoxDepth.toString();
+        row.nativeDepth = cotiDepth.toString();
+        if (devoxDepth > 0n) {
+          row.lastPrice = Number(cotiDepth) / Number(devoxDepth);
+        }
+      }
+    } catch {
+      // A missing pool is a fact about the chain, not an error worth failing
+      // the whole table over.
+    }
+  }
+
   const pairs = [...rows.values()].sort((x, y) => {
+    // The protocol token sits at the top of its own page, always.
+    if (!!x.official !== !!y.official) return x.official ? -1 : 1;
     if (!!x.fromChain !== !!y.fromChain) return x.fromChain ? -1 : 1;
     return y.liquidityUsd - x.liquidityUsd || y.trades - x.trades;
   });

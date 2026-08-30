@@ -56,6 +56,11 @@ export interface NFTListing {
   price: string;
   live: boolean;
   reason: string;
+  /** Filled in so a listing card can render without a second round trip. */
+  collectionName?: string;
+  collectionSymbol?: string;
+  previewURI?: string;
+  official?: boolean;
 }
 
 export interface NFTPool {
@@ -432,7 +437,69 @@ export async function listings(
       reason: why,
     });
   });
+
+  await nameListings(out, net);
   return out;
+}
+
+/**
+ * Attaches the collection's name, symbol and art to each listing.
+ *
+ * A listing on chain is four numbers and two addresses, which is not something
+ * anyone can browse. Reading the metadata once per distinct collection - not
+ * once per listing - keeps a page of twenty listings from becoming twenty
+ * duplicate round trips for the same collection.
+ */
+async function nameListings(list: NFTListing[], net: CotiNetworkName) {
+  if (list.length === 0) return;
+  const a = addressesFor(net);
+  const client = publicClient(net);
+  const unique = [...new Set(list.map((l) => l.collection.toLowerCase()))] as Address[];
+
+  const [names, symbols, previews, officials] = await Promise.all([
+    client.multicall({
+      contracts: unique.map((ad) => ({ address: ad, abi: devoxNFTDropAbi, functionName: "name" as const })),
+      allowFailure: true,
+    }),
+    client.multicall({
+      contracts: unique.map((ad) => ({ address: ad, abi: devoxNFTDropAbi, functionName: "symbol" as const })),
+      allowFailure: true,
+    }),
+    client.multicall({
+      contracts: unique.map((ad) => ({ address: ad, abi: devoxNFTDropAbi, functionName: "previewURI" as const })),
+      allowFailure: true,
+    }),
+    isDeployed(a.nftMarket)
+      ? client.multicall({
+          contracts: unique.map((ad) => ({
+            address: a.nftMarket,
+            abi: devoxNFTMarketAbi,
+            functionName: "official" as const,
+            args: [ad],
+          })),
+          allowFailure: true,
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const meta = new Map<string, { name: string; symbol: string; preview: string; official: boolean }>();
+  unique.forEach((ad, i) => {
+    meta.set(ad.toLowerCase(), {
+      name: names[i]?.status === "success" ? String(names[i].result) : "",
+      symbol: symbols[i]?.status === "success" ? String(symbols[i].result) : "",
+      preview: previews[i]?.status === "success" ? String(previews[i].result) : "",
+      official: officials[i]?.status === "success" ? Boolean(officials[i].result) : false,
+    });
+  });
+
+  for (const l of list) {
+    const m = meta.get(l.collection.toLowerCase());
+    if (!m) continue;
+    l.collectionName = m.name;
+    l.collectionSymbol = m.symbol;
+    l.previewURI = m.preview;
+    l.official = m.official;
+  }
 }
 
 /** Every staking pool, with the APY the launcher set. */

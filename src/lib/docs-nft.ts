@@ -239,11 +239,11 @@ export const nftPage: DocPage = {
         {
           type: "kv",
           rows: [
-            { k: "DevoxNFTFactory", v: "0xa2a2f45fA83eDD2f6FB8E4Cf59D55B044eb03Bb9" },
-            { k: "DevoxNFTEditionsFactory", v: "0x4550a1DCc8850AED6534168fE21CA0814200F1dD" },
-            { k: "DevoxNFTMarket", v: "0x93604ce0a1DD3f3A136a759E52f86b09218E0Fb8" },
-            { k: "DevoxNFTStaking", v: "0x4CE6e04338bB15334c52290F145A50e1Cdc73546" },
-            { k: "DEVOXPAD Genesis", v: "0xD1F29a647CF56C0b13c1555794B5C383E0b08888" },
+            { k: "DevoxNFTFactory", v: "0xca4E24923724C09F905593988487338780e3424a" },
+            { k: "DevoxNFTEditionsFactory", v: "0x47506dFEA23658333178eb52997e549Bf197E079" },
+            { k: "DevoxNFTMarket", v: "0x83dAA54A3d5D96434458a294Af60a39A6EF04791" },
+            { k: "DevoxNFTStaking", v: "0x2438202dd999022da10c6E6ac914cBC6a72E0cd2" },
+            { k: "DEVOXPAD Genesis", v: "0x262ee68C9a01fC3f362e06c857CF0D6384898888" },
           ],
         },
         {

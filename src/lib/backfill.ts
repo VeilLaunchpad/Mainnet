@@ -128,9 +128,26 @@ export async function backfillLaunches(
 }
 
 /** True when the launchpad has nothing, which is the only time to rebuild. */
+/**
+ * Whether this network's index still needs rebuilding from the chain.
+ *
+ * "Any row at all" is the wrong question, and getting it wrong is silent. The
+ * protocol token is seeded before this runs and comes from no factory, so a
+ * plain COUNT(*) sees one row, calls the index populated, and skips the
+ * backfill forever - leaving every genuinely launched token invisible on a
+ * fresh database. That is exactly what happened after the rebrand: the
+ * launchpad showed only $DEVOX while a real launch sat on chain, unindexed.
+ *
+ * So the question is specifically whether any FACTORY-launched token is known.
+ * Those are the ones with a curve; the seeded protocol token has none.
+ */
 export function indexIsEmpty(net: CotiNetworkName = DEFAULT_NETWORK): boolean {
   const r = rows<{ n: number }>(
-    db().prepare("SELECT COUNT(*) AS n FROM tokens WHERE network = ?").all(net),
+    db()
+      .prepare(
+        "SELECT COUNT(*) AS n FROM tokens WHERE network = ? AND curve IS NOT NULL AND curve != ''",
+      )
+      .all(net),
   );
   return (r[0]?.n ?? 0) === 0;
 }

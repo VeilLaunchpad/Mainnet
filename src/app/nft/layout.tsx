@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 
 const TABS = [
   { href: "/nft", label: "Marketplace" },
+  { href: "/nft/explore", label: "Explore" },
   { href: "/nft/studio", label: "Studio" },
   { href: "/nft/stake", label: "Stake" },
   { href: "/nft/activity", label: "Activity" },
