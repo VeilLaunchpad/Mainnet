@@ -6,6 +6,13 @@ import { useAgentChat, useHeartbeat, type ChatTurn } from "@/lib/use-agent-chat"
 import { ActionCard } from "./action-card";
 import { deDash } from "@/lib/text";
 
+/** The reason a step failed, when the tool returned one. */
+function toolError(result: unknown): string {
+  if (!result || typeof result !== "object") return "";
+  const e = (result as { error?: unknown }).error;
+  return typeof e === "string" ? e : "";
+}
+
 const TOOL_LABEL: Record<string, string> = {
   get_chain_info: "reading network",
   get_coti_market: "checking COTI price",
@@ -152,7 +159,27 @@ function Turn({
   agentName: string;
   onUpdateAction: (id: string, patch: Record<string, unknown>) => void;
 }) {
-  const [showTools, setShowTools] = useState(false);
+  /**
+   * The steps are for watching, not for reading afterwards.
+   *
+   * `null` means follow the work: expanded while tools are running, closed once
+   * the answer lands. A click pins it either way, and the pin is dropped when
+   * the turn finishes so the answer is what you are left looking at rather than
+   * a list of steps that already happened.
+   */
+  const [pinned, setPinned] = useState<boolean | null>(null);
+
+  /**
+   * Let go of the pin when the work stops.
+   *
+   * Someone who opened the steps to watch them should not be left with the
+   * answer pushed below a list of finished steps. This runs for every turn,
+   * before the user-role early return, because a hook cannot be conditional.
+   */
+  const busy = turn.role !== "user" && turn.tools.some((t) => t.running);
+  useEffect(() => {
+    if (!busy) setPinned(null);
+  }, [busy]);
 
   if (turn.role === "user") {
     return (
@@ -168,6 +195,7 @@ function Turn({
   const done = turn.tools.filter((t) => !t.running);
   const failed = done.filter((t) => t.ok === false).length;
   const current = turn.tools.find((t) => t.running);
+  const showTools = pinned ?? running;
 
   return (
     <div className="animate-rise flex gap-2.5">
@@ -179,7 +207,7 @@ function Turn({
         {turn.tools.length > 0 && (
           <div className="mb-1.5">
             <button
-              onClick={() => setShowTools((v) => !v)}
+              onClick={() => setPinned(!showTools)}
               className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/45 transition hover:border-white/20 hover:text-white/70"
             >
               <span
@@ -206,17 +234,27 @@ function Turn({
             {showTools && (
               <div className="mt-1.5 space-y-1 rounded-xl border border-white/[0.07] bg-white/[0.02] p-2.5">
                 {turn.tools.map((t, i) => (
-                  <div key={i} className="flex items-center gap-2 text-[11px]">
-                    <span
-                      className={
-                        "size-1.5 shrink-0 rounded-full " +
-                        (t.running ? "animate-pulse-slow bg-cy-400" : t.ok ? "bg-mint-400" : "bg-rose-400")
-                      }
-                    />
-                    <span className="text-white/50">
-                      {TOOL_LABEL[t.name] || t.name.replace(/_/g, " ")}
-                    </span>
-                    <span className="mono ml-auto text-white/20">{t.name}</span>
+                  <div key={i}>
+                    <div className="flex items-center gap-2 text-[11px]">
+                      <span
+                        className={
+                          "size-1.5 shrink-0 rounded-full " +
+                          (t.running ? "animate-pulse-slow bg-cy-400" : t.ok ? "bg-mint-400" : "bg-rose-400")
+                        }
+                      />
+                      <span className="text-white/50">
+                        {TOOL_LABEL[t.name] || t.name.replace(/_/g, " ")}
+                      </span>
+                      <span className="mono ml-auto text-white/20">{t.name}</span>
+                    </div>
+                    {/* A red dot with no reason is the interface knowing why
+                        something failed and declining to say. The tool already
+                        returns one; it was simply never rendered. */}
+                    {t.ok === false && toolError(t.result) && (
+                      <div className="ml-3.5 mt-0.5 text-[10px] text-rose-300/70">
+                        {toolError(t.result)}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
