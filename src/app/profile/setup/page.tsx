@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
+import { claimMessage } from "@/lib/profile-claim";
 import { Section, Avatar, Badge } from "@/components/ui";
 import { slugify, shortAddr } from "@/lib/format";
 
 export default function ProfileSetupPage() {
   const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   const router = useRouter();
 
   const [username, setUsername] = useState("");
@@ -60,10 +62,17 @@ export default function ProfileSetupPage() {
     setBusy(true);
     setErr(null);
     try {
+      // The server verifies this and uses the recovered address, so a claim
+      // can only ever be made for the wallet that actually signed it.
+      const issuedAt = Date.now();
+      const signature = await signMessageAsync({
+        message: claimMessage(String(address), handle, issuedAt),
+      });
+
       const res = await fetch("/api/profile", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ address, username: handle, displayName, bio, avatar, banner }),
+        body: JSON.stringify({ address, username: handle, displayName, bio, avatar, banner, signature, issuedAt }),
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "could not save");

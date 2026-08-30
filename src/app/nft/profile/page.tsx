@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { formatEther } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
+import { claimMessage } from "@/lib/profile-claim";
 import { Section, Stat, Badge, Empty, Skeleton, Avatar } from "@/components/ui";
 import { Spinner } from "@/components/busy";
 import { useResult } from "@/components/result-modal";
@@ -40,6 +41,7 @@ interface Profile {
 export default function ProfilePage() {
   const { net } = useNetwork();
   const { address: me } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   const result = useResult();
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -93,10 +95,17 @@ export default function ProfilePage() {
     if (!me) return;
     setSaving(true);
     try {
+      // The server verifies this and uses the recovered address, so a claim
+      // can only ever be made for the wallet that actually signed it.
+      const issuedAt = Date.now();
+      const signature = await signMessageAsync({
+        message: claimMessage(String(me), handle, issuedAt),
+      });
+
       const res = await fetch("/api/profile", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ address: me, username: handle }),
+        body: JSON.stringify({ address: me, username: handle, signature, issuedAt }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error ?? "could not save");

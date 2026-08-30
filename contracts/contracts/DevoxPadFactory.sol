@@ -321,12 +321,28 @@ contract DevoxPadFactory {
     }
 
     /// Finishes graduation for a curve that froze before a DEX existed here.
-    function seedPool(
-        address curve,
-        address swapFactory,
-        address wcoti
-    ) external onlyOwner returns (address) {
-        return DevoxCurve(payable(curve)).seedPool(swapFactory, wcoti);
+    /**
+     * Where a graduating curve sends its raise.
+     *
+     * Held here, as protocol configuration, because the curve must not take it
+     * from whoever calls `graduate` - that let any caller name the destination
+     * of the entire reserve. Set once at deployment; changing it only affects
+     * launches that have not graduated yet.
+     */
+    address public swapFactory;
+    address public wcoti;
+
+    event DexSet(address swapFactory, address wcoti);
+
+    function setDex(address swapFactory_, address wcoti_) external onlyOwner {
+        swapFactory = swapFactory_;
+        wcoti = wcoti_;
+        emit DexSet(swapFactory_, wcoti_);
+    }
+
+    /// Finishes a graduation that froze because no DEX was configured yet.
+    function seedPool(address curve) external onlyOwner returns (address) {
+        return DevoxCurve(payable(curve)).seedPool();
     }
 
     /// The curve pays the dev buy out to this contract, so it must accept COTI.

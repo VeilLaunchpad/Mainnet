@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { db, rows, now } from "@/lib/db";
+import { verifyMessage } from "viem";
 import { slugify, isAddress } from "@/lib/format";
+import { claimMessage, CLAIM_WINDOW_MS } from "@/lib/profile-claim";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,6 +30,41 @@ export async function POST(req: NextRequest) {
   const username = slugify(String(b.username || ""));
   if (username.length < 3) {
     return Response.json({ error: "username must be at least 3 characters" }, { status: 400 });
+  }
+
+  /**
+   * Prove the wallet is the caller's.
+   *
+   * This route used to trust `address` straight from the body, which meant
+   * anyone could POST somebody else's address and overwrite their handle,
+   * display name, bio, avatar and links. The address is public information, so
+   * there was nothing to guess.
+   */
+  const signature = String(b.signature || "");
+  const issuedAt = Number(b.issuedAt || 0);
+
+  if (!signature || !issuedAt) {
+    return Response.json(
+      { error: "sign the claim with your wallet first" },
+      { status: 401 },
+    );
+  }
+  if (Math.abs(Date.now() - issuedAt) > CLAIM_WINDOW_MS) {
+    return Response.json({ error: "that signature has expired, try again" }, { status: 401 });
+  }
+
+  let signerOk = false;
+  try {
+    signerOk = await verifyMessage({
+      address: address as `0x${string}`,
+      message: claimMessage(address, username, issuedAt),
+      signature: signature as `0x${string}`,
+    });
+  } catch {
+    signerOk = false;
+  }
+  if (!signerOk) {
+    return Response.json({ error: "that signature does not match the address" }, { status: 401 });
   }
 
   const taken = db()

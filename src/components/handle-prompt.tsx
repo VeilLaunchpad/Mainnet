@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
+import { claimMessage } from "@/lib/profile-claim";
 import { Avatar } from "./ui";
 import { slugify, shortAddr } from "@/lib/format";
 
@@ -18,6 +19,7 @@ const DISMISS_KEY = "devoxpad.handle.dismissed";
  */
 export function HandlePrompt() {
   const { address, isConnected } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   const router = useRouter();
   const path = usePathname();
 
@@ -114,10 +116,17 @@ export function HandlePrompt() {
     setBusy(true);
     setErr(null);
     try {
+      // The server verifies this and uses the recovered address, so a claim
+      // can only ever be made for the wallet that actually signed it.
+      const issuedAt = Date.now();
+      const signature = await signMessageAsync({
+        message: claimMessage(String(address), handle, issuedAt),
+      });
+
       const res = await fetch("/api/profile", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ address, username: handle, displayName }),
+        body: JSON.stringify({ address, username: handle, displayName, signature, issuedAt }),
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "could not claim that handle");

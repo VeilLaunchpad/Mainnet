@@ -76,8 +76,8 @@ export default function TradePage() {
 
       <Section
         kicker="Private trading desk"
-        title="SHADE trades what nobody can see"
-        sub="Positions and balances are ciphertext on-chain. There is no mempool signal to front-run and no block explorer to copy. That is the whole edge."
+        title="SHADE trades a position nobody can size"
+        sub="Balances are ciphertext on-chain, so what you are holding does not show up on an explorer. The trades themselves do: the transaction, your address and the COTI amount are public like any other. What is hidden is the position behind them, not the act of trading."
       >
         <div className="grid gap-3 lg:grid-cols-3">
           <div className="card flex h-[calc(100dvh-250px)] min-h-[560px] flex-col p-4 lg:col-span-2">

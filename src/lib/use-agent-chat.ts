@@ -66,7 +66,9 @@ export function useAgentChat(agentSlug: string, address?: string | null) {
       /* private mode */
     }
     let cancelled = false;
-    fetch("/api/threads/" + threadId)
+    // The wallet is sent so the route can check the thread belongs to it. A
+    // thread with an owner will not replay for anyone else.
+    fetch("/api/threads/" + threadId + (address ? "?viewer=" + address : ""))
       .then((r) => r.json())
       .then((j) => {
         if (cancelled || !Array.isArray(j.messages)) return;
@@ -86,7 +88,7 @@ export function useAgentChat(agentSlug: string, address?: string | null) {
     return () => {
       cancelled = true;
     };
-  }, [threadId]);
+  }, [threadId, address]);
 
   const patchLast = useCallback((fn: (t: ChatTurn) => ChatTurn) => {
     setTurns((prev) => {

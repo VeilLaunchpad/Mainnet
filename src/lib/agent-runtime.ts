@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db, rows, row, now } from "./db";
 import { toolSpecs, runTool, type ToolContext } from "./agent-tools";
 import { streamComplete, complete, type ChatMessage } from "./llm";
@@ -212,7 +213,12 @@ export function ensureThread(agentId: string, threadId?: string, owner = ""): st
     const t = row(db().prepare("SELECT id FROM threads WHERE id = ?").get(threadId));
     if (t) return threadId;
   }
-  const id = threadId || "th_" + Math.random().toString(36).slice(2, 12);
+  // Unguessable, because the thread id is effectively the capability that
+  // reads the transcript. The old id was 10 base36 characters from
+  // Math.random() - roughly 51 bits from a non-cryptographic PRNG, which is
+  // enumerable by anyone willing to spend an afternoon on it, and these are
+  // private agent conversations.
+  const id = threadId || "th_" + randomUUID().replace(/-/g, "");
   db()
     .prepare("INSERT INTO threads (id, agent_id, owner, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
     .run(id, agentId, owner, "New session", now(), now());

@@ -213,7 +213,7 @@
         "envKey": "NEXT_PUBLIC_DEVOX_STAKING_MAINNET"
       },
       "devoxpadTokenTwin": {
-        "address": "0xcDfbB8D5A1ef2c2805cA31Fffd6fEbF758a7beb5",
+        "address": "0x139c3258B0a7dB739A18f00c226A50A598cd2c40",
         "status": "deployed",
         "role": "p.DEVOXPAD, the private twin. Minted one to one against DEVOXPAD locked in DevoxPortal.",
         "envKey": "NEXT_PUBLIC_DEVOX_TOKEN_TWIN_MAINNET"
@@ -1242,7 +1242,7 @@
     "totalSupply": "1000000000",
     "mintable": false,
     "vanitySuffix": "8888",
-    "privateTwin": "0xcDfbB8D5A1ef2c2805cA31Fffd6fEbF758a7beb5",
+    "privateTwin": "0x139c3258B0a7dB739A18f00c226A50A598cd2c40",
     "treasuryAllocation": "200000000"
   },
   "nft": {

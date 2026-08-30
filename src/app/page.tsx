@@ -23,7 +23,7 @@ const PILLARS = [
     href: "/desk",
     tag: "Private Trading Agent",
     title: "A book nobody can read",
-    body: "SHADE trades with its positions encrypted on-chain by garbled circuits. No front-running, no copy-trading - the strategy is the moat and the moat holds.",
+    body: "SHADE trades with its positions encrypted on-chain by garbled circuits. You can watch it trade - the transactions are public - but not read the position behind them, so there is nothing to copy.",
     glyph: "◐",
     accent: "mint" as const,
   },

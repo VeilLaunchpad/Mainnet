@@ -1,6 +1,33 @@
 import { NextRequest } from "next/server";
-import { db } from "@/lib/db";
+import { db, row } from "@/lib/db";
 import { threadMessages } from "@/lib/agent-runtime";
+
+/**
+ * Whether this request may touch this thread.
+ *
+ * A thread records the wallet that started it. Both handlers used to ignore
+ * that column entirely, so any caller who had a thread id could read - or
+ * delete - somebody else's private agent conversation.
+ *
+ * Two things guard it now: the id is an unguessable random one, and a thread
+ * that recorded an owner only answers to that owner.
+ *
+ * Be clear about the limit. The address arrives from the client and is not
+ * proved, so this stops enumeration and cross-linking from the UI, not a
+ * determined attacker who already knows the victim's address AND their thread
+ * id. Closing that properly needs a signed session, which is a larger change
+ * than this route.
+ */
+function mayTouch(id: string, viewer: string): { ok: boolean; status: number } {
+  const t = row(
+    db().prepare("SELECT owner FROM threads WHERE id = ?").get(id),
+  ) as { owner?: string } | undefined;
+
+  if (!t) return { ok: false, status: 404 };
+  const owner = (t.owner || "").toLowerCase();
+  if (!owner) return { ok: true, status: 200 }; // pre-ownership threads stay readable
+  return owner === viewer.toLowerCase() ? { ok: true, status: 200 } : { ok: false, status: 403 };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,8 +37,17 @@ export const dynamic = "force-dynamic";
  * they belong to so the UI can replay the agent's steps exactly as they
  * happened rather than showing raw JSON blobs.
  */
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  const gate = mayTouch(id, req.nextUrl.searchParams.get("viewer") ?? "");
+  if (!gate.ok) {
+    return Response.json(
+      { error: gate.status === 404 ? "no such thread" : "this thread belongs to another wallet" },
+      { status: gate.status },
+    );
+  }
+
   const stored = threadMessages(id, 200);
 
   const out: {
@@ -52,8 +88,17 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   return Response.json({ threadId: id, messages: merged });
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  const gate = mayTouch(id, req.nextUrl.searchParams.get("viewer") ?? "");
+  if (!gate.ok) {
+    return Response.json(
+      { error: gate.status === 404 ? "no such thread" : "this thread belongs to another wallet" },
+      { status: gate.status },
+    );
+  }
+
   db().prepare("DELETE FROM messages WHERE thread_id = ?").run(id);
   db().prepare("DELETE FROM threads WHERE id = ?").run(id);
   return Response.json({ ok: true });

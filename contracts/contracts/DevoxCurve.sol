@@ -7,6 +7,20 @@ import {DevoxSwapFactory} from "./DevoxSwapFactory.sol";
 import {DevoxSwapPair} from "./DevoxSwapPair.sol";
 
 /**
+ * The launchpad's DEX configuration.
+ *
+ * The curve reads the swap factory and WCOTI from here rather than accepting
+ * them as arguments. `graduate` is deliberately permissionless - a filled
+ * launch must not be hostage to the team remembering to finish it - but
+ * "anyone may call it" and "the caller names the destination" are different
+ * properties, and only the first one was intended.
+ */
+interface IDevoxDexConfig {
+    function swapFactory() external view returns (address);
+    function wcoti() external view returns (address);
+}
+
+/**
  * @title DevoxCurve - the bonding curve a DEVOXPAD launch lives on until it graduates.
  *
  * Pricing is a constant-product curve over *virtual* reserves, so the very
@@ -193,7 +207,7 @@ contract DevoxCurve is ReentrancyGuard {
      * and holds the reserve, so `seedPool` can finish the job later rather than
      * trapping the raise behind an address that does not exist yet.
      */
-    function graduate(address swapFactory, address wcoti) external nonReentrant returns (address) {
+    function graduate() external nonReentrant returns (address) {
         if (graduated) revert AlreadyGraduated();
         if (reserve < graduationTarget) revert TargetNotReached();
 
@@ -203,6 +217,14 @@ contract DevoxCurve is ReentrancyGuard {
         reserve = 0;
 
         _payCreatorFees();
+
+        // Read from the factory, never from calldata. Taking these as arguments
+        // let any caller point the whole reserve at a contract they control:
+        // `_seed` forwards it with `IWCOTI(wcoti).deposit{value: ...}()`, and a
+        // forged `getPair` returns an address that then receives the pool
+        // allocation too. The sibling `seedPool` was gated; this one was not.
+        address swapFactory = IDevoxDexConfig(factory).swapFactory();
+        address wcoti = IDevoxDexConfig(factory).wcoti();
 
         if (swapFactory == address(0) || wcoti == address(0)) {
             emit Graduated(address(0), cotiLiquidity, poolSupply);
@@ -215,10 +237,14 @@ contract DevoxCurve is ReentrancyGuard {
     }
 
     /// Finishes a graduation that froze before a DEX existed on this network.
-    function seedPool(address swapFactory, address wcoti) external nonReentrant returns (address) {
+    function seedPool() external nonReentrant returns (address) {
         if (msg.sender != factory) revert NotFactory();
         if (!graduated) revert NotGraduated();
         if (pool != address(0)) revert PoolAlreadySeeded();
+
+        address swapFactory = IDevoxDexConfig(factory).swapFactory();
+        address wcoti = IDevoxDexConfig(factory).wcoti();
+        if (swapFactory == address(0) || wcoti == address(0)) revert TargetNotReached();
 
         uint256 cotiLiquidity = address(this).balance - accruedFees;
         pool = _seed(swapFactory, wcoti, cotiLiquidity);
