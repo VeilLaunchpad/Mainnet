@@ -305,4 +305,53 @@ async function seedAndBackfill() {
   } catch (err) {
     console.warn("[devoxpad] launches  : backfill failed, " + String(err).slice(0, 160));
   }
+
+  await dropRevertedTrades();
+}
+
+/**
+ * Removes trades the chain never confirmed.
+ *
+ * The trade recorder used to insert whatever the browser sent, and the browser
+ * treated any mined transaction as a success - so a reverted sell was written
+ * into a token's history as a completed fill. The route now verifies before
+ * inserting, but rows written under the old behaviour are still there claiming
+ * trades that did not happen, and a price history built on them is wrong.
+ *
+ * Only rows contradicted by a receipt are removed. A hash that cannot be
+ * checked right now is left alone: an RPC that is briefly unreachable must not
+ * be able to erase real history.
+ */
+async function dropRevertedTrades() {
+  try {
+    const { db, rows } = await import("./lib/db");
+    const { publicClient } = await import("./lib/rpc");
+
+    const list = rows(
+      db().prepare("SELECT id, tx_hash FROM trades WHERE tx_hash IS NOT NULL AND tx_hash != ''").all(),
+    ) as { id: number; tx_hash: string }[];
+    if (!list.length) return;
+
+    const client = publicClient();
+    let removed = 0;
+    for (const t of list) {
+      if (!/^0x[0-9a-fA-F]{64}$/.test(t.tx_hash)) continue;
+      let status: string | null = null;
+      try {
+        const r = await client.getTransactionReceipt({ hash: t.tx_hash as `0x${string}` });
+        status = r.status;
+      } catch {
+        continue; // unknown to this node, not proof of anything
+      }
+      if (status !== "success") {
+        db().prepare("DELETE FROM trades WHERE id = ?").run(t.id);
+        removed += 1;
+      }
+    }
+    console.log(
+      "[devoxpad] trades    : " + list.length + " checked, " + removed + " reverted removed",
+    );
+  } catch (err) {
+    console.warn("[devoxpad] trades    : check failed, " + String(err).slice(0, 160));
+  }
 }
