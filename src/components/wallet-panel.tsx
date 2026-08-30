@@ -7,7 +7,7 @@ import { parseEther, type Address } from "viem";
 import { Contract } from "@coti-io/coti-ethers";
 import QRCode from "qrcode";
 import { Badge, Avatar, Skeleton } from "./ui";
-import { privateErc20Abi } from "@/lib/abis";
+import { erc20Abi, privateErc20Abi } from "@/lib/abis";
 import { useCotiSession } from "@/lib/coti-client";
 import { fmtNum, fmtUnits, parseUnits, shortAddr, isAddress } from "@/lib/format";
 import { explorerTx, explorerAddress } from "@/lib/chain";
@@ -104,8 +104,10 @@ export function WalletPanel() {
           if (h.kind !== "private") return h;
           try {
             const c = new Contract(h.address, privateErc20Abi as never, session.signer);
-            const ct = await c["balanceOf(address)"](address);
-            const clear = await session.signer.decryptValue256(ct);
+            const r = await c["balanceOf(address)"](address);
+            // Named fields, not the array ethers hands back.
+            const ct = { ciphertextHigh: r[0], ciphertextLow: r[1] };
+            const clear = await session.signer.decryptValue256(ct as never);
             return { ...h, balance: fmtUnits(BigInt(clear.toString()), h.decimals, 6) };
           } catch {
             return { ...h, balance: "?" };
@@ -131,9 +133,12 @@ export function WalletPanel() {
       const updates = new Map<string, string>();
       for (const h of pending) {
         try {
+          // A public token, so the plain ERC-20 ABI is the correct one. It
+          // used to read through privateErc20Abi, which happened to work only
+          // while that ABI mis-declared balanceOf as a single uint256.
           const bal = (await publicClient.readContract({
             address: h.address as Address,
-            abi: privateErc20Abi,
+            abi: erc20Abi,
             functionName: "balanceOf",
             args: [address],
           })) as bigint;

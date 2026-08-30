@@ -160,8 +160,10 @@ export default function PortalPage() {
       for (const p of data.pairs) {
         try {
           const c = new Contract(p.twin, privateErc20Abi as never, session.signer);
-          const ct = await c["balanceOf(address)"](address);
-          const clear = await session.signer.decryptValue256(ct);
+          const r = await c["balanceOf(address)"](address);
+          // Named fields, not the array ethers hands back.
+          const ct = { ciphertextHigh: r[0], ciphertextLow: r[1] };
+          const clear = await session.signer.decryptValue256(ct as never);
           out[p.twin] = fmtUnits(BigInt(clear.toString()), p.decimals, 4);
         } catch {
           out[p.twin] = "?";

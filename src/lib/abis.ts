@@ -60,12 +60,27 @@ export const privateErc20Abi = [
   { type: "function", name: "symbol", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
   { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },
   { type: "function", name: "totalSupply", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
-  {
+    {
     type: "function",
     name: "balanceOf",
     stateMutability: "view",
     inputs: [{ name: "account", type: "address" }],
-    outputs: [{ name: "", type: "uint256" }],
+    /**
+     * A ctUint256 is TWO words, and declaring it as one is a silent corruption
+     * rather than an error: ethers happily decodes the first word, the SDK
+     * happily "decrypts" half a ciphertext, and the result is a plausible
+     * number - usually 0. A wrapped balance then reads as empty, which looks
+     * exactly like the wrap having taken the tokens and credited nothing.
+     */
+    outputs: [
+      {
+        type: "tuple",
+        components: [
+          { name: "ciphertextHigh", type: "uint256" },
+          { name: "ciphertextLow", type: "uint256" },
+        ],
+      },
+    ],
   },
   {
     type: "function",
