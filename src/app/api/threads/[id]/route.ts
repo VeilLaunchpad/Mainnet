@@ -80,9 +80,45 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     out.push({ role: m.role, content: m.content, tools: [], actions: [], at: m.created_at });
   }
 
-  const merged = out.filter((m, i) => {
-    if (m.role !== "assistant" || m.content || m.tools.length) return true;
-    return i === out.length - 1;
+  /**
+   * Put the steps back on the answer they belong to.
+   *
+   * Each tool-calling round is stored as its own contentless assistant row, and
+   * the reply that follows is a separate row - so replaying them one for one
+   * produced two turns: a bare step list, then the answer underneath it. That is
+   * not how the turn happened, and it is why the steps reappeared above every
+   * reply on a reload.
+   *
+   * A contentless assistant row carrying tools is therefore folded into the next
+   * assistant row that actually said something, taking its tools and actions
+   * with it.
+   */
+  const folded: typeof out = [];
+  for (const m of out) {
+    const prev = folded[folded.length - 1];
+    if (
+      m.role === "assistant" &&
+      m.content &&
+      prev &&
+      prev.role === "assistant" &&
+      !prev.content
+    ) {
+      folded[folded.length - 1] = {
+        ...m,
+        tools: [...prev.tools, ...m.tools],
+        actions: [...prev.actions, ...m.actions],
+        at: prev.at,
+      };
+      continue;
+    }
+    folded.push(m);
+  }
+
+  // Whatever is left with nothing to say and nothing to show is dropped, except
+  // a trailing one - a turn that was still being written when the page closed.
+  const merged = folded.filter((m, i) => {
+    if (m.role !== "assistant" || m.content || m.tools.length || m.actions.length) return true;
+    return i === folded.length - 1;
   });
 
   return Response.json({ threadId: id, messages: merged });
