@@ -70,6 +70,27 @@ export interface RepriceArgs {
   onStep?: (message: string) => void;
 }
 
+/**
+ * The fallback got halfway: the old listing is down, the new one was never made.
+ *
+ * This has to be its own error rather than the raw one from the second call,
+ * because the two states could not be further apart. "Could not change the
+ * price" reads as nothing happened, while the token is in fact no longer for
+ * sale - and the seller would find that out from a buyer, not from us.
+ */
+export class ListingTakenDownError extends Error {
+  readonly delistHash: `0x${string}`;
+  constructor(delistHash: `0x${string}`, cause: unknown) {
+    super(
+      "The old listing came down but the new one was not created, so your NFT is no longer for sale. Nothing was lost - it never left your wallet - but you need to list it again. (" +
+        String((cause as Error)?.message || cause).slice(0, 120) +
+        ")",
+    );
+    this.name = "ListingTakenDownError";
+    this.delistHash = delistHash;
+  }
+}
+
 export interface RepriceResult {
   /** How many wallet confirmations it actually took. */
   signatures: number;
@@ -97,10 +118,11 @@ export async function repriceListing(a: RepriceArgs): Promise<RepriceResult> {
   /**
    * The older marketplace has no reprice, and `list()` rejects a token that is
    * already listed, so the old listing has to go first. That leaves the token
-   * briefly unlisted - which is safe here only because nothing is escrowed and
-   * the NFT never leaves the seller's wallet. If the second signature is
-   * refused the token is simply not for sale, which is recoverable by listing
-   * again; it is not a state where anything can be lost.
+   * briefly unlisted - which is safe for custody, because nothing is escrowed
+   * and the NFT never leaves the seller's wallet, but it is NOT safe to stay
+   * quiet about. If the second signature is refused the token really is off the
+   * market, so that case throws ListingTakenDownError rather than a message
+   * that reads as though nothing happened.
    */
   a.onStep?.("This marketplace needs two steps: taking the old listing down");
   const off = await a.writeContractAsync({
@@ -113,14 +135,19 @@ export async function repriceListing(a: RepriceArgs): Promise<RepriceResult> {
   await a.confirm(off);
 
   a.onStep?.("Listing again at the new price");
-  const on = await a.writeContractAsync({
-    address: a.market,
-    abi: devoxNFTMarketAbi,
-    functionName: "list",
-    args: [a.collection, a.tokenId, a.payToken, a.newPrice],
-    gas: 1_000_000n,
-  });
-  await a.confirm(on);
+  let on: `0x${string}`;
+  try {
+    on = await a.writeContractAsync({
+      address: a.market,
+      abi: devoxNFTMarketAbi,
+      functionName: "list",
+      args: [a.collection, a.tokenId, a.payToken, a.newPrice],
+      gas: 1_000_000n,
+    });
+    await a.confirm(on);
+  } catch (e) {
+    throw new ListingTakenDownError(off, e);
+  }
 
   return { signatures: 2, inPlace: false, hash: on };
 }
@@ -166,15 +193,80 @@ export const NATIVE_PAY = "0x0000000000000000000000000000000000000000" as Addres
  * the price is sent exactly as listed rather than rounded or padded: the
  * contract reverts with WrongPayment on anything else.
  */
-export async function buyListing(a: BuyArgs): Promise<`0x${string}`> {
+export async function buyListing(a: BuyArgs & { client?: PublicClient }): Promise<`0x${string}`> {
+  /**
+   * Pay no more than the price on screen.
+   *
+   * `buy(id, maxPrice)` exists because repricing in place keeps a listing's id
+   * while moving the number under it: an ERC-20 purchase already in the
+   * mempool would otherwise be pulled from a standing allowance at whatever
+   * the seller changed it to. The marketplace deployed before repricing has no
+   * such argument and does not need one - with no way to change a price in
+   * place, a buy either matches the listing it saw or reverts because the
+   * relist gave it a new id.
+   */
+  const bounded = await marketCanReprice(a.client, a.market);
+
   const hash = await a.writeContractAsync({
     address: a.market,
     abi: devoxNFTMarketAbi,
     functionName: "buy",
-    args: [a.id],
+    args: bounded ? [a.id, a.price] : [a.id],
     value: a.payToken === NATIVE_PAY ? a.price : 0n,
     gas: 2_000_000n,
   });
   await a.confirm(hash);
   return hash;
+}
+
+export interface ClearStaleArgs {
+  writeContractAsync: (config: Record<string, unknown>) => Promise<`0x${string}`>;
+  confirm: (hash: `0x${string}`) => Promise<void>;
+  market: Address;
+  id: bigint;
+}
+
+/**
+ * Clears a listing left behind by a previous owner.
+ *
+ * When a listed token is transferred off-market the listing stays active and
+ * keeps the token's slot, so the new holder can neither list it nor delist it -
+ * `delist` answers only to the recorded seller. `clearStaleListing` exists for
+ * exactly that and is restricted on chain to listings `buy` would already
+ * reject, so calling it can never cancel a sale that could still have happened.
+ *
+ * Only marketplaces deployed with the function have it; `marketCanClearStale`
+ * says which, so the button is not offered where it would revert.
+ */
+export async function clearStaleListing(a: ClearStaleArgs): Promise<`0x${string}`> {
+  const hash = await a.writeContractAsync({
+    address: a.market,
+    abi: devoxNFTMarketAbi,
+    functionName: "clearStaleListing",
+    args: [a.id],
+    gas: 1_000_000n,
+  });
+  await a.confirm(hash);
+  return hash;
+}
+
+const CLEAR_STALE_SELECTOR = toFunctionSelector("clearStaleListing(uint256)");
+const clearCache = new Map<string, boolean>();
+
+export async function marketCanClearStale(
+  client: PublicClient | undefined,
+  market: Address,
+): Promise<boolean> {
+  if (!client) return false;
+  const key = client.chain?.id + ":" + market.toLowerCase();
+  const hit = clearCache.get(key);
+  if (hit !== undefined) return hit;
+  try {
+    const code = await client.getCode({ address: market });
+    const ok = !!code && code.includes(CLEAR_STALE_SELECTOR.slice(2));
+    clearCache.set(key, ok);
+    return ok;
+  } catch {
+    return false;
+  }
 }

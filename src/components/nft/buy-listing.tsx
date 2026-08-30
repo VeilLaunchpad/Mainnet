@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { formatEther, type Address } from "viem";
+import { formatUnits, type Address } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 import { Spinner } from "@/components/busy";
-import { useResult } from "@/components/result-modal";
+import { useResult, readable } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { confirmTx } from "@/lib/confirm-tx";
 import { ensureAllowance } from "@/lib/allowance";
@@ -50,7 +50,11 @@ export function BuyListing({
 
   const price = BigInt(listing.price);
   const payToken = (listing.payToken || NATIVE_PAY) as Address;
-  const isNative = payToken === NATIVE_PAY;
+  const isNative = payToken.toLowerCase() === NATIVE_PAY;
+  // The marketplace accepts any ERC-20, so calling every price COTI would
+  // misstate the currency on a third-party listing - and the button would ask
+  // for one thing while the transaction pulled another.
+  const unit = isNative ? "COTI" : "tokens";
   const mine = !!address && address.toLowerCase() === listing.seller.toLowerCase();
   const fillable = listing.live !== false;
 
@@ -77,6 +81,7 @@ export function BuyListing({
 
       setStep("Buying");
       const hash = await buyListing({
+        client: publicClient,
         writeContractAsync: writeContractAsync as never,
         confirm: (h) => confirmTx(publicClient, h),
         market: addresses.nftMarket,
@@ -92,8 +97,10 @@ export function BuyListing({
           "#" +
           listing.tokenId +
           " is yours for " +
-          formatEther(price) +
-          " COTI. On a sealed collection its metadata is re-sealed to your key on transfer, so unlock it to read what only the holder can.",
+          formatUnits(price, 18) +
+          " " +
+          unit +
+          ". If this collection seals its metadata, it has been re-sealed to your key - open the collection page and unlock it there.",
         txHash: hash,
       });
       onBought?.();
@@ -101,12 +108,22 @@ export function BuyListing({
       result.show({
         ok: false,
         title: "Could not buy it",
-        detail: String((e as Error).message || e).slice(0, 240),
+        detail: readable(e),
       });
     } finally {
       setBusy(false);
       setStep("");
     }
+  }
+
+  // A dead listing is reported before whose it is: "your listing" on something
+  // nobody could fill tells the seller the wrong thing about why it is quiet.
+  if (!fillable) {
+    return (
+      <span className={"text-[10px] text-white/30 " + (className || "")}>
+        {listing.reason || "cannot be filled right now"}
+      </span>
+    );
   }
 
   if (mine) {
@@ -120,8 +137,7 @@ export function BuyListing({
   return (
     <button
       onClick={go}
-      disabled={busy || !fillable}
-      title={fillable ? undefined : listing.reason || "This listing cannot be filled right now."}
+      disabled={busy}
       className={
         "rounded-lg bg-gradient-to-r from-devox-500 to-cy-500 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 " +
         (className || "")
@@ -131,10 +147,8 @@ export function BuyListing({
         <span className="inline-flex items-center gap-1.5">
           <Spinner /> {step || "Buying"}…
         </span>
-      ) : fillable ? (
-        "Buy for " + formatEther(price) + " COTI"
       ) : (
-        "Not fillable"
+        "Buy for " + formatUnits(price, 18) + " " + unit
       )}
     </button>
   );

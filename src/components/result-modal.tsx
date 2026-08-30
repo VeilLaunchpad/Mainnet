@@ -133,9 +133,15 @@ export function ResultProvider({ children }: { children: ReactNode }) {
               </a>
             ) : (
               <p className="mx-5 mt-4 rounded-xl border border-white/[0.07] px-3.5 py-2.5 text-[11px] text-white/30">
+                {/* Only true when nothing reached the chain. A failure that
+                    reverted after mining has a hash and takes the branch
+                    above, but a message that already says gas was spent must
+                    not be contradicted by the box under it. */}
                 {spec.ok
                   ? "No transaction was needed for this."
-                  : "Nothing was sent, so nothing was spent."}
+                  : /gas is spent|reverted on chain|came down/i.test(String(spec.detail || ""))
+                    ? "Check the explorer for what did land."
+                    : "Nothing was sent, so nothing was spent."}
               </p>
             )}
 

@@ -301,6 +301,9 @@ export default function NFTExplorePage() {
                       tokenId: l.tokenId,
                       price: l.price,
                       payToken: l.payToken,
+                      seller: l.seller,
+                      live: l.live,
+                      reason: l.reason,
                     }}
                     onChanged={reload}
                   />
@@ -338,8 +341,10 @@ export default function NFTExplorePage() {
       {mode === "listings" && shownListings && shownListings.length > 0 && (
         <p className="mt-6 max-w-3xl text-[12px] leading-relaxed text-white/35">
           A listing is approval-based: the token stays in the seller&apos;s wallet until it sells,
-          which means a listing can stop being fillable if they move it. Those are shown with the
-          reason rather than hidden, so the count here is honest about what it is.
+          which means a listing can stop being fillable if they move it.{" "}
+          {liveOnly
+            ? "Those are hidden right now - turn off the live filter to see them with their reason."
+            : "Those are shown with the reason rather than hidden, so this count is everything that exists."}
         </p>
       )}
     </Section>

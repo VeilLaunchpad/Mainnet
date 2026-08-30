@@ -85,6 +85,8 @@ contract DevoxNFTMarket is Ownable, ReentrancyGuard {
     error AlreadyListed();
     error FeeTooHigh();
     error NativeTransferFailed();
+    /// The listing was repriced above what the buyer agreed to pay.
+    error PriceMoved();
 
     constructor(address owner_, address feeRecipient_, uint256 feeBps_) Ownable(owner_) {
         require(feeRecipient_ != address(0), "fee recipient is zero");
@@ -255,9 +257,26 @@ contract DevoxNFTMarket is Ownable, ReentrancyGuard {
      * moved or sold the token in between, and a marketplace that assumes
      * otherwise moves tokens that are no longer there to move.
      */
-    function buy(uint256 id) external payable nonReentrant {
+    function buy(uint256 id, uint256 maxPrice) external payable nonReentrant {
         Listing storage l = _listings[id];
         if (!l.active) revert NotActive();
+
+        /**
+         * The price the buyer agreed to, not whatever it says now.
+         *
+         * `updatePrice` moves the number while the listing keeps its id, so a
+         * buy in the mempool can land against a price the buyer never saw. On
+         * the native path `msg.value != price` already catches that, but an
+         * ERC-20 payment is pulled from a standing allowance with nothing to
+         * compare against - a seller could raise the price on top of a pending
+         * purchase and be paid the difference.
+         *
+         * Before repricing existed this was unreachable: changing a price meant
+         * delist and relist, which produced a new id, so the old buy reverted
+         * on its own. Adding reprice removed that accident, so the guarantee is
+         * now written down.
+         */
+        if (l.price > maxPrice) revert PriceMoved();
 
         IERC721 c = IERC721(l.collection);
         if (c.ownerOf(l.tokenId) != l.seller) revert NotOwner();

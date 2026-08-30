@@ -29,6 +29,7 @@ interface Listing {
   tokenId: string;
   seller: string;
   price: string;
+  payToken?: string;
   live: boolean;
   reason: string;
 }
@@ -268,6 +269,13 @@ export default function ProfilePage() {
                       collection: l.collection,
                       tokenId: l.tokenId,
                       price: l.price,
+                      // Dropping these made a fallback reprice relist an
+                      // ERC-20 listing for the same number in native COTI,
+                      // and offered controls on somebody else's listing.
+                      payToken: l.payToken,
+                      seller: l.seller,
+                      live: l.live,
+                      reason: l.reason,
                     }}
                     onChanged={loadListings}
                   />

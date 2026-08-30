@@ -9,12 +9,13 @@ import { useAccount, useWriteContract } from "wagmi";
 import { Contract } from "@coti-io/coti-ethers";
 import { Section, Stat, Badge, Empty, Skeleton, Progress } from "@/components/ui";
 import { Spinner } from "@/components/busy";
-import { useResult } from "@/components/result-modal";
+import { useResult, readable } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { useCotiSession } from "@/lib/coti-client";
 import { devoxNFTDropAbi, devoxNFTEditionsAbi, devoxNFTMarketAbi } from "@/lib/nft-abis";
 import { addressesFor, isDeployed } from "@/lib/addresses";
+import { confirmTx } from "@/lib/confirm-tx";
 import { explorerAddress } from "@/lib/chain";
 import { shortAddr, fmtUnits } from "@/lib/format";
 import { PrivacyNote } from "@/components/privacy-note";
@@ -387,13 +388,10 @@ export default function CollectionPage() {
           args: [a.nftMarket, true],
           gas: 1_000_000n,
         });
-        result.show({
-          ok: true,
-          title: "Marketplace approved",
-          detail: "One approval covers every token in this collection. Listing next.",
-          txHash: h,
-        });
-        await new Promise((r) => setTimeout(r, 2500));
+        // Waited for, not slept through. A fixed 2.5s guess meant listing on an
+        // approval that had not mined, which reverts with NotApproved after the
+        // user has already been shown "Marketplace approved".
+        await confirmTx(client, h);
       }
 
       const hash = await writeContractAsync({
@@ -403,6 +401,10 @@ export default function CollectionPage() {
         args: [address, tokenId, NATIVE, parseEther(listPrice)],
         gas: 1_000_000n,
       });
+      // writeContractAsync resolves when the transaction is broadcast, not when
+      // it is mined. Announcing "Listed" here without waiting is how a reverted
+      // listing came to show a green tick.
+      await confirmTx(client, hash);
       result.show({
         ok: true,
         title: "Listed",
@@ -415,9 +417,13 @@ export default function CollectionPage() {
         txHash: hash,
       });
     } catch (e) {
-      result.show({ ok: false, title: "Listing failed", detail: String((e as Error).message || e) });
+      result.show({ ok: false, title: "Listing failed", detail: readable(e) });
     } finally {
       setListing(null);
+      // Whether it worked or not, the cards must agree with the chain - so the
+      // token that just sold stops offering "List", and one that did not still
+      // does.
+      void loadOwned();
     }
   };
 
@@ -678,6 +684,13 @@ export default function CollectionPage() {
               />
               <span className="text-[12px] text-white/35">
                 sets the asking price for the List buttons below
+              </span>
+              {/* The reprice path warns about its second signature; listing
+                  needed the same courtesy, since a first-time seller signs an
+                  approval before the listing itself. */}
+              <span className="w-full text-[11px] text-white/25">
+                The first listing in a collection takes two signatures: one approval for the
+                marketplace, then the listing. After that it is one.
               </span>
             </div>
 

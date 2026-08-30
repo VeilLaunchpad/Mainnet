@@ -163,7 +163,7 @@ describe("DevoxNFTMarket", () => {
     const feeBefore = await ethers.provider.getBalance(fee.address);
     const royaltyBefore = await ethers.provider.getBalance(owner.address);
 
-    await market.connect(bob).buy(0, { value: e18(100) });
+    await market.connect(bob).buy(0, e18(100), { value: e18(100) });
 
     expect(await nft.ownerOf(1)).to.equal(bob.address);
     expect((await ethers.provider.getBalance(fee.address)) - feeBefore).to.equal(e18("2.5"));
@@ -179,7 +179,7 @@ describe("DevoxNFTMarket", () => {
 
     await devox.connect(owner).transfer(bob.address, e18(1000));
     await devox.connect(bob).approve(await market.getAddress(), e18(1000));
-    await market.connect(bob).buy(0);
+    await market.connect(bob).buy(0, ethers.MaxUint256);
 
     expect(await nft.ownerOf(1)).to.equal(bob.address);
     expect(await devox.balanceOf(fee.address)).to.equal(e18(25));   // 2.5%
@@ -198,7 +198,7 @@ describe("DevoxNFTMarket", () => {
     const [live, reason] = await market.listingLive(0);
     expect(live).to.equal(false);
     expect(reason).to.equal("the seller no longer holds it");
-    await expect(market.connect(bob).buy(0, { value: e18(100) })).to.be.revertedWithCustomError(
+    await expect(market.connect(bob).buy(0, e18(100), { value: e18(100) })).to.be.revertedWithCustomError(
       market,
       "NotOwner",
     );
@@ -214,7 +214,7 @@ describe("DevoxNFTMarket", () => {
     const [live, reason] = await market.listingLive(0);
     expect(live).to.equal(false);
     expect(reason).to.equal("approval was revoked");
-    await expect(market.connect(bob).buy(0, { value: e18(100) })).to.be.revertedWithCustomError(
+    await expect(market.connect(bob).buy(0, e18(100), { value: e18(100) })).to.be.revertedWithCustomError(
       market,
       "NotApproved",
     );
@@ -226,7 +226,9 @@ describe("DevoxNFTMarket", () => {
     await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
     await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
 
-    await expect(market.connect(bob).buy(0, { value: e18(99) })).to.be.revertedWithCustomError(
+    // maxPrice is the listed price, so this gets past the price guard and
+    // still tests what it was written to test: the wrong amount of COTI.
+    await expect(market.connect(bob).buy(0, e18(100), { value: e18(99) })).to.be.revertedWithCustomError(
       market,
       "WrongPayment",
     );
@@ -337,14 +339,14 @@ describe("DevoxNFTMarket", () => {
     expect(l.price).to.equal(e18(40));
 
     // The old price must stop working, or the reprice was decorative.
-    await expect(market.connect(bob).buy(0, { value: e18(100) })).to.be.revertedWithCustomError(
+    await expect(market.connect(bob).buy(0, e18(100), { value: e18(100) })).to.be.revertedWithCustomError(
       market,
       "WrongPayment",
     );
 
     const sellerBefore = await ethers.provider.getBalance(alice.address);
     const feeBefore = await ethers.provider.getBalance(fee.address);
-    await market.connect(bob).buy(0, { value: e18(40) });
+    await market.connect(bob).buy(0, e18(40), { value: e18(40) });
 
     expect(await nft.ownerOf(1)).to.equal(bob.address);
     expect((await ethers.provider.getBalance(fee.address)) - feeBefore).to.equal(e18(1)); // 2.5%
@@ -466,6 +468,54 @@ describe("DevoxNFTMarket", () => {
 
     const [, , l] = await market.listingOf(await nft.getAddress(), 1);
     expect(l.price).to.equal(e18(100));
+  });
+
+  /**
+   * Repricing must not be able to charge a buyer more than they agreed to.
+   *
+   * Before updatePrice existed, changing a price meant delist and relist, which
+   * produced a new listing id - so a buy already in the mempool reverted on its
+   * own. Repricing in place keeps the id and moves the number under it, which
+   * on the ERC-20 path would have let a seller raise the price on top of a
+   * pending purchase and be paid out of a standing allowance.
+   */
+  it("will not let a reprice overcharge a buy that is already in flight", async () => {
+    const { owner, alice, bob, market, nft, devox } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, await devox.getAddress(), e18(10));
+
+    // A buyer with a standing allowance, which is the normal case.
+    await devox.connect(owner).transfer(bob.address, e18(5000));
+    await devox.connect(bob).approve(await market.getAddress(), e18(5000));
+
+    // The seller raises the price before the buy lands.
+    await market.connect(alice).updatePrice(0, e18(5000));
+
+    await expect(
+      market.connect(bob).buy(0, e18(10)),
+    ).to.be.revertedWithCustomError(market, "PriceMoved");
+
+    // Nothing moved: the buyer still holds every token and the NFT is unsold.
+    expect(await devox.balanceOf(bob.address)).to.equal(e18(5000));
+    expect(await nft.ownerOf(1)).to.equal(alice.address);
+
+    // A buyer who does agree to the new number can still buy.
+    await market.connect(bob).buy(0, e18(5000));
+    expect(await nft.ownerOf(1)).to.equal(bob.address);
+  });
+
+  it("lets a price drop through, since a cheaper fill never harms the buyer", async () => {
+    const { alice, bob, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    await market.connect(alice).updatePrice(0, e18(40));
+
+    // Agreed to 100, charged 40. The native path still requires exact value.
+    await market.connect(bob).buy(0, e18(100), { value: e18(40) });
+    expect(await nft.ownerOf(1)).to.equal(bob.address);
   });
 
   it("refuses to reprice once approval has been revoked", async () => {

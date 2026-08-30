@@ -2166,6 +2166,11 @@ export const devoxNFTMarketAbi = [
  },
  {
   "inputs": [],
+  "name": "PriceMoved",
+  "type": "error"
+ },
+ {
+  "inputs": [],
   "name": "ReentrancyGuardReentrantCall",
   "type": "error"
  },
@@ -2538,6 +2543,11 @@ export const devoxNFTMarketAbi = [
    {
     "internalType": "uint256",
     "name": "id",
+    "type": "uint256"
+   },
+   {
+    "internalType": "uint256",
+    "name": "maxPrice",
     "type": "uint256"
    }
   ],
