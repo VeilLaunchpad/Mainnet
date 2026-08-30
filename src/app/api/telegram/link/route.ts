@@ -13,11 +13,7 @@ import { appUrl } from "@/lib/app-url";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const BOT = // Still @VeilPadBot: a bot's @username can only be changed in BotFather, by
-// hand. The display name, description and command list are all DEVOXPAD
-// already - the handle is the one piece the API cannot rebrand. Flip the env
-// var the moment the username is changed there.
-  process.env.NEXT_PUBLIC_TELEGRAM_BOT || "VeilPadBot";
+const BOT = process.env.NEXT_PUBLIC_TELEGRAM_BOT || "DevoxPadBot";
 const APP = appUrl();
 
 /** Which chats an address has linked, and what they have been up to. */

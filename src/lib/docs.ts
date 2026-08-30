@@ -898,7 +898,7 @@ const telegram: DocPage = {
       blocks: [
         {
           type: "p",
-          text: "Linking a Telegram chat to a wallet lets @VeilPadBot run the same agents that run on the site, read the chain on your behalf, and record everything into the same dashboard timeline. It is the app, reachable from where you already are.",
+          text: "Linking a Telegram chat to a wallet lets @DevoxPadBot run the same agents that run on the site, read the chain on your behalf, and record everything into the same dashboard timeline. It is the app, reachable from where you already are.",
         },
         {
           type: "note",

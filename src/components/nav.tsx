@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { PrivacySwitch } from "./privacy-switch";
 import { ConnectButton } from "./connect-button";
 import { NetworkSwitch } from "./network-switch";
 
@@ -78,6 +79,7 @@ export function Nav() {
           >
             Launch
           </Link>
+          <PrivacySwitch />
           <NetworkSwitch />
           <ConnectButton />
           <button

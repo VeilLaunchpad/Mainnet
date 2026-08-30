@@ -15,6 +15,8 @@ import { isDeployed } from "@/lib/addresses";
 import { ensureAllowance } from "@/lib/allowance";
 import { explorerAddress } from "@/lib/chain";
 import { shortAddr } from "@/lib/format";
+import { PrivacyNote } from "@/components/privacy-note";
+import { usePrivacy } from "@/components/privacy-provider";
 
 /**
  * Staking, and what it actually promises.
@@ -62,6 +64,21 @@ export default function StakePage() {
   const { report, show } = useResult();
 
   const [pools, setPools] = useState<PoolCard[] | null>(null);
+  const privacy = usePrivacy();
+
+  /**
+   * With privacy on, the pool that takes an encrypted token comes first.
+   *
+   * The switch has to change what you see, not just what a caption says. This
+   * is the only pool here whose staked balance is a ciphertext, so it is the
+   * one a person who turned privacy on is looking for - and hunting for it
+   * three cards down is how a privacy setting becomes decoration.
+   */
+  const ordered = useMemo(() => {
+    if (!pools) return null;
+    if (!privacy.on) return pools;
+    return [...pools].sort((a, b) => Number(b.privateToken) - Number(a.privateToken));
+  }, [pools, privacy.on]);
   /**
    * Why the list is empty, when it is empty for a reason.
    *
@@ -232,6 +249,15 @@ export default function StakePage() {
         />
       </div>
 
+      <div className="mb-5">
+        <PrivacyNote
+          hidden={[
+            "your staked amount in a private-token pool, and its balance",
+          ]}
+          visible={["that you staked", "your address", "amounts in the public pools"]}
+        />
+      </div>
+
       {pools === null ? (
         <div className="grid gap-4 lg:grid-cols-2">
           <Skeleton className="h-64 rounded-2xl" />
@@ -250,7 +276,7 @@ export default function StakePage() {
         <Empty title="No pools yet" body="Nothing has been opened for staking on this network." />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          {pools.map((p) => (
+          {(ordered ?? pools).map((p) => (
             <PoolPanel
               key={p.pid}
               pool={p}

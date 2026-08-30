@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { wagmiConfig } from "@/lib/wagmi";
 import { BusyProvider } from "./busy";
 import { ResultProvider } from "./result-modal";
+import { PrivacyProvider } from "./privacy-provider";
 import { NetworkProvider } from "./network-provider";
 import type { CotiNetworkName } from "@/lib/chain";
 
@@ -35,7 +36,7 @@ export function Providers({
       <QueryClientProvider client={client}>
         <NetworkProvider initial={network} pinned={pinned} needsChoice={needsChoice}>
           <BusyProvider>
-            <ResultProvider>{children}</ResultProvider>
+            <ResultProvider><PrivacyProvider>{children}</PrivacyProvider></ResultProvider>
           </BusyProvider>
         </NetworkProvider>
       </QueryClientProvider>

@@ -21,6 +21,7 @@ import {
 } from "@/lib/nft-abis";
 import { erc20Abi } from "@/lib/abis";
 import { addressesFor, isDeployed } from "@/lib/addresses";
+import { PrivacyNote } from "@/components/privacy-note";
 import { NATIVE } from "@/components/nft/shared";
 
 /**
@@ -465,6 +466,16 @@ export default function StudioPage() {
               placeholder="An unlock link, a key, the real art — whatever only a holder should see"
               className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
             />
+            <div className="mb-1">
+              <PrivacyNote
+                hidden={["the private half of the metadata, sealed to each holder"]}
+                visible={[
+                  "the collection, its supply and its price",
+                  "the public preview and traits",
+                  "who owns which token",
+                ]}
+              />
+            </div>
             <p className="text-[12px] text-white/40">
               Encrypted in this browser under your key, validated by COTI&apos;s MPC network, and
               re-sealed to each holder on mint and on every transfer. We never see it, and neither

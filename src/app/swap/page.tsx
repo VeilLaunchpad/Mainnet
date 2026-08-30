@@ -11,6 +11,7 @@ import { isDeployed, SWAP_FEE_BPS } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { fmtNum, fmtUnits, parseUnits, shortAddr, isAddress } from "@/lib/format";
 import { explorerTx, explorerAddress } from "@/lib/chain";
+import { PrivacyNote } from "@/components/privacy-note";
 import { ensureAllowance } from "@/lib/allowance";
 import { CARBON_CONTROLLER, CARBON_NATIVE } from "@/lib/carbon";
 import { carbonRouteAbi } from "@/lib/carbon-route";
@@ -483,6 +484,21 @@ function DefiInner() {
                     )}
                   </div>
                 )}
+              </div>
+
+              <div className="mt-3">
+                <PrivacyNote
+                  hidden={
+                    active && active.address
+                      ? ["your balance of this token, if it was launched with encrypted balances"]
+                      : []
+                  }
+                  visible={[
+                    "the swap itself",
+                    "your address",
+                    "the COTI amount",
+                  ]}
+                />
               </div>
 
               <label className="mt-3 block text-[11px] font-semibold text-white/60">

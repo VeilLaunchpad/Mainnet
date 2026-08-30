@@ -10,6 +10,8 @@ import { AgentChat } from "@/components/agent-chat";
 import { PriceText } from "@/components/price-chart";
 import { devoxFactoryAbi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
+import { usePrivacy } from "@/components/privacy-provider";
+import { PrivacyNote } from "@/components/privacy-note";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { explorerTx, explorerAddress } from "@/lib/chain";
 import { fmtNum, slugify } from "@/lib/format";
@@ -67,7 +69,16 @@ function LaunchInner() {
   const [allocation, setAllocation] = useState<Allocation>("keep");
   const [burnPercent, setBurnPercent] = useState(50);
   const [lockDays, setLockDays] = useState(30);
+  // Seeded from the global switch so a user who set privacy once does not have
+  // to set it again per launch. Still overridable here: this is the one place
+  // the choice is permanent, because a token's kind is fixed at deployment.
+  const privacy = usePrivacy();
   const [privateBalances, setPrivateBalances] = useState(true);
+  const [touchedPrivacy, setTouchedPrivacy] = useState(false);
+
+  useEffect(() => {
+    if (!touchedPrivacy && privacy.ready) setPrivateBalances(privacy.on);
+  }, [privacy.ready, privacy.on, touchedPrivacy]);
 
   const [uploading, setUploading] = useState(false);
   const [econ, setEcon] = useState<Economics | null>(null);
@@ -345,7 +356,27 @@ function LaunchInner() {
               hasDevBuy={devBuyWei > 0n}
             />
 
-            <Privacy value={privateBalances} onChange={setPrivateBalances} />
+            <Privacy
+              value={privateBalances}
+              onChange={(v) => {
+                setTouchedPrivacy(true);
+                setPrivateBalances(v);
+              }}
+            />
+            <div className="mt-3">
+              <PrivacyNote
+                hidden={
+                  privateBalances
+                    ? ["every holder's balance", "the total supply figure"]
+                    : []
+                }
+                visible={[
+                  "the token exists and who deployed it",
+                  "every transfer's sender and recipient",
+                  "the COTI paid on the curve",
+                ]}
+              />
+            </div>
           </div>
 
           <div className="space-y-3 lg:col-span-2">

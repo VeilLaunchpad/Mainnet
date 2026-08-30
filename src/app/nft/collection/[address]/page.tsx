@@ -17,6 +17,7 @@ import { devoxNFTDropAbi, devoxNFTEditionsAbi, devoxNFTMarketAbi } from "@/lib/n
 import { addressesFor } from "@/lib/addresses";
 import { explorerAddress } from "@/lib/chain";
 import { shortAddr, fmtUnits } from "@/lib/format";
+import { PrivacyNote } from "@/components/privacy-note";
 import { PreviewArt, priceLabel, NATIVE, type Collection } from "@/components/nft/shared";
 
 /**
@@ -499,6 +500,12 @@ export default function CollectionPage() {
       {/* ── mint ──────────────────────────────────────────────────────── */}
       <Section className="mt-8" title="Mint">
         <div className="card p-5">
+          <div className="mb-4">
+            <PrivacyNote
+              hidden={["the sealed metadata, re-sealed to you on mint and on every transfer"]}
+              visible={["that you minted", "your address", "what you paid"]}
+            />
+          </div>
           {c.kind === "editions" && editions.length > 0 && (
             <div className="mb-4">
               <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-white/35">
