@@ -95,7 +95,7 @@
         "abi": "wcotiAbi"
       },
       "swapFactory": {
-        "address": "0x9B6b892d89F1AC96A06a768f6D4dDb9A50Cd689c",
+        "address": "0x9DFC22785fF4a6D42334b8BB953F63F1AFF5BA3C",
         "status": "deployed",
         "deployOrder": 2,
         "role": "DevoxSwap pair factory. One pair per token pair, CREATE2 so the address is derivable before it exists.",
@@ -103,7 +103,7 @@
         "abi": "devoxSwapFactoryAbi"
       },
       "swapRouter": {
-        "address": "0x8C464A9Ad2E08209f4e92D8c912d9B9467a2d74a",
+        "address": "0x4727E0cC090dc3233301Cd01E6F85eD29c1aF883",
         "status": "deployed",
         "deployOrder": 3,
         "role": "Wraps and unwraps native COTI around a swap, applies deadlines, exposes quotes. Holds no funds, has no admin.",
@@ -111,21 +111,21 @@
         "abi": "devoxSwapRouterAbi"
       },
       "privateTokenDeployer": {
-        "address": "0x0bcdF5f2120709610e1f4B66c52cC0a0543899cD",
+        "address": "0xAFc2b1DeAd18EC869d6dcc513Fde3356d440D81A",
         "status": "deployed",
         "deployOrder": 4,
         "role": "Holds DevoxToken creation code so the factory stays under the 24KB limit. Renounces its own admin role in the same transaction.",
         "envKey": null
       },
       "publicTokenDeployer": {
-        "address": "0x04cf3572Ea8CFeF5a8B8f0Ffbf4c688A82EC2741",
+        "address": "0xD621FCa951C87b02bbBC21883ba71737cE4f1e5e",
         "status": "deployed",
         "deployOrder": 5,
         "role": "Same, for the transparent ERC-20 variant.",
         "envKey": null
       },
       "factory": {
-        "address": "0xc0D9E704071341896b3B0BBCedF242A16B363773",
+        "address": "0x2Cd471Fbe4684C7E77ADd24fb8a33961419B4D05",
         "status": "deployed",
         "deployOrder": 6,
         "role": "One transaction deploys a token and its bonding curve. Curve first, so the token can name it sole minter in its own constructor - no role handoff window.",
@@ -168,13 +168,13 @@
         "abi": "devoxSwapPairAbi"
       },
       "portal": {
-        "address": "0xf418A5cFa6f67c4A635A8F9814C98d7AbB72ED8a",
+        "address": "0xaaF58A4ac53B441db322704398343b68D8E536Ff",
         "status": "deployed",
         "role": "Privacy portal. Locks a public token and mints its private twin one to one; burns the twin to release the escrow.",
         "envKey": "NEXT_PUBLIC_PORTAL_MAINNET"
       },
       "portalTokenDeployer": {
-        "address": "0xBdD18894D4c1697cD38adD26Bb6C82fF90f015F3",
+        "address": "0x1a463b6F16CAc6A504a0476e99b519C30df19986",
         "status": "deployed",
         "role": "Holds DevoxPortalToken creation code so the portal stays under the 24KB limit. Renounces its own admin on every twin it makes."
       },
@@ -185,7 +185,7 @@
         "envKey": null
       },
       "locker": {
-        "address": "0xB739F0B5506e8f9a29e41aaEb11B458BF9b0B5Df",
+        "address": "0x5E5B8999EB8571f87EC5Bc5778441D41646bcd77",
         "status": "deployed"
       },
       "devoxpadToken": {

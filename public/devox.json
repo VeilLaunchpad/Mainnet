@@ -1,0 +1,29 @@
+{
+  "name": "DEVOXPAD",
+  "symbol": "DEVOX",
+  "decimals": 18,
+  "chainId": 2632500,
+  "address": "0x17f23bdE4f3111777fD113390B7dAA3C49c28888",
+  "description": "The protocol token of DEVOXPAD, the agentic privacy superapp on COTI. One billion, minted once in the constructor, with no mint function afterwards. Stake it, or wrap it through DevoxPortal for p.DEVOXPAD, its private twin.",
+  "image": "https://devoxpad-app.vercel.app/devox-token.svg",
+  "external_url": "https://devoxpad-app.vercel.app",
+  "links": {
+    "site": "https://devoxpad-app.vercel.app",
+    "nft": "https://devoxpad-nft.vercel.app",
+    "x": "https://x.com/LaunchOnVeil",
+    "contracts": "https://devoxpad-app.vercel.app/devox-contracts",
+    "staking": "https://devoxpad-app.vercel.app/stake",
+    "docs": "https://devoxpad-app.vercel.app/docs",
+    "explorer": "https://mainnet.cotiscan.io/address/0x17f23bdE4f3111777fD113390B7dAA3C49c28888"
+  },
+  "supply": {
+    "total": "1000000000",
+    "mintable": false,
+    "treasuryAllocation": "200000000",
+    "note": "The treasury allocation exists to pay staking rewards. It cannot be topped up by minting, because nothing can mint."
+  },
+  "history": {
+    "renamedFrom": "VEILPAD",
+    "note": "DEVOXPAD was previously called VEILPAD. The old $VEIL token at 0x11728cBe1734b437723D06Dd137549e05f358888 is abandoned: its liquidity was withdrawn and its order-book strategy deleted, so it has no market. It is not convertible to $DEVOX and was never held by anyone but the deployer."
+  }
+}
