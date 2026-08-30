@@ -197,6 +197,18 @@ function Turn({
   const current = turn.tools.find((t) => t.running);
   const showTools = pinned ?? running;
 
+  /**
+   * Once the answer is here, the steps have done their job.
+   *
+   * They exist to show work in progress, not to sit above the reply
+   * afterwards - so the whole block goes, pill included, the moment content
+   * starts arriving. The one exception is a step that failed: the answer may
+   * be missing something because of it, and quietly hiding that would be the
+   * interface deciding you do not need to know.
+   */
+  const answered = !!turn.content && !running;
+  const showSteps = !answered || failed > 0;
+
   return (
     <div className="animate-rise flex gap-2.5">
       <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-devox-500 to-cy-500 text-[10px] font-bold text-white">
@@ -204,7 +216,7 @@ function Turn({
       </span>
 
       <div className="min-w-0 flex-1">
-        {turn.tools.length > 0 && (
+        {turn.tools.length > 0 && showSteps && (
           <div className="mb-1.5">
             <button
               onClick={() => setPinned(!showTools)}
