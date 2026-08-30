@@ -1248,7 +1248,7 @@
   "nft": {
     "_comment": "The NFT stack. Drops are COTI PrivateERC721: the preview is public so a marketplace can render it, and the metadata is a ciphertext re-sealed to whoever holds the token.",
     "factory": "0xca4E24923724C09F905593988487338780e3424a",
-    "market": "0x83dAA54A3d5D96434458a294Af60a39A6EF04791",
+    "market": "0x02b9cB08C89BF96885C1e72ae5a2dE5466837067",
     "staking": "0x2438202dd999022da10c6E6ac914cBC6a72E0cd2",
     "marketFeeBps": 250,
     "launchFeeCoti": "0.05",
