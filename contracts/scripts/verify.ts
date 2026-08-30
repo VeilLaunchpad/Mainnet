@@ -30,18 +30,56 @@ interface BuildInfo {
   output: { contracts: Record<string, Record<string, unknown>> };
 }
 
-/** Finds the build-info that actually produced a given contract. */
-function buildInfoFor(contractName: string): { info: BuildInfo; sourcePath: string } | null {
+/**
+ * Finds the build-info that actually produced the code at a given address.
+ *
+ * Taking the first build-info that merely mentions the contract name is wrong
+ * as soon as a contract has been recompiled, and it fails in the worst way:
+ * Blockscout accepts the submission, compares the old source against the new
+ * bytecode, and the job simply never verifies - no error surfaces anywhere.
+ * That is what happened to the redeployed marketplace, which had two
+ * build-infos, one per version.
+ *
+ * So the deployed runtime code decides. `deployedBytecode` carries the metadata
+ * hash at its tail, which differs between builds, and only the build that
+ * produced this contract matches it. When nothing matches - a contract compiled
+ * elsewhere, say - the newest is used and the caller is told it was a guess.
+ */
+function buildInfoFor(
+  contractName: string,
+  runtime?: string,
+): { info: BuildInfo; sourcePath: string; matched: boolean } | null {
   const dir = path.resolve(__dirname, "../artifacts/build-info");
   if (!fs.existsSync(dir)) return null;
 
+  const onChain = (runtime || "").replace(/^0x/, "").toLowerCase();
+  const candidates: { info: BuildInfo; sourcePath: string; mtime: number; compiled: string }[] = [];
+
   for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".json"))) {
-    const info = JSON.parse(fs.readFileSync(path.join(dir, file), "utf8")) as BuildInfo;
+    const full = path.join(dir, file);
+    const info = JSON.parse(fs.readFileSync(full, "utf8")) as BuildInfo;
     for (const [sourcePath, contracts] of Object.entries(info.output.contracts ?? {})) {
-      if (contractName in contracts) return { info, sourcePath };
+      if (!(contractName in contracts)) continue;
+      const c = contracts[contractName] as {
+        evm?: { deployedBytecode?: { object?: string } };
+      };
+      candidates.push({
+        info,
+        sourcePath,
+        mtime: fs.statSync(full).mtimeMs,
+        compiled: (c.evm?.deployedBytecode?.object || "").replace(/^0x/, "").toLowerCase(),
+      });
     }
   }
-  return null;
+  if (!candidates.length) return null;
+
+  if (onChain) {
+    const hit = candidates.find((c) => c.compiled && c.compiled === onChain);
+    if (hit) return { info: hit.info, sourcePath: hit.sourcePath, matched: true };
+  }
+
+  candidates.sort((a, b) => b.mtime - a.mtime);
+  return { info: candidates[0].info, sourcePath: candidates[0].sourcePath, matched: false };
 }
 
 async function alreadyVerified(address: string): Promise<boolean> {
@@ -58,10 +96,16 @@ async function alreadyVerified(address: string): Promise<boolean> {
 async function verify(address: string, contractName: string): Promise<string> {
   if (await alreadyVerified(address)) return "already verified";
 
-  const found = buildInfoFor(contractName);
+  // The code actually at the address, so the right build is chosen rather than
+  // whichever one the directory listing happened to yield first.
+  const runtime = await ethers.provider.getCode(address).catch(() => "");
+  const found = buildInfoFor(contractName, runtime);
   if (!found) return "no build-info for " + contractName + "; run hardhat compile";
 
-  const { info, sourcePath } = found;
+  const { info, sourcePath, matched } = found;
+  if (!matched) {
+    console.log("    ! no build matches the deployed code; using the newest, which may fail");
+  }
 
   const form = new FormData();
   form.append("compiler_version", "v" + info.solcLongVersion);
