@@ -35,6 +35,15 @@ export interface ChatTurn {
   tools: ToolStep[];
   actions: AgentAction[];
   streaming?: boolean;
+  /**
+   * Replayed from the thread rather than watched happening.
+   *
+   * The step list is a progress indicator, so on a reload there is no progress
+   * left to indicate - the work finished before the page existed. Without this
+   * flag a restored turn is indistinguishable from one still running, and the
+   * steps come back every refresh.
+   */
+  restored?: boolean;
   at: number;
 }
 
@@ -80,6 +89,7 @@ export function useAgentChat(agentSlug: string, address?: string | null) {
             content: m.content,
             tools: (m.tools || []).map((t: any) => ({ name: t.name, ok: t.ok, running: false, result: t.result })),
             actions: (m.actions || []).map((a: any) => ({ ...a, state: "pending" as const })),
+            restored: true,
             at: m.at,
           }));
         });

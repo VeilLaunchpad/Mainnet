@@ -206,8 +206,29 @@ function Turn({
    * be missing something because of it, and quietly hiding that would be the
    * interface deciding you do not need to know.
    */
+  /**
+   * Steps are a progress indicator, so they only belong to work in progress.
+   *
+   * On a reload there is no progress left to show - the turn finished before
+   * the page existed - so a replayed turn never shows them, however it ended.
+   * A live turn keeps its steps while tools run, and keeps the pill afterwards
+   * only if one failed, because the answer may be missing something because of
+   * it and hiding that would be the interface choosing what you get to know.
+   */
   const answered = !!turn.content && !running;
-  const showSteps = !answered || failed > 0;
+  const showSteps = turn.restored ? false : !answered || failed > 0;
+
+  /**
+   * Nothing to say and nothing to show.
+   *
+   * A turn that ended with no text, no actions and no visible steps was still
+   * drawing an avatar beside an empty row - which reads as a reply that failed
+   * to load rather than one that never had a body.
+   */
+  const empty =
+    !turn.content && !turn.streaming && turn.actions.length === 0 && !showSteps;
+
+  if (empty) return null;
 
   return (
     <div className="animate-rise flex gap-2.5">
