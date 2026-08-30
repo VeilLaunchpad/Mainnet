@@ -32,7 +32,13 @@ export interface TokenBalance {
   loading: boolean;
   revealing: boolean;
   error: string | null;
-  /** Decrypts an encrypted balance locally. Costs one signature, no gas. */
+  /**
+   * Decrypts an encrypted balance locally.
+   *
+   * Free once the COTI key exists for this address and network. Creating that
+   * key the first time is a signature AND an on-chain transaction, so this does
+   * not promise "one signature, no gas" the way the rest of the app used to.
+   */
   reveal: () => Promise<void>;
   refresh: () => void;
 }

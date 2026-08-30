@@ -310,7 +310,7 @@ function Assets({
             <p className="mt-0.5 text-[12px] leading-relaxed text-white/45">
               {unlocked
                 ? "Decrypted locally. Nothing left this browser, and the numbers above exist nowhere on our server."
-                : "One signature derives your AES key and decrypts every private holding at once. The key is cached here and never sent anywhere."}
+                : "The first unlock takes one signature and one transaction - COTI registers your key on chain, so it costs a little gas. After that the key is cached here, never sent anywhere, and decrypting is free."}
             </p>
           </div>
           {unlocked ? (

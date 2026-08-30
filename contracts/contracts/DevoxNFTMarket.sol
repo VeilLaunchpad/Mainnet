@@ -70,6 +70,7 @@ contract DevoxNFTMarket is Ownable, ReentrancyGuard {
 
     event Listed(uint256 indexed id, address indexed collection, uint256 indexed tokenId, address seller, address payToken, uint256 price);
     event Delisted(uint256 indexed id, address indexed collection, uint256 indexed tokenId);
+    event PriceUpdated(uint256 indexed id, address indexed collection, uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice);
     event Sold(uint256 indexed id, address indexed collection, uint256 indexed tokenId, address seller, address buyer, uint256 price, uint256 fee, uint256 royalty);
     event OfferMade(uint256 indexed id, address indexed collection, uint256 indexed tokenId, address bidder, address payToken, uint256 amount);
     event OfferCancelled(uint256 indexed id);
@@ -175,6 +176,75 @@ contract DevoxNFTMarket is Ownable, ReentrancyGuard {
         l.active = false;
         delete _listingOf[l.collection][l.tokenId];
         emit Delisted(id, l.collection, l.tokenId);
+    }
+
+    /**
+     * Clears a listing that can never execute again.
+     *
+     * `_listingOf` still points at a listing after the seller moves the token
+     * off-market, and `list()` refuses a token that already has an active one.
+     * The new holder could therefore neither list it nor take the old listing
+     * down, because `delist` answers only to the recorded seller. The token was
+     * permanently unlistable here unless its previous owner came back to tidy
+     * up - and if they had sold it, they had no reason to.
+     *
+     * Opening this to anyone is safe precisely because it is limited to a
+     * listing that is already dead: `buy` re-checks ownership and reverts on
+     * exactly this state, so nothing that could still have executed is being
+     * cancelled. A seller who still holds their token keeps sole control - a
+     * revoked approval does not qualify, since re-approving or delisting is
+     * theirs to do.
+     */
+    function clearStaleListing(uint256 id) external nonReentrant {
+        Listing storage l = _listings[id];
+        if (!l.active) revert NotActive();
+
+        address holder;
+        try IERC721(l.collection).ownerOf(l.tokenId) returns (address o) {
+            holder = o;
+        } catch {
+            // Burned. The listing outlived the token it was selling.
+            holder = address(0);
+        }
+        require(holder != l.seller, "the seller still holds it");
+
+        l.active = false;
+        delete _listingOf[l.collection][l.tokenId];
+        emit Delisted(id, l.collection, l.tokenId);
+    }
+
+    /**
+     * Changes the asking price of a listing already made.
+     *
+     * Without this, a seller who wants a different number has to delist and list
+     * again: two signatures, two fees, and a new listing id that breaks the
+     * thread of the token's own history. Repricing is the most ordinary thing a
+     * seller does, so it should not cost more than the listing itself did.
+     *
+     * Only the price moves. The seller, the collection, the token and the pay
+     * token are all left exactly as they were, so this cannot be used to point
+     * an existing listing at a different asset - the one thing a reprice must
+     * never be able to do.
+     *
+     * Ownership is re-checked because a listing can go stale while it sits, and
+     * putting a fresh price on a token the seller no longer holds would make a
+     * dead listing look newly minted to anyone sorting by price.
+     */
+    function updatePrice(uint256 id, uint256 newPrice) external nonReentrant {
+        Listing storage l = _listings[id];
+        if (!l.active) revert NotActive();
+        require(l.seller == msg.sender, "not the seller");
+        require(newPrice > 0, "price is zero");
+
+        IERC721 c = IERC721(l.collection);
+        if (c.ownerOf(l.tokenId) != msg.sender) revert NotOwner();
+        if (!c.isApprovedForAll(msg.sender, address(this)) && c.getApproved(l.tokenId) != address(this)) {
+            revert NotApproved();
+        }
+
+        uint256 oldPrice = l.price;
+        l.price = newPrice;
+        emit PriceUpdated(id, l.collection, l.tokenId, oldPrice, newPrice);
     }
 
     /**

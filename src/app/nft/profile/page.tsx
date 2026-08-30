@@ -12,6 +12,7 @@ import { useNetwork } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { shortAddr } from "@/lib/format";
 import { CollectionCard, type Collection } from "@/components/nft/shared";
+import { ListingControls } from "@/components/nft/listing-controls";
 
 /**
  * My profile.
@@ -81,6 +82,21 @@ export default function ProfilePage() {
       alive = false;
     };
   }, [net]);
+
+  /**
+   * Re-read the listings after the seller changes one.
+   *
+   * Listings are read from the chain on every request rather than from an
+   * index, so this only has to ask again - but it does have to ask. Leaving the
+   * old price on screen after a successful reprice would be the same class of
+   * untruth as showing a reverted trade as confirmed.
+   */
+  const loadListings = useCallback(() => {
+    fetch("/api/nft/listings?limit=200")
+      .then((r) => r.json())
+      .then((l) => setListings(l.listings ?? []))
+      .catch(() => {});
+  }, []);
 
   const mineCollections = useMemo(
     () => (collections && me ? collections.filter((c) => c.creator.toLowerCase() === me.toLowerCase()) : []),
@@ -217,28 +233,46 @@ export default function ProfilePage() {
           <Empty title="Nothing listed" body="Open a collection you hold and list a token from there." />
         ) : (
           <div className="card divide-y divide-white/[0.06]">
+            {/* The row used to be one big link, which left nowhere to put a
+                control: a button inside an anchor navigates as well as acts.
+                Only the token reference is a link now. */}
             {myListings.map((l) => (
-              <Link
+              <div
                 key={l.id}
-                href={"/nft/collection/" + l.collection}
                 className="flex flex-wrap items-center gap-3 px-4 py-3 transition hover:bg-white/[0.03]"
               >
-                <span className="mono text-[13px] font-semibold">#{l.tokenId}</span>
-                <span className="mono text-[11px] text-white/35">{shortAddr(l.collection)}</span>
-                <span className="mono text-[13px] text-white/70">
-                  {Number(formatEther(BigInt(l.price))).toLocaleString(undefined, {
-                    maximumFractionDigits: 4,
-                  })}{" "}
-                  COTI
-                </span>
-                <span className="ml-auto">
+                <Link
+                  href={"/nft/collection/" + l.collection}
+                  className="flex flex-wrap items-center gap-3"
+                >
+                  <span className="mono text-[13px] font-semibold">#{l.tokenId}</span>
+                  <span className="mono text-[11px] text-white/35">{shortAddr(l.collection)}</span>
+                  <span className="mono text-[13px] text-white/70">
+                    {Number(formatEther(BigInt(l.price))).toLocaleString(undefined, {
+                      maximumFractionDigits: 4,
+                    })}{" "}
+                    COTI
+                  </span>
+                </Link>
+                <span>
                   {l.live ? (
                     <Badge tone="mint">live</Badge>
                   ) : (
                     <Badge tone="muted">{l.reason || "inactive"}</Badge>
                   )}
                 </span>
-              </Link>
+                <div className="ml-auto">
+                  <ListingControls
+                    listing={{
+                      id: l.id,
+                      collection: l.collection,
+                      tokenId: l.tokenId,
+                      price: l.price,
+                    }}
+                    onChanged={loadListings}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         )}

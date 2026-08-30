@@ -14,11 +14,12 @@ import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { useCotiSession } from "@/lib/coti-client";
 import { devoxNFTDropAbi, devoxNFTEditionsAbi, devoxNFTMarketAbi } from "@/lib/nft-abis";
-import { addressesFor } from "@/lib/addresses";
+import { addressesFor, isDeployed } from "@/lib/addresses";
 import { explorerAddress } from "@/lib/chain";
 import { shortAddr, fmtUnits } from "@/lib/format";
 import { PrivacyNote } from "@/components/privacy-note";
 import { PreviewArt, priceLabel, NATIVE, type Collection } from "@/components/nft/shared";
+import { ListingControls } from "@/components/nft/listing-controls";
 
 /**
  * One collection: mint it, unlock what you own, and list it.
@@ -34,7 +35,12 @@ import { PreviewArt, priceLabel, NATIVE, type Collection } from "@/components/nf
  * opens every private thing in DEVOXPAD.
  */
 
-type OwnedDrop = { tokenId: bigint; secret?: string };
+type OwnedDrop = {
+  tokenId: bigint;
+  secret?: string;
+  /** Present when this token is currently up for sale on the marketplace. */
+  listing?: { id: bigint; price: bigint; payToken: Address };
+};
 
 export default function CollectionPage() {
   const params = useParams<{ address: string }>();
@@ -183,8 +189,38 @@ export default function CollectionPage() {
     }
 
     ids.sort((x, y) => (x < y ? -1 : 1));
-    setOwned(ids.map((tokenId) => ({ tokenId })));
-  }, [c, client, me, address, editionId]);
+
+    /**
+     * Whether each token is already listed.
+     *
+     * Without this the card offered "List" on a token that was already up for
+     * sale, and `list()` rejects that with AlreadyListed - a wallet prompt, a
+     * signature, and a revert to find out something the page could have said.
+     */
+    let listings: (OwnedDrop["listing"] | undefined)[] = [];
+    if (isDeployed(a.nftMarket) && ids.length) {
+      const res = await client.multicall({
+        contracts: ids.map((tokenId) => ({
+          address: a.nftMarket,
+          abi: devoxNFTMarketAbi,
+          functionName: "listingOf" as const,
+          args: [address, tokenId],
+        })),
+        allowFailure: true,
+      });
+      listings = res.map((r) => {
+        if (r.status !== "success") return undefined;
+        const [listed, id, l] = r.result as unknown as [
+          boolean,
+          bigint,
+          { price: bigint; payToken: Address },
+        ];
+        return listed ? { id, price: l.price, payToken: l.payToken } : undefined;
+      });
+    }
+
+    setOwned(ids.map((tokenId, i) => ({ tokenId, listing: listings[i] })));
+  }, [c, client, me, address, editionId, a.nftMarket]);
 
   useEffect(() => {
     void loadOwned();
@@ -663,6 +699,15 @@ export default function CollectionPage() {
                     </p>
                   )}
 
+                  {o.listing && (
+                    <div className="mt-3 flex items-center justify-between rounded-lg border border-mint-400/20 bg-mint-400/[0.05] px-3 py-2">
+                      <span className="text-[11px] text-white/50">Listed at</span>
+                      <span className="mono text-[13px] font-semibold text-mint-300">
+                        {fmtUnits(o.listing.price.toString(), 18, 4)} COTI
+                      </span>
+                    </div>
+                  )}
+
                   <div className="mt-3 flex gap-2">
                     <button
                       onClick={() => unlock(o.tokenId)}
@@ -671,14 +716,34 @@ export default function CollectionPage() {
                     >
                       {unlocking === o.tokenId.toString() ? <Spinner /> : o.secret ? "Unlocked" : "Unlock"}
                     </button>
-                    <button
-                      onClick={() => listToken(o.tokenId)}
-                      disabled={listing === o.tokenId.toString()}
-                      className="flex-1 rounded-lg border border-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
-                    >
-                      {listing === o.tokenId.toString() ? <Spinner /> : "List"}
-                    </button>
+                    {/* A token that is already listed cannot be listed again -
+                        `list()` reverts with AlreadyListed - so it is offered
+                        the two things it can actually do instead. */}
+                    {!o.listing && (
+                      <button
+                        onClick={() => listToken(o.tokenId)}
+                        disabled={listing === o.tokenId.toString()}
+                        className="flex-1 rounded-lg border border-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
+                      >
+                        {listing === o.tokenId.toString() ? <Spinner /> : "List"}
+                      </button>
+                    )}
                   </div>
+
+                  {o.listing && (
+                    <div className="mt-2">
+                      <ListingControls
+                        listing={{
+                          id: o.listing.id,
+                          collection: address,
+                          tokenId: o.tokenId,
+                          price: o.listing.price,
+                          payToken: o.listing.payToken,
+                        }}
+                        onChanged={() => void loadOwned()}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

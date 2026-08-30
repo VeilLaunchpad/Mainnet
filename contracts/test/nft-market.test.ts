@@ -314,4 +314,170 @@ describe("DevoxNFTMarket", () => {
     const [listed] = await market.listingOf(await nft.getAddress(), 1);
     expect(listed).to.equal(false);
   });
+
+  /**
+   * Repricing.
+   *
+   * Sellers change their minds, and before `updatePrice` the only way to do it
+   * was delist and list again - two signatures, and a new listing id that broke
+   * the token's history. These pin the two things that matter: the new price is
+   * what a buyer actually pays, and a reprice can move nothing except the price.
+   */
+  it("lets the seller change the asking price, and the new one is what a buyer pays", async () => {
+    const { alice, bob, fee, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    await expect(market.connect(alice).updatePrice(0, e18(40)))
+      .to.emit(market, "PriceUpdated")
+      .withArgs(0, await nft.getAddress(), 1, e18(100), e18(40));
+
+    const [, , l] = await market.listingOf(await nft.getAddress(), 1);
+    expect(l.price).to.equal(e18(40));
+
+    // The old price must stop working, or the reprice was decorative.
+    await expect(market.connect(bob).buy(0, { value: e18(100) })).to.be.revertedWithCustomError(
+      market,
+      "WrongPayment",
+    );
+
+    const sellerBefore = await ethers.provider.getBalance(alice.address);
+    const feeBefore = await ethers.provider.getBalance(fee.address);
+    await market.connect(bob).buy(0, { value: e18(40) });
+
+    expect(await nft.ownerOf(1)).to.equal(bob.address);
+    expect((await ethers.provider.getBalance(fee.address)) - feeBefore).to.equal(e18(1)); // 2.5%
+    expect((await ethers.provider.getBalance(alice.address)) - sellerBefore).to.equal(e18(39));
+  });
+
+  it("changes only the price, never what is being sold", async () => {
+    const { alice, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    const [, , before] = await market.listingOf(await nft.getAddress(), 1);
+    await market.connect(alice).updatePrice(0, e18(7));
+    const [, , after] = await market.listingOf(await nft.getAddress(), 1);
+
+    expect(after.seller).to.equal(before.seller);
+    expect(after.collection).to.equal(before.collection);
+    expect(after.tokenId).to.equal(before.tokenId);
+    expect(after.payToken).to.equal(before.payToken);
+    expect(after.listedAt).to.equal(before.listedAt);
+    expect(after.active).to.equal(true);
+    expect(after.price).to.equal(e18(7));
+
+    // The listing keeps its identity, which is the point of repricing in place.
+    const [listed, id] = await market.listingOf(await nft.getAddress(), 1);
+    expect(listed).to.equal(true);
+    expect(id).to.equal(0n);
+  });
+
+  it("only lets the seller reprice", async () => {
+    const { alice, bob, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    await expect(market.connect(bob).updatePrice(0, e18(1))).to.be.revertedWith("not the seller");
+    const [, , l] = await market.listingOf(await nft.getAddress(), 1);
+    expect(l.price).to.equal(e18(100));
+  });
+
+  it("refuses a zero price, a delisted listing, and a token the seller sold on", async () => {
+    const { alice, bob, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    // Zero would make the token free to anyone sending nothing.
+    await expect(market.connect(alice).updatePrice(0, 0)).to.be.revertedWith("price is zero");
+
+    // A stale listing must not be given a fresh price: it would sort into the
+    // market by a number that can never execute.
+    await nft.connect(alice).transferFrom(alice.address, bob.address, 1);
+    await expect(market.connect(alice).updatePrice(0, e18(5))).to.be.revertedWithCustomError(
+      market,
+      "NotOwner",
+    );
+
+    // And once delisted there is nothing to reprice.
+    await nft.connect(bob).transferFrom(bob.address, alice.address, 1);
+    await market.connect(alice).delist(0);
+    await expect(market.connect(alice).updatePrice(0, e18(5))).to.be.revertedWithCustomError(
+      market,
+      "NotActive",
+    );
+  });
+
+  /**
+   * The stale-listing lock.
+   *
+   * Before `clearStaleListing`, moving a listed token off-market left it
+   * permanently unlistable: `list()` refused it as AlreadyListed and `delist`
+   * answered only to the recorded seller, who no longer had any reason to help.
+   */
+  it("lets anyone clear a listing whose seller has moved the token on", async () => {
+    const { alice, bob, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    // Sold or gifted outside the marketplace.
+    await nft.connect(alice).transferFrom(alice.address, bob.address, 1);
+
+    // This is the state that used to be a dead end for bob.
+    await nft.connect(bob).setApprovalForAll(await market.getAddress(), true);
+    await expect(
+      market.connect(bob).list(await nft.getAddress(), 1, ZERO, e18(50)),
+    ).to.be.revertedWithCustomError(market, "AlreadyListed");
+    await expect(market.connect(bob).delist(0)).to.be.revertedWith("not the seller");
+
+    await expect(market.connect(bob).clearStaleListing(0))
+      .to.emit(market, "Delisted")
+      .withArgs(0, await nft.getAddress(), 1);
+
+    // And now the new owner can sell it.
+    await market.connect(bob).list(await nft.getAddress(), 1, ZERO, e18(50));
+    const [listed, , l] = await market.listingOf(await nft.getAddress(), 1);
+    expect(listed).to.equal(true);
+    expect(l.seller).to.equal(bob.address);
+    expect(l.price).to.equal(e18(50));
+  });
+
+  it("will not let a stranger clear a listing that is still good", async () => {
+    const { alice, bob, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    await expect(market.connect(bob).clearStaleListing(0)).to.be.revertedWith(
+      "the seller still holds it",
+    );
+
+    // A revoked approval is the seller's own business, not grounds for a
+    // stranger to cancel their sale.
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), false);
+    await expect(market.connect(bob).clearStaleListing(0)).to.be.revertedWith(
+      "the seller still holds it",
+    );
+
+    const [, , l] = await market.listingOf(await nft.getAddress(), 1);
+    expect(l.price).to.equal(e18(100));
+  });
+
+  it("refuses to reprice once approval has been revoked", async () => {
+    const { alice, market, nft } = await setup();
+    await nft.mint(alice.address, 1);
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), true);
+    await market.connect(alice).list(await nft.getAddress(), 1, ZERO, e18(100));
+
+    await nft.connect(alice).setApprovalForAll(await market.getAddress(), false);
+    await expect(market.connect(alice).updatePrice(0, e18(5))).to.be.revertedWithCustomError(
+      market,
+      "NotApproved",
+    );
+  });
 });

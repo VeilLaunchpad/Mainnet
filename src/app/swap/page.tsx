@@ -527,7 +527,7 @@ function DefiInner() {
                         {sellBal.revealing ? "Decrypting…" : "Reveal balance"}
                       </button>
                       <span className="text-[10px] text-white/30">
-                        encrypted on chain - one signature, no gas, stays local
+                        encrypted on chain - decrypted locally with your COTI key
                       </span>
                     </div>
                   );

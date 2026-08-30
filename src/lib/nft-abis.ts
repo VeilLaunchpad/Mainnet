@@ -2092,6 +2092,100 @@ export const devoxNFTEditionsFactoryAbi = [
 
 export const devoxNFTMarketAbi = [
  {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "owner_",
+    "type": "address"
+   },
+   {
+    "internalType": "address",
+    "name": "feeRecipient_",
+    "type": "address"
+   },
+   {
+    "internalType": "uint256",
+    "name": "feeBps_",
+    "type": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable",
+  "type": "constructor"
+ },
+ {
+  "inputs": [],
+  "name": "AlreadyListed",
+  "type": "error"
+ },
+ {
+  "inputs": [],
+  "name": "FeeTooHigh",
+  "type": "error"
+ },
+ {
+  "inputs": [],
+  "name": "NativeTransferFailed",
+  "type": "error"
+ },
+ {
+  "inputs": [],
+  "name": "NotActive",
+  "type": "error"
+ },
+ {
+  "inputs": [],
+  "name": "NotApproved",
+  "type": "error"
+ },
+ {
+  "inputs": [],
+  "name": "NotOwner",
+  "type": "error"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "owner",
+    "type": "address"
+   }
+  ],
+  "name": "OwnableInvalidOwner",
+  "type": "error"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "account",
+    "type": "address"
+   }
+  ],
+  "name": "OwnableUnauthorizedAccount",
+  "type": "error"
+ },
+ {
+  "inputs": [],
+  "name": "ReentrancyGuardReentrantCall",
+  "type": "error"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "token",
+    "type": "address"
+   }
+  ],
+  "name": "SafeERC20FailedOperation",
+  "type": "error"
+ },
+ {
+  "inputs": [],
+  "name": "WrongPayment",
+  "type": "error"
+ },
+ {
   "anonymous": false,
   "inputs": [
    {
@@ -2210,6 +2304,19 @@ export const devoxNFTMarketAbi = [
     "internalType": "uint256",
     "name": "id",
     "type": "uint256"
+   }
+  ],
+  "name": "OfferCancelled",
+  "type": "event"
+ },
+ {
+  "anonymous": false,
+  "inputs": [
+   {
+    "indexed": true,
+    "internalType": "uint256",
+    "name": "id",
+    "type": "uint256"
    },
    {
     "indexed": true,
@@ -2243,6 +2350,106 @@ export const devoxNFTMarketAbi = [
    }
   ],
   "name": "OfferMade",
+  "type": "event"
+ },
+ {
+  "anonymous": false,
+  "inputs": [
+   {
+    "indexed": true,
+    "internalType": "address",
+    "name": "collection",
+    "type": "address"
+   },
+   {
+    "indexed": false,
+    "internalType": "bool",
+    "name": "official",
+    "type": "bool"
+   }
+  ],
+  "name": "OfficialSet",
+  "type": "event"
+ },
+ {
+  "anonymous": false,
+  "inputs": [
+   {
+    "indexed": true,
+    "internalType": "address",
+    "name": "previousOwner",
+    "type": "address"
+   },
+   {
+    "indexed": true,
+    "internalType": "address",
+    "name": "newOwner",
+    "type": "address"
+   }
+  ],
+  "name": "OwnershipTransferred",
+  "type": "event"
+ },
+ {
+  "anonymous": false,
+  "inputs": [
+   {
+    "indexed": true,
+    "internalType": "uint256",
+    "name": "id",
+    "type": "uint256"
+   },
+   {
+    "indexed": true,
+    "internalType": "address",
+    "name": "collection",
+    "type": "address"
+   },
+   {
+    "indexed": true,
+    "internalType": "uint256",
+    "name": "tokenId",
+    "type": "uint256"
+   },
+   {
+    "indexed": false,
+    "internalType": "uint256",
+    "name": "oldPrice",
+    "type": "uint256"
+   },
+   {
+    "indexed": false,
+    "internalType": "uint256",
+    "name": "newPrice",
+    "type": "uint256"
+   }
+  ],
+  "name": "PriceUpdated",
+  "type": "event"
+ },
+ {
+  "anonymous": false,
+  "inputs": [
+   {
+    "indexed": true,
+    "internalType": "address",
+    "name": "collection",
+    "type": "address"
+   },
+   {
+    "indexed": false,
+    "internalType": "address",
+    "name": "recipient",
+    "type": "address"
+   },
+   {
+    "indexed": false,
+    "internalType": "uint256",
+    "name": "bps",
+    "type": "uint256"
+   }
+  ],
+  "name": "RoyaltySet",
   "type": "event"
  },
  {
@@ -2301,6 +2508,19 @@ export const devoxNFTMarketAbi = [
   "type": "event"
  },
  {
+  "inputs": [],
+  "name": "NATIVE",
+  "outputs": [
+   {
+    "internalType": "address",
+    "name": "",
+    "type": "address"
+   }
+  ],
+  "stateMutability": "view",
+  "type": "function"
+ },
+ {
   "inputs": [
    {
     "internalType": "uint256",
@@ -2335,6 +2555,19 @@ export const devoxNFTMarketAbi = [
    }
   ],
   "name": "cancelOffer",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "uint256",
+    "name": "id",
+    "type": "uint256"
+   }
+  ],
+  "name": "clearStaleListing",
   "outputs": [],
   "stateMutability": "nonpayable",
   "type": "function"
@@ -2699,6 +2932,26 @@ export const devoxNFTMarketAbi = [
   "type": "function"
  },
  {
+  "inputs": [],
+  "name": "owner",
+  "outputs": [
+   {
+    "internalType": "address",
+    "name": "",
+    "type": "address"
+   }
+  ],
+  "stateMutability": "view",
+  "type": "function"
+ },
+ {
+  "inputs": [],
+  "name": "renounceOwnership",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+ },
+ {
   "inputs": [
    {
     "internalType": "address",
@@ -2734,6 +2987,24 @@ export const devoxNFTMarketAbi = [
    }
   ],
   "stateMutability": "view",
+  "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "recipient",
+    "type": "address"
+   },
+   {
+    "internalType": "uint256",
+    "name": "bps",
+    "type": "uint256"
+   }
+  ],
+  "name": "setFee",
+  "outputs": [],
+  "stateMutability": "nonpayable",
   "type": "function"
  },
  {
@@ -2776,6 +3047,41 @@ export const devoxNFTMarketAbi = [
   "outputs": [],
   "stateMutability": "nonpayable",
   "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "newOwner",
+    "type": "address"
+   }
+  ],
+  "name": "transferOwnership",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "uint256",
+    "name": "id",
+    "type": "uint256"
+   },
+   {
+    "internalType": "uint256",
+    "name": "newPrice",
+    "type": "uint256"
+   }
+  ],
+  "name": "updatePrice",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+ },
+ {
+  "stateMutability": "payable",
+  "type": "receive"
  }
 ] as const;
 

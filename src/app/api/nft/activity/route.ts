@@ -31,11 +31,19 @@ const EVENTS = {
   sold: parseAbiItem(
     "event Sold(uint256 indexed id, address indexed collection, uint256 indexed tokenId, address seller, address buyer, uint256 price, uint256 fee, uint256 royalty)",
   ),
+  // A listing coming down is as much a fact as one going up, and repricing was
+  // invisible here because the marketplace could not do it at all until now.
+  delisted: parseAbiItem(
+    "event Delisted(uint256 indexed id, address indexed collection, uint256 indexed tokenId)",
+  ),
+  repriced: parseAbiItem(
+    "event PriceUpdated(uint256 indexed id, address indexed collection, uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice)",
+  ),
   staked: parseAbiItem("event Staked(address indexed who, uint256 indexed pid, uint256 tokenId)"),
 };
 
 export interface Activity {
-  kind: "launch" | "list" | "sale" | "stake";
+  kind: "launch" | "list" | "delist" | "reprice" | "sale" | "stake";
   block: number;
   hash: string;
   collection?: string;
@@ -54,7 +62,7 @@ export async function GET(req: NextRequest) {
   const range = { fromBlock: "earliest" as const, toBlock: "latest" as const };
   const grab = async <T>(run: () => Promise<T[]>): Promise<T[]> => run().catch(() => []);
 
-  const [drops, editions, listed, sold, staked] = await Promise.all([
+  const [drops, editions, listed, delisted, repriced, sold, staked] = await Promise.all([
     isDeployed(a.nftFactory)
       ? grab(() => client.getLogs({ address: a.nftFactory, event: EVENTS.launched, ...range }))
       : [],
@@ -65,6 +73,14 @@ export async function GET(req: NextRequest) {
       : [],
     isDeployed(a.nftMarket)
       ? grab(() => client.getLogs({ address: a.nftMarket, event: EVENTS.listed, ...range }))
+      : [],
+    isDeployed(a.nftMarket)
+      ? grab(() => client.getLogs({ address: a.nftMarket, event: EVENTS.delisted, ...range }))
+      : [],
+    // PriceUpdated only exists on a marketplace that can reprice; on an older
+    // one getLogs simply finds nothing, which grab() already tolerates.
+    isDeployed(a.nftMarket)
+      ? grab(() => client.getLogs({ address: a.nftMarket, event: EVENTS.repriced, ...range }))
       : [],
     isDeployed(a.nftMarket)
       ? grab(() => client.getLogs({ address: a.nftMarket, event: EVENTS.sold, ...range }))
@@ -97,6 +113,31 @@ export async function GET(req: NextRequest) {
       who: args.seller,
       price: args.price?.toString(),
       label: "#" + args.tokenId + " listed",
+    });
+  }
+
+  for (const l of delisted) {
+    const args = l.args as { collection?: Address; tokenId?: bigint };
+    out.push({
+      kind: "delist",
+      block: Number(l.blockNumber ?? 0n),
+      hash: l.transactionHash ?? "",
+      collection: args.collection,
+      tokenId: args.tokenId?.toString(),
+      label: "#" + args.tokenId + " delisted",
+    });
+  }
+
+  for (const l of repriced) {
+    const args = l.args as { collection?: Address; tokenId?: bigint; oldPrice?: bigint; newPrice?: bigint };
+    out.push({
+      kind: "reprice",
+      block: Number(l.blockNumber ?? 0n),
+      hash: l.transactionHash ?? "",
+      collection: args.collection,
+      tokenId: args.tokenId?.toString(),
+      price: args.newPrice?.toString(),
+      label: "#" + args.tokenId + " repriced",
     });
   }
 

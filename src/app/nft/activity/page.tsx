@@ -16,7 +16,7 @@ import { shortAddr } from "@/lib/format";
  */
 
 interface Activity {
-  kind: "launch" | "list" | "sale" | "stake";
+  kind: "launch" | "list" | "delist" | "reprice" | "sale" | "stake";
   block: number;
   hash: string;
   collection?: string;
@@ -29,6 +29,9 @@ interface Activity {
 const TONE = {
   launch: "devox",
   list: "cy",
+  // Taking a listing down is neither good news nor bad, so it reads as neither.
+  delist: "muted",
+  reprice: "cy",
   sale: "mint",
   stake: "amber",
 } as const;
@@ -63,6 +66,8 @@ export default function ActivityPage() {
               ["all", "All"],
               ["launch", "Launches"],
               ["list", "Listings"],
+              ["reprice", "Reprices"],
+              ["delist", "Delists"],
               ["sale", "Sales"],
               ["stake", "Stakes"],
             ] as const

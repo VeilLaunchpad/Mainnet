@@ -7,6 +7,9 @@ import { Section, Stat, Badge, Empty, Skeleton } from "@/components/ui";
 import { useNetwork } from "@/components/network-provider";
 import { shortAddr } from "@/lib/format";
 import { CollectionCard, PreviewArt, OfficialMark, type Collection } from "@/components/nft/shared";
+import { BuyListing } from "@/components/nft/buy-listing";
+import { ListingControls } from "@/components/nft/listing-controls";
+import { useAccount } from "wagmi";
 
 /**
  * Explore, two ways.
@@ -34,6 +37,7 @@ interface Listing {
   price: string;
   live: boolean;
   reason: string;
+  payToken?: string;
   collectionName?: string;
   collectionSymbol?: string;
   previewURI?: string;
@@ -52,6 +56,21 @@ export default function NFTExplorePage() {
 
   const [collections, setCollections] = useState<Collection[] | null>(null);
   const [listings, setListings] = useState<Listing[] | null>(null);
+  const { address: me } = useAccount();
+
+  /**
+   * Re-read after a purchase or a reprice.
+   *
+   * Listings come from the chain per request, not from an index, so this only
+   * has to ask again - but a card still showing the old price after the seller
+   * changed it, or a sold token still offered for sale, would be the interface
+   * telling somebody something untrue.
+   */
+  const reload = () =>
+    fetch("/api/nft/listings?limit=200")
+      .then((r) => r.json())
+      .then((l) => setListings(l.listings ?? []))
+      .catch(() => {});
 
   useEffect(() => {
     let alive = true;
@@ -225,10 +244,10 @@ export default function NFTExplorePage() {
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {shownListings.map((l) => (
+              <div key={l.id} className="card group overflow-hidden transition hover:border-white/20">
               <Link
-                key={l.id}
                 href={"/nft/collection/" + l.collection}
-                className="card group overflow-hidden transition hover:border-white/20"
+                className="block"
               >
                 <div className="relative aspect-square overflow-hidden">
                   <PreviewArt
@@ -268,6 +287,28 @@ export default function NFTExplorePage() {
                   </div>
                 </div>
               </Link>
+
+              {/* Outside the link on purpose: a button inside an anchor
+                  navigates as well as acts, so the card would open the
+                  collection instead of buying. */}
+              <div className="border-t border-white/[0.06] px-3 py-2.5">
+                {me && l.seller.toLowerCase() === me.toLowerCase() ? (
+                  <ListingControls
+                    compact
+                    listing={{
+                      id: l.id,
+                      collection: l.collection,
+                      tokenId: l.tokenId,
+                      price: l.price,
+                      payToken: l.payToken,
+                    }}
+                    onChanged={reload}
+                  />
+                ) : (
+                  <BuyListing listing={l} onBought={reload} className="w-full" />
+                )}
+              </div>
+              </div>
             ))}
           </div>
         ))}
