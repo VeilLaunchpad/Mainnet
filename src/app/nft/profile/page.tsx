@@ -12,6 +12,7 @@ import { useNetwork } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { shortAddr } from "@/lib/format";
 import { CollectionCard, type Collection } from "@/components/nft/shared";
+const ZERO_PAY = "0x0000000000000000000000000000000000000000";
 import { ListingControls } from "@/components/nft/listing-controls";
 
 /**
@@ -202,8 +203,10 @@ export default function ProfilePage() {
           <Stat
             label="Asking, total"
             value={
+              // Only the COTI listings are summed. Adding an ERC-20 price into
+              // the same total would produce a number denominated in nothing.
               myListings
-                .filter((l) => l.live)
+                .filter((l) => l.live && (!l.payToken || l.payToken === ZERO_PAY))
                 .reduce((a, l) => a + Number(formatEther(BigInt(l.price))), 0)
                 .toFixed(2) + " COTI"
             }
@@ -252,7 +255,9 @@ export default function ProfilePage() {
                     {Number(formatEther(BigInt(l.price))).toLocaleString(undefined, {
                       maximumFractionDigits: 4,
                     })}{" "}
-                    COTI
+                    {/* The marketplace accepts any ERC-20, so the currency is
+                        the listing's, not an assumption. */}
+                    {!l.payToken || l.payToken === ZERO_PAY ? "COTI" : "tokens"}
                   </span>
                 </Link>
                 <span>
