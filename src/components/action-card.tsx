@@ -210,7 +210,37 @@ export function ActionCard({
       }
 
       onUpdate(action.id, { txHash: hash });
-      await publicClient?.waitForTransactionReceipt({ hash });
+
+      /**
+       * A receipt is not a success.
+       *
+       * `waitForTransactionReceipt` resolves for a reverted transaction just as
+       * happily as for a mined one - the outcome is in `receipt.status`. This
+       * used to discard the receipt and mark the action done either way, so a
+       * sell that reverted on chain was reported to the user as "Confirmed",
+       * and `recordSideEffects` wrote the phantom trade into their history.
+       *
+       * The optional chain was the second half of the same bug: with no public
+       * client the await vanished and the action was marked done without
+       * anything having been checked at all.
+       */
+      if (!publicClient) {
+        onUpdate(action.id, {
+          state: "failed",
+          error: "Sent, but this browser could not reach the chain to confirm it. Check the hash before assuming it went through.",
+        });
+        return;
+      }
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") {
+        onUpdate(action.id, {
+          state: "failed",
+          error: "The transaction reverted on chain. Nothing moved, and the gas is spent.",
+        });
+        return;
+      }
+
       onUpdate(action.id, { state: "done" });
       void recordSideEffects(hash);
     } catch (err) {

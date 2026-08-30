@@ -233,6 +233,11 @@ function LaunchInner() {
       setTx(hash);
       setStep("Waiting for the chain");
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") {
+        // A revert produces no logs, so the log scan below used to fail with a
+        // confusing "could not find the token" instead of the real reason.
+        throw new Error("The launch reverted on chain. No token was created, and the fee is spent.");
+      }
 
       let token: Address | null = null;
       let curve: Address | null = null;

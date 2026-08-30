@@ -11,6 +11,7 @@ import { useResult } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { devoxLockerAbi, erc20Abi } from "@/lib/abis";
+import { confirmTx } from "@/lib/confirm-tx";
 import { isDeployed } from "@/lib/addresses";
 import { explorerAddress } from "@/lib/chain";
 import { shortAddr } from "@/lib/format";
@@ -123,7 +124,7 @@ export default function LockPage() {
             args: [BigInt(l.id)],
             gas: 1_500_000n,
           });
-          await publicClient?.waitForTransactionReceipt({ hash });
+          await confirmTx(publicClient, hash);
           return { hash };
         },
       );

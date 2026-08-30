@@ -4,15 +4,18 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
-import { parseEther, type Address } from "viem";
+import { formatUnits, parseEther, type Address } from "viem";
 import { Section, Badge, Avatar, Skeleton, Stat } from "@/components/ui";
 import { devoxSwapRouterAbi, devoxSwapFactoryAbi, erc20Abi } from "@/lib/abis";
+import { confirmTx } from "@/lib/confirm-tx";
 import { isDeployed, SWAP_FEE_BPS } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { fmtNum, fmtUnits, parseUnits, shortAddr, isAddress } from "@/lib/format";
 import { explorerTx, explorerAddress } from "@/lib/chain";
 import { PrivacyNote } from "@/components/privacy-note";
 import { ensureAllowance } from "@/lib/allowance";
+import { useTokenBalance, percentOf } from "@/lib/use-token-balance";
+import { useCotiSession } from "@/lib/coti-client";
 import { CARBON_CONTROLLER, CARBON_NATIVE } from "@/lib/carbon";
 import { carbonRouteAbi } from "@/lib/carbon-route";
 
@@ -68,6 +71,8 @@ function DefiInner() {
   const publicClient = useNetworkClient();
   const { writeContractAsync } = useWriteContract();
   const { data: native } = useBalance({ address, query: { enabled: !!address } });
+  const coti = useCotiSession(address);
+
 
   const [pools, setPools] = useState<PoolRow[] | null>(null);
   const [custom, setCustom] = useState("");
@@ -89,6 +94,20 @@ function DefiInner() {
    */
   const [selected, setSelected] = useState<string>(() => initialToken(params));
   const [side, setSide] = useState<"buy" | "sell">(() => initialSide(params));
+
+  /**
+   * What the wallet holds of the token being sold.
+   *
+   * The sell side used to show nothing at all, so the only way to find the
+   * number was to guess it - and a sell for more than the balance reverts,
+   * which is exactly the transaction that started this.
+   */
+  const sellBal = useTokenBalance(
+    side === "sell" && isAddress(selected) ? (selected as Address) : undefined,
+    address,
+    publicClient,
+    coti,
+  );
   const [amount, setAmount] = useState("");
   const [quote, setQuote] = useState<string | null>(null);
   /** The winning route, kept so the trade fills exactly what was quoted. */
@@ -328,6 +347,19 @@ function DefiInner() {
       } else {
         const amountIn = parseUnits(amount, decimals);
 
+        // Refuse a sell the wallet cannot cover. The router reverts on it
+        // anyway, but only after the gas is spent and with a message nobody
+        // can read; a known balance makes it answerable before signing.
+        if (sellBal.raw !== null && amountIn > sellBal.raw) {
+          throw new Error(
+            "You are selling more than you hold - " +
+              fmtUnits(sellBal.raw, decimals, 6) +
+              " " +
+              (active?.symbol || "tokens") +
+              " available.",
+          );
+        }
+
         // Only signs an approval when the existing allowance does not cover it,
         // so a repeat sell is a single confirmation.
         await ensureAllowance({
@@ -349,7 +381,8 @@ function DefiInner() {
       }
 
       setTx(hash);
-      await publicClient?.waitForTransactionReceipt({ hash });
+      await confirmTx(publicClient, hash);
+      sellBal.refresh();
 
       await fetch("/api/trades", {
         method: "POST",
@@ -425,7 +458,30 @@ function DefiInner() {
                 ))}
               </select>
 
-              <label className="mt-3 block text-[11px] font-semibold text-white/60">You pay</label>
+              <div className="mt-3 flex items-end justify-between gap-2">
+                <label className="block text-[11px] font-semibold text-white/60">You pay</label>
+                {/* The balance belongs next to the field that spends it. */}
+                <span className="text-[10px] text-white/35">
+                  {side === "buy"
+                    ? native
+                      ? "balance " + fmtNum(Number(native.formatted), 4) + " COTI"
+                      : ""
+                    : !address
+                      ? "connect to see your balance"
+                      : sellBal.loading
+                        ? "reading balance…"
+                        : sellBal.sealed
+                          ? "balance encrypted"
+                          : sellBal.raw !== null
+                            ? "balance " +
+                              fmtUnits(sellBal.raw, active?.decimals ?? 18, 6) +
+                              " " +
+                              (active?.symbol || "")
+                            : sellBal.error
+                              ? "balance unavailable"
+                              : ""}
+                </span>
+              </div>
               <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-devox-400/50">
                 <input
                   value={amount}
@@ -438,14 +494,65 @@ function DefiInner() {
                   {side === "buy" ? "COTI" : active?.symbol || "token"}
                 </span>
               </div>
-              {side === "buy" && native && (
-                <button
-                  onClick={() => setAmount(String(Math.max(0, Number(native.formatted) - 0.05)))}
-                  className="mt-1 text-[10px] text-white/30 transition hover:text-white"
-                >
-                  balance {fmtNum(Number(native.formatted), 4)} COTI - use max
-                </button>
-              )}
+              {/* Percentages of what is actually held. Computed on the integer
+                  amount, so 100% is the balance to the wei rather than a
+                  rounded display value that reverts on a balance check. */}
+              {(() => {
+                const payRaw =
+                  side === "buy" ? (native ? native.value : null) : sellBal.raw;
+                const payDecimals = side === "buy" ? 18 : active?.decimals ?? 18;
+                const ready = payRaw !== null && payRaw > 0n;
+
+                const apply = (pct: number) => {
+                  if (payRaw === null) return;
+                  let take = percentOf(payRaw, pct);
+                  // Spending the last wei of COTI leaves nothing for gas, so a
+                  // native max keeps a little back rather than producing a
+                  // transaction that cannot be paid for.
+                  if (side === "buy" && pct >= 100) {
+                    const headroom = parseEther("0.05");
+                    take = take > headroom ? take - headroom : 0n;
+                  }
+                  setAmount(formatUnits(take, payDecimals));
+                };
+
+                if (side === "sell" && sellBal.sealed) {
+                  return (
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <button
+                        onClick={() => void sellBal.reveal()}
+                        disabled={sellBal.revealing}
+                        className="rounded-lg border border-cy-400/30 bg-cy-400/10 px-2.5 py-1 text-[10px] font-semibold text-cy-300 transition hover:bg-cy-400/20 disabled:opacity-50"
+                      >
+                        {sellBal.revealing ? "Decrypting…" : "Reveal balance"}
+                      </button>
+                      <span className="text-[10px] text-white/30">
+                        encrypted on chain - one signature, no gas, stays local
+                      </span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    {[25, 50, 75, 100].map((pct) => (
+                      <button
+                        key={pct}
+                        onClick={() => apply(pct)}
+                        disabled={!ready}
+                        className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-white/60 transition hover:border-devox-400/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                      >
+                        {pct === 100 ? "Max" : pct + "%"}
+                      </button>
+                    ))}
+                    {side === "buy" && (
+                      <span className="ml-0.5 text-[10px] text-white/25">
+                        max keeps 0.05 for gas
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="mt-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
                 <div className="flex items-center justify-between text-[11px] text-white/35">

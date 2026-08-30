@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
-import { parseEther, type Address } from "viem";
+import { formatUnits, parseEther, type Address } from "viem";
 import { devoxCurveAbi, devoxSwapRouterAbi, erc20Abi } from "@/lib/abis";
+import { confirmTx } from "@/lib/confirm-tx";
 import { isDeployed, SWAP_FEE_BPS } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "./network-provider";
 import { explorerTx, explorerAddress } from "@/lib/chain";
 import { fmtNum, fmtUnits, parseUnits, shortAddr } from "@/lib/format";
 import { Badge } from "./ui";
 import { ensureAllowance } from "@/lib/allowance";
+import { useTokenBalance, percentOf } from "@/lib/use-token-balance";
+import { useCotiSession } from "@/lib/coti-client";
 
 /**
  * One panel, two venues.
@@ -42,10 +45,22 @@ export function TradePanel({
   const { net, addresses } = useNetwork();
   const { address } = useAccount();
   const publicClient = useNetworkClient();
+  const coti = useCotiSession(address);
+
   const { writeContractAsync } = useWriteContract();
   const { data: native } = useBalance({ address, query: { enabled: !!address } });
 
   const [side, setSide] = useState<"buy" | "sell">("buy");
+
+  // The sell side is where a wrong amount costs gas, so it is the side that
+  // most needed a balance next to the field. This is the panel the failed sell
+  // was signed from.
+  const sellBal = useTokenBalance(
+    side === "sell" ? (token as Address) : undefined,
+    address,
+    publicClient,
+    coti,
+  );
   const [amount, setAmount] = useState("");
   const [quote, setQuote] = useState<string | null>(null);
   const [quoting, setQuoting] = useState(false);
@@ -143,6 +158,13 @@ export function TradePanel({
           });
         } else {
           const amountIn = parseUnits(amount, decimals);
+
+        if (sellBal.raw !== null && amountIn > sellBal.raw) {
+          throw new Error(
+            "You are selling more than you hold - " +
+              fmtUnits(sellBal.raw, decimals, 6) + " " + symbol + " available.",
+          );
+        }
           await approveSpender(addresses.swapRouter, amountIn);
           setStep("Swapping…");
           hash = await writeContractAsync({
@@ -165,6 +187,15 @@ export function TradePanel({
         });
       } else {
         const amountIn = parseUnits(amount, decimals);
+
+        // The curve sell is the exact path that reverted with the gas spent.
+        if (sellBal.raw !== null && amountIn > sellBal.raw) {
+          throw new Error(
+            "You are selling more than you hold - " +
+              fmtUnits(sellBal.raw, decimals, 6) + " " + symbol + " available.",
+          );
+        }
+
         await approveSpender(curve as Address, amountIn);
         setStep("Selling…");
         hash = await writeContractAsync({
@@ -178,7 +209,8 @@ export function TradePanel({
 
       setTx(hash);
       setStep("Confirming…");
-      await publicClient?.waitForTransactionReceipt({ hash });
+      await confirmTx(publicClient, hash);
+      sellBal.refresh();
 
       await fetch("/api/trades", {
         method: "POST",
@@ -250,15 +282,67 @@ export function TradePanel({
       <div className="mt-3">
         <div className="flex items-center justify-between text-[11px] text-white/35">
           <span>You pay</span>
-          {side === "buy" && native && (
-            <button
-              onClick={() => setAmount(String(Math.max(0, Number(native.formatted) - 0.05)))}
-              className="transition hover:text-white"
-            >
-              max {fmtNum(Number(native.formatted), 3)} COTI
-            </button>
-          )}
+          <span>
+            {side === "buy"
+              ? native
+                ? "balance " + fmtNum(Number(native.formatted), 3) + " COTI"
+                : ""
+              : !address
+                ? "connect to see your balance"
+                : sellBal.loading
+                  ? "reading balance…"
+                  : sellBal.sealed
+                    ? "balance encrypted"
+                    : sellBal.raw !== null
+                      ? "balance " + fmtUnits(sellBal.raw, decimals, 6) + " " + symbol
+                      : ""}
+          </span>
         </div>
+
+        {/* Percentages off the integer balance, so Max is the balance to the
+            wei and not a rounded figure the contract then rejects. */}
+        {(() => {
+          const payRaw = side === "buy" ? (native ? native.value : null) : sellBal.raw;
+          const payDecimals = side === "buy" ? 18 : decimals;
+          const ready = payRaw !== null && payRaw > 0n;
+
+          const apply = (pct: number) => {
+            if (payRaw === null) return;
+            let take = percentOf(payRaw, pct);
+            if (side === "buy" && pct >= 100) {
+              const headroom = parseEther("0.05");
+              take = take > headroom ? take - headroom : 0n;
+            }
+            setAmount(formatUnits(take, payDecimals));
+          };
+
+          if (side === "sell" && sellBal.sealed) {
+            return (
+              <button
+                onClick={() => void sellBal.reveal()}
+                disabled={sellBal.revealing}
+                className="mt-1.5 rounded-lg border border-cy-400/30 bg-cy-400/10 px-2.5 py-1 text-[10px] font-semibold text-cy-300 transition hover:bg-cy-400/20 disabled:opacity-50"
+              >
+                {sellBal.revealing ? "Decrypting…" : "Reveal balance"}
+              </button>
+            );
+          }
+
+          return (
+            <div className="mt-1.5 flex items-center gap-1.5">
+              {[25, 50, 75, 100].map((pct) => (
+                <button
+                  key={pct}
+                  onClick={() => apply(pct)}
+                  disabled={!ready}
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-white/60 transition hover:border-devox-400/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  {pct === 100 ? "Max" : pct + "%"}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
         <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-devox-400/50">
           <input
             value={amount}

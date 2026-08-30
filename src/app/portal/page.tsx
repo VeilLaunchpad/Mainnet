@@ -8,6 +8,7 @@ import { Section, Badge, Avatar, Skeleton } from "@/components/ui";
 import { Spinner } from "@/components/busy";
 import { useResult, readable } from "@/components/result-modal";
 import { devoxPortalAbi, erc20Abi, privateErc20Abi } from "@/lib/abis";
+import { confirmTx } from "@/lib/confirm-tx";
 import { isDeployed } from "@/lib/addresses";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { useCotiSession } from "@/lib/coti-client";
@@ -234,7 +235,7 @@ export default function PortalPage() {
 
       setTx(hash);
       setStep("Confirming…");
-      await publicClient?.waitForTransactionReceipt({ hash });
+      await confirmTx(publicClient, hash);
       setAmount("");
       load();
       if (Object.keys(privateBalances).length) void revealPrivate();
@@ -305,7 +306,7 @@ export default function PortalPage() {
       args: [spender, value],
       gas: 6_000_000n,
     });
-    await publicClient?.waitForTransactionReceipt({ hash });
+    await confirmTx(publicClient, hash);
   }
 
   const unlocked = Object.keys(privateBalances).length > 0;

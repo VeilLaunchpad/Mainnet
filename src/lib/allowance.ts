@@ -1,5 +1,6 @@
-import type { Address, PublicClient } from "viem";
+import { encodeFunctionData, type Address, type PublicClient } from "viem";
 import { erc20Abi } from "./abis";
+import { confirmTx } from "./confirm-tx";
 
 /**
  * Ask for an approval only when the chain actually needs one.
@@ -66,21 +67,37 @@ export async function ensureAllowance({
   onStep,
   headroom,
 }: EnsureAllowanceArgs): Promise<{ approvals: number }> {
+  /**
+   * Read the allowance without letting a wrong shape pass for a number.
+   *
+   * A COTI PrivateERC20 answers `allowance` with a six-word struct - 192 bytes.
+   * Asking for a single uint256 does not fail on that; the decoder simply takes
+   * the first word and returns a value around 7e58. The check below then
+   * concluded the allowance was ample, signed no approval, and let the trade go
+   * on to revert in `transferFrom` with the gas already spent. That is the
+   * transaction this function now exists to prevent.
+   *
+   * So the byte length decides. Exactly 32 bytes is a real allowance; anything
+   * else is unreadable, and an unreadable allowance is never treated as
+   * sufficient.
+   */
   let current = 0n;
+  let readable = false;
   try {
-    current = (await publicClient?.readContract({
-      address: token,
-      abi: erc20Abi,
-      functionName: "allowance",
-      args: [owner, spender],
-    })) as bigint;
+    const res = await publicClient?.call({
+      to: token,
+      data: encodeFunctionData({ abi: erc20Abi, functionName: "allowance", args: [owner, spender] }),
+    });
+    const hex = (res?.data || "0x") as string;
+    if ((hex.length - 2) / 2 === 32) {
+      current = BigInt(hex);
+      readable = true;
+    }
   } catch {
-    // An unreadable allowance is treated as zero: approving again is safe,
-    // whereas skipping an approval that was needed is not.
-    current = 0n;
+    // Approving again is safe; skipping an approval that was needed is not.
   }
 
-  if (current >= amount) return { approvals: 0 };
+  if (readable && current >= amount) return { approvals: 0 };
 
   // Approve the headroom when one is offered, but never less than the action
   // actually needs.
@@ -88,7 +105,7 @@ export async function ensureAllowance({
 
   let approvals = 0;
 
-  if (current > 0n) {
+  if (readable && current > 0n) {
     onStep?.("Clearing the old allowance");
     await writeContractAsync({
       address: token,
@@ -101,15 +118,39 @@ export async function ensureAllowance({
   }
 
   onStep?.("Approving once");
-  const hash = await writeContractAsync({
-    address: token,
-    abi: erc20Abi,
-    functionName: "approve",
-    args: [spender, target],
-    gas: 6_000_000n,
-  });
-  approvals += 1;
+  const approve = (value: bigint) =>
+    writeContractAsync({
+      address: token,
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [spender, value],
+      gas: 6_000_000n,
+    });
 
-  await publicClient?.waitForTransactionReceipt({ hash });
+  let hash: `0x${string}`;
+  try {
+    hash = await approve(target);
+    approvals += 1;
+    await confirmTx(publicClient, hash);
+  } catch (e) {
+    // A PrivateERC20 refuses to overwrite an allowance that is already
+    // non-zero, and its value cannot be read to know in advance. When the
+    // approval is rejected, clearing first is the remaining move - but only
+    // once, so a genuinely broken token surfaces its own error instead of
+    // being retried forever.
+    if (!readable) {
+      onStep?.("Clearing the old allowance");
+      const reset = await approve(0n);
+      approvals += 1;
+      await confirmTx(publicClient, reset);
+
+      hash = await approve(target);
+      approvals += 1;
+      await confirmTx(publicClient, hash);
+    } else {
+      throw e;
+    }
+  }
+
   return { approvals };
 }

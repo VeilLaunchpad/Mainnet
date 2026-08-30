@@ -8,6 +8,7 @@ import { Contract } from "@coti-io/coti-ethers";
 import QRCode from "qrcode";
 import { Badge, Avatar, Skeleton } from "./ui";
 import { erc20Abi, privateErc20Abi } from "@/lib/abis";
+import { confirmTx } from "@/lib/confirm-tx";
 import { useCotiSession } from "@/lib/coti-client";
 import { fmtNum, fmtUnits, parseUnits, shortAddr, isAddress } from "@/lib/format";
 import { explorerTx, explorerAddress } from "@/lib/chain";
@@ -395,7 +396,7 @@ function Send({
           value: parseEther(amount),
         });
         setTx(hash);
-        await publicClient?.waitForTransactionReceipt({ hash });
+        await confirmTx(publicClient, hash);
       } else {
         // A private transfer moves an encrypted amount, so it goes through the
         // COTI signer rather than a plain contract write.

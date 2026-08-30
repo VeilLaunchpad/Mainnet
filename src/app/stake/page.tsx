@@ -11,6 +11,7 @@ import { useResult } from "@/components/result-modal";
 import { useNetwork, useNetworkClient } from "@/components/network-provider";
 import { ConnectButton } from "@/components/connect-button";
 import { devoxStakingAbi, devoxTreasuryAbi, erc20Abi } from "@/lib/abis";
+import { confirmTx } from "@/lib/confirm-tx";
 import { isDeployed } from "@/lib/addresses";
 import { ensureAllowance } from "@/lib/allowance";
 import { explorerAddress } from "@/lib/chain";
@@ -473,7 +474,7 @@ function PoolPanel({
               value: p.native ? wei : 0n,
               gas: 1_500_000n,
             });
-            await publicClient?.waitForTransactionReceipt({ hash });
+            await confirmTx(publicClient, hash);
             return { hash };
           }
 
@@ -484,7 +485,7 @@ function PoolPanel({
             args: [BigInt(p.pid), wei],
             gas: 1_500_000n,
           });
-          await publicClient?.waitForTransactionReceipt({ hash });
+          await confirmTx(publicClient, hash);
           return { hash };
         },
       );
@@ -507,7 +508,7 @@ function PoolPanel({
           args: [BigInt(p.pid)],
           gas: 1_000_000n,
         });
-        await publicClient?.waitForTransactionReceipt({ hash });
+        await confirmTx(publicClient, hash);
         return { hash };
       });
       await onDone();

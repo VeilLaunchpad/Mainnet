@@ -14,6 +14,7 @@ import {
 import { Section, Stat, Badge, Skeleton } from "@/components/ui";
 import { SelectMenu, type SelectOption } from "@/components/select-menu";
 import { erc20Abi } from "@/lib/abis";
+import { confirmTx } from "@/lib/confirm-tx";
 import { cotiPrivacyBridgeErc20Abi, cotiPrivacyBridgeNativeAbi } from "@/lib/coti-bridge";
 import { explorerAddress, explorerTx, ethExplorerTx } from "@/lib/chain";
 import { fmtNum } from "@/lib/format";
@@ -369,7 +370,7 @@ export default function BridgePage() {
       args: [spender, value],
       gas: 6_000_000n,
     });
-    await publicClient?.waitForTransactionReceipt({ hash });
+    await confirmTx(publicClient, hash);
   }
 
   function record(hash: string, dir: string, amt: string, venue: string) {
@@ -420,7 +421,7 @@ export default function BridgePage() {
 
     setTx({ hash, onEth: false });
     setStep("Confirming");
-    await publicClient?.waitForTransactionReceipt({ hash });
+    await confirmTx(publicClient, hash);
     record(hash, direction === "deposit" ? "into_privacy" : "out_of_privacy", q.amount, "COTI Privacy Bridge");
     return hash;
   }
