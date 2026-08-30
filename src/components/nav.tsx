@@ -116,17 +116,42 @@ export function Nav() {
   );
 }
 
+/**
+ * The wordmark's glyph, and the same shape the token carries.
+ *
+ * It is drawn inline rather than loaded from /devox-token.svg because this
+ * renders in the header of every page: an <img> would be a second request on
+ * first paint and would flash empty until it lands. The geometry is the token
+ * mark scaled to a 24-unit box - hexagon shell, an X, and the sealed centre -
+ * so the two cannot drift apart in shape, only in file.
+ *
+ * The shield-and-tick it replaced was VEILPAD's, and read as "verified" rather
+ * than as a brand.
+ */
 export function DevoxMark({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
       <defs>
-        <linearGradient id="vm" x1="0" y1="0" x2="24" y2="24">
-          <stop stopColor="#a78bfa" />
-          <stop offset="1" stopColor="#22d3ee" />
+        <linearGradient id="dvm" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#8f99ff" />
+          <stop offset="1" stopColor="#00e5ff" />
         </linearGradient>
       </defs>
-      <path d="M12 2 3 7v6.2C3 18.4 6.9 21.4 12 22.5c5.1-1.1 9-4.1 9-9.3V7l-9-5Z" stroke="url(#vm)" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M8.4 12.2 11 14.8l4.6-5.2" stroke="url(#vm)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      {/* the shell: public, and the part you always see */}
+      <path
+        d="M12 1.6 21.5 7v10L12 22.4 2.5 17V7Z"
+        stroke="url(#dvm)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      {/* the X */}
+      <g stroke="url(#dvm)" strokeWidth="2.1" strokeLinecap="round">
+        <path d="M8.6 8.4 15.4 15.2" />
+        <path d="M15.4 8.4 8.6 15.2" />
+      </g>
+      {/* the seal, where the strokes cross */}
+      <circle cx="12" cy="11.8" r="2.1" fill="#050c22" />
+      <circle cx="12" cy="11.8" r="1.05" fill="#00e5ff" />
     </svg>
   );
 }

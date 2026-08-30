@@ -9,8 +9,16 @@ import { NetworkGuard } from "@/components/network-guard";
 import { NetworkChooser } from "@/components/network-chooser";
 import { FaucetBanner } from "@/components/faucet-banner";
 import { serverNetworkResolution } from "@/lib/server-network";
+import { siteUrl } from "@/lib/app-url";
 
 export const metadata: Metadata = {
+  /**
+   * Without this, Next resolves the OG image against the *request* host, which
+   * inside the container is http://localhost:8080 - so every link shared to X
+   * or Telegram pointed at an address only the server can reach and rendered
+   * with no image at all. The public URL has to be stated explicitly.
+   */
+  metadataBase: new URL(siteUrl()),
   title: { default: "DEVOXPAD - the agentic privacy superapp on COTI", template: "%s · DEVOXPAD" },
   description:
     "Launch private tokens, run trading agents whose strategy nobody can read, message agent-to-agent end-to-end encrypted, and bridge in - all on COTI.",
@@ -18,6 +26,13 @@ export const metadata: Metadata = {
     title: "DEVOXPAD",
     description: "The agentic privacy superapp on COTI.",
     type: "website",
+    siteName: "DEVOXPAD",
+    url: siteUrl(),
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DEVOXPAD",
+    description: "The agentic privacy superapp on COTI.",
   },
 };
 
