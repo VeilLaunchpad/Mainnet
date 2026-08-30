@@ -306,7 +306,10 @@ async function seedAndBackfill() {
     console.warn("[devoxpad] launches  : backfill failed, " + String(err).slice(0, 160));
   }
 
-  await dropRevertedTrades();
+  // Deliberately not awaited. It makes one RPC call per recorded trade, and
+  // blocking startup on that would put boot time at the mercy of how much
+  // history exists - with Railway's health check waiting on the other side.
+  void dropRevertedTrades();
 }
 
 /**
@@ -327,10 +330,21 @@ async function dropRevertedTrades() {
     const { db, rows } = await import("./lib/db");
     const { publicClient } = await import("./lib/rpc");
 
+    // Legacy rows only: everything written from now on is verified before it
+    // is inserted, so this set does not grow. The cap is a backstop, and it
+    // says so out loud rather than quietly covering part of the table.
+    const CAP = 500;
     const list = rows(
-      db().prepare("SELECT id, tx_hash FROM trades WHERE tx_hash IS NOT NULL AND tx_hash != ''").all(),
+      db()
+        .prepare(
+          "SELECT id, tx_hash FROM trades WHERE tx_hash IS NOT NULL AND tx_hash != '' ORDER BY id DESC LIMIT ?",
+        )
+        .all(CAP),
     ) as { id: number; tx_hash: string }[];
     if (!list.length) return;
+    if (list.length === CAP) {
+      console.warn("[devoxpad] trades    : only the newest " + CAP + " rows were checked");
+    }
 
     const client = publicClient();
     let removed = 0;
