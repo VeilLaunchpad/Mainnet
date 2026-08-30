@@ -9,7 +9,7 @@ import { Section, Badge, Avatar, Skeleton, Stat } from "@/components/ui";
 import { devoxSwapRouterAbi, devoxSwapFactoryAbi, erc20Abi } from "@/lib/abis";
 import { confirmTx } from "@/lib/confirm-tx";
 import { isDeployed, SWAP_FEE_BPS } from "@/lib/addresses";
-import { useNetwork, useNetworkClient } from "@/components/network-provider";
+import { useNetwork, useNetworkClient, withNetwork } from "@/components/network-provider";
 import { fmtNum, fmtUnits, parseUnits, shortAddr, isAddress } from "@/lib/format";
 import { explorerTx, explorerAddress } from "@/lib/chain";
 import { PrivacyNote } from "@/components/privacy-note";
@@ -384,7 +384,7 @@ function DefiInner() {
       await confirmTx(publicClient, hash);
       sellBal.refresh();
 
-      await fetch("/api/trades", {
+      await fetch(withNetwork("/api/trades", net), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({

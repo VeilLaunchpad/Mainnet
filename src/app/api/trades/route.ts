@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { db, rows, now } from "@/lib/db";
 import { isAddress } from "@/lib/format";
 import { publicClient } from "@/lib/rpc";
-import type { CotiNetworkName } from "@/lib/chain";
+import { isNetworkName } from "@/lib/chain";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,7 +50,10 @@ export async function POST(req: NextRequest) {
     .get(txHash) as { id: number } | undefined;
   if (already) return Response.json({ ok: true, deduped: true });
 
-  const net = (req.nextUrl.searchParams.get("network") || undefined) as CotiNetworkName | undefined;
+  // An unrecognised name would index the chain table to undefined and throw
+  // on the next line, so it falls back to the server default instead.
+  const asked = req.nextUrl.searchParams.get("network");
+  const net = isNetworkName(asked) ? asked : undefined;
   const trader = String(b.trader || "");
   try {
     const receipt = await publicClient(net).getTransactionReceipt({

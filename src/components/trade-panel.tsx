@@ -6,7 +6,7 @@ import { formatUnits, parseEther, type Address } from "viem";
 import { devoxCurveAbi, devoxSwapRouterAbi, erc20Abi } from "@/lib/abis";
 import { confirmTx } from "@/lib/confirm-tx";
 import { isDeployed, SWAP_FEE_BPS } from "@/lib/addresses";
-import { useNetwork, useNetworkClient } from "./network-provider";
+import { useNetwork, useNetworkClient, withNetwork } from "./network-provider";
 import { explorerTx, explorerAddress } from "@/lib/chain";
 import { fmtNum, fmtUnits, parseUnits, shortAddr } from "@/lib/format";
 import { Badge } from "./ui";
@@ -212,7 +212,7 @@ export function TradePanel({
       await confirmTx(publicClient, hash);
       sellBal.refresh();
 
-      await fetch("/api/trades", {
+      await fetch(withNetwork("/api/trades", net), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({

@@ -7,7 +7,7 @@ import { parseEther, type Address } from "viem";
 import { mineVanitySalt, randomSalt } from "@/lib/vanity";
 import { devoxCurveAbi, devoxFactoryAbi, erc20Abi, privateMessagingAbi } from "@/lib/abis";
 import { isDeployed } from "@/lib/addresses";
-import { useNetwork, useNetworkClient } from "./network-provider";
+import { useNetwork, useNetworkClient, withNetwork } from "./network-provider";
 import { explorerTx } from "@/lib/chain";
 import { parseUnits } from "@/lib/format";
 import { openCotiSession } from "@/lib/coti-client";
@@ -172,7 +172,7 @@ export function ActionCard({
   async function recordSideEffects(hash: string) {
     if (action.kind !== "trade") return;
     try {
-      await fetch("/api/trades", {
+      await fetch(withNetwork("/api/trades", net), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
