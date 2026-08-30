@@ -207,16 +207,19 @@ function Turn({
    * interface deciding you do not need to know.
    */
   /**
-   * Steps are a progress indicator, so they only belong to work in progress.
+   * Steps are what you watch until there is something to read.
    *
-   * On a reload there is no progress left to show - the turn finished before
-   * the page existed - so a replayed turn never shows them, however it ended.
-   * A live turn keeps its steps while tools run, and keeps the pill afterwards
-   * only if one failed, because the answer may be missing something because of
-   * it and hiding that would be the interface choosing what you get to know.
+   * The moment an answer starts arriving they are replaced by it, with no
+   * exception - not for a failed step, not for anything. A replayed turn never
+   * shows them either: the work finished before the page existed, so there is
+   * no progress left to indicate.
+   *
+   * That does mean a failed step leaves no mark once the reply lands, so the
+   * reply has to be the thing that tells the truth about it. See the note on
+   * `failed` below.
    */
   const answered = !!turn.content && !running;
-  const showSteps = turn.restored ? false : !answered || failed > 0;
+  const showSteps = !turn.restored && !answered;
 
   /**
    * Nothing to say and nothing to show.

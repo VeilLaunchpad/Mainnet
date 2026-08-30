@@ -523,6 +523,30 @@ export async function* runAgentTurn(opts: {
           name: call.function.name,
           meta: result.action ? JSON.stringify({ action: result.action }) : "{}",
         });
+
+        /**
+         * A failed tool must not be answered as though it worked.
+         *
+         * `watch_token` returned "no connected wallet" and the reply still
+         * opened with "I'm now watching the three newest launches" - the one
+         * thing the user had asked for was the one thing that had not
+         * happened. The failure is already in the tool result, but a JSON
+         * `ok:false` is easy for a model to read past on its way to a
+         * confident summary, so it is also said in words it cannot miss.
+         *
+         * This matters more now that the step list disappears once an answer
+         * arrives: the reply is the only place left that can tell the truth
+         * about what did not happen.
+         */
+        if (result && (result as { ok?: unknown }).ok === false) {
+          const why = String((result as { error?: unknown }).error || "it failed");
+          messages.push({
+            role: "system",
+            content:
+              "The tool " + call.function.name + " DID NOT succeed: " + why +
+              ". Do not tell the user that this action happened. Say plainly that it did not, and why, before anything else you report.",
+          });
+        }
       }
     }
 
