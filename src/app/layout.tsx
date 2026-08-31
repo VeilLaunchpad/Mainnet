@@ -33,6 +33,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "DEVOXPAD",
     description: "The agentic privacy superapp on COTI.",
+    // Without these a shared link renders a card credited to nobody, which is
+    // exactly the shape an impersonation account wants.
+    site: "@DevoxOfficial",
+    creator: "@DevoxOfficial",
   },
 };
 

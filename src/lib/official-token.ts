@@ -120,7 +120,7 @@ export async function seedOfficialToken(net: CotiNetworkName): Promise<boolean> 
         site: "https://devoxpad-app.vercel.app",
         stake: "https://devoxpad-app.vercel.app/stake",
         contracts: "https://devoxpad-app.vercel.app/devox-contracts",
-        x: "https://x.com/LaunchOnDevox",
+        x: "https://x.com/DevoxOfficial",
       }),
       "",
       createdAt,

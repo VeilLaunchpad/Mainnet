@@ -459,6 +459,8 @@ export const BOT_PROFILE = {
     "",
     "🔐 I never hold a key and never sign. Anything that moves value is prepared here and confirmed in your own wallet.",
     "",
+    "🐦 x.com/DevoxOfficial",
+    "",
     "Tap Start to begin.",
   ].join("\n"),
 

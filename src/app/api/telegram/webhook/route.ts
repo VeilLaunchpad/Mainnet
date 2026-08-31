@@ -229,7 +229,9 @@ ${walletLine}
 I never hold a key and I never sign. Anything that moves value is prepared here and confirmed in your own wallet on the site.
 
 💬 Type anything at all and the agent answers.
-❓ /help for the full list.`,
+❓ /help for the full list.
+
+🐦 <a href="https://x.com/DevoxOfficial">@DevoxOfficial</a> · 🌐 <a href="https://devoxpad-app.vercel.app">devoxpad-app.vercel.app</a>`,
     { reply_markup: networkKeyboard(net) },
   );
 }

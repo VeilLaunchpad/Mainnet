@@ -22,13 +22,13 @@ export async function Footer() {
           </p>
 
           <a
-            href="https://x.com/LaunchOnDevox"
+            href="https://x.com/DevoxOfficial"
             target="_blank"
             rel="noreferrer"
             className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-[12px] font-medium text-white/60 transition hover:border-cy-400/45 hover:text-white"
           >
             <XMark />
-            @LaunchOnDevox
+            @DevoxOfficial
           </a>
         </div>
 
@@ -97,13 +97,13 @@ export async function Footer() {
               Block explorer
             </a>
             <a
-              href="https://x.com/LaunchOnDevox"
+              href="https://x.com/DevoxOfficial"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 transition hover:text-white/60"
             >
               <XMark />
-              @LaunchOnDevox
+              @DevoxOfficial
             </a>
           </div>
         </div>
