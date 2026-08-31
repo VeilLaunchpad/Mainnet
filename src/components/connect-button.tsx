@@ -47,7 +47,7 @@ export function ConnectButton() {
         <button
           onClick={() => setPicking(true)}
           disabled={isPending}
-          className="rounded-xl btn-primary px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+          className="btn-primary shrink-0 whitespace-nowrap px-3 py-2 text-[13px] sm:px-4 sm:text-sm"
         >
           {isPending ? "Connecting…" : "Connect wallet"}
         </button>
@@ -71,7 +71,7 @@ export function ConnectButton() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm transition hover:border-devox-400/50"
+        className="flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap rounded-lg border border-white/10 bg-white/5 px-2.5 py-2 text-sm transition hover:border-devox-400/50"
       >
         <span className="size-2 rounded-full bg-mint-400 shadow-[0_0_8px] shadow-mint-400/70" />
         <span className="mono text-xs text-white/90">

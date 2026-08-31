@@ -77,8 +77,8 @@ export function Nav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-ink-950/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-4 sm:px-6">
-        <Link href="/" className="group flex items-center gap-2.5">
+      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-3 px-4 sm:gap-6 sm:px-6">
+        <Link href="/" className="group flex shrink-0 items-center gap-2.5">
           <DevoxMark />
           <span className="text-[15px] font-bold tracking-tight">
             DEVOX<span className="text-devox-400">PAD</span>
@@ -160,7 +160,7 @@ export function Nav() {
           </div>
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex min-w-0 items-center gap-2">
           <Link
             href="/docs"
             className={
@@ -176,12 +176,18 @@ export function Nav() {
           >
             Launch
           </Link>
-          <PrivacySwitch />
-          <NetworkSwitch />
+          {/* Five controls do not fit across 390px. At that width the wallet
+              address was wrapping onto a second line and pushing the menu
+              button off the edge, so these two move into the sheet - where
+              they get a label and more room than they had up here. */}
+          <div className="hidden items-center gap-2 md:flex">
+            <PrivacySwitch />
+            <NetworkSwitch />
+          </div>
           <ConnectButton />
           <button
             onClick={() => setOpen((v) => !v)}
-            className="rounded-lg border border-white/10 p-2 lg:hidden"
+            className="btn-frosted shrink-0 p-2 lg:hidden"
             aria-label="Menu"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -192,7 +198,12 @@ export function Nav() {
       </div>
 
       {open && (
-        <nav className="animate-rise border-t border-white/5 px-4 py-2 lg:hidden">
+        <nav className="animate-rise border-t border-white/5 px-4 pb-3 pt-2 lg:hidden">
+          {/* The two controls the bar could not hold, given room and a name. */}
+          <div className="mb-2 flex items-center gap-2 border-b border-white/[0.06] pb-3 md:hidden">
+            <PrivacySwitch />
+            <NetworkSwitch />
+          </div>
           {[
             ...LINKS,
             { href: "/launch", label: "Launch a token" },

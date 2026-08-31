@@ -103,13 +103,13 @@ export default async function Home() {
             </Link>
             <Link
               href="/desk"
-              className="rounded-xl border border-white/12 bg-white/[0.03] px-5 py-3 text-sm font-semibold transition hover:border-devox-400/50"
+              className="btn-ghost px-5 py-3 text-sm"
             >
               Open the private desk
             </Link>
             <Link
               href="/agents"
-              className="rounded-xl px-5 py-3 text-sm font-semibold text-white/55 transition hover:text-white"
+              className="rounded-lg px-2 py-3 text-sm font-medium text-white/55 transition hover:text-white sm:px-5"
             >
               Meet the agents →
             </Link>

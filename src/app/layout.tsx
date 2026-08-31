@@ -65,7 +65,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Providers network={network} pinned={pinned} needsChoice={needsChoice}>
           <Nav />
           <FaucetBanner />
-          <main className="min-h-[70dvh]">{children}</main>
+          {/* The floating agent button sits over the bottom-right corner, so the
+              page keeps a lane clear underneath it. Without this the last row of
+              content on a phone is permanently half-covered. */}
+          <main className="min-h-[70dvh] pb-20 sm:pb-0">{children}</main>
           <Footer />
           <AgentDock />
           <HandlePrompt />

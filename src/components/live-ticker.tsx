@@ -36,8 +36,11 @@ export function LiveTicker() {
     { label: "Live now", value: s ? fmtNum(s.counts.liveAgents, 0) : "-", tone: "up" },
   ];
 
+  // A wrapping flex row left an orphan on its own line at phone widths - four
+  // figures, then two, with the second row half empty. An explicit grid keeps
+  // the columns even at every size instead.
   return (
-    <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/[0.06] pt-6">
+    <div className="mt-10 grid grid-cols-3 gap-x-6 gap-y-5 border-t border-white/[0.06] pt-6 sm:grid-cols-6 sm:gap-x-8">
       {items.map((i) => (
         <div key={i.label}>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-white/30">{i.label}</div>
