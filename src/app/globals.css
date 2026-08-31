@@ -7,16 +7,29 @@
    ───────────────────────────────────────────────────────────── */
 
 @theme {
-  /* Surfaces are COTI navy rather than black. Pure near-black made large
-     areas read as dead space; navy keeps the page dark while still being a
-     colour, so empty regions look intentional instead of switched off. */
-  --color-ink-950: #030d24;
-  --color-ink-900: #04133d;
-  --color-ink-850: #071848;
-  --color-ink-800: #0a2057;
-  --color-ink-700: #102c6e;
-  --color-ink-600: #1a3d8f;
-  --color-ink-500: #2b55b0;
+  /*
+     Surfaces step, they do not float.
+     -------------------------------------------------------------
+     Depth here comes from background colour alone: void -> card ->
+     panel -> shell. Nothing uses an outset drop shadow to lift
+     itself off the page, because a dark interface stacked out of
+     shadows reads as cardboard cut-outs rather than one surface
+     lit from within.
+
+     The base carries a violet undertone rather than being neutral
+     black or plain navy. That undertone is load-bearing: it is what
+     makes the dark read as deliberate instead of switched off, and
+     it is the reason the cyan accent glows against it.
+
+     The `ink-*` names are unchanged so every existing class keeps
+     working; only the values moved. */
+  --color-ink-950: #0e0918;
+  --color-ink-900: #141021;
+  --color-ink-850: #1a1624;
+  --color-ink-800: #1b1728;
+  --color-ink-700: #241f31;
+  --color-ink-600: #2c2834;
+  --color-ink-500: #3e3a46;
 
   /* COTI's own electric blue, read off coti.io and privacy.coti.io where it is
      the single most used colour on both. The token names stay `devox-*` so
@@ -37,18 +50,68 @@
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /*
+     A type scale, so sizes stop being invented per component.
+     Display sizes run light and tight: weight 300 with negative
+     tracking and leading under 1, which lets a headline sit as a
+     dense block instead of shouting. Body sizes stay at 400 with
+     open leading, because the same restraint applied to reading
+     text just makes it hard to read. */
+  --text-caption: 0.75rem;      /* 12 */
+  --text-body-sm: 0.875rem;     /* 14 */
+  --text-body: 1rem;            /* 16 */
+  --text-subheading: 1.125rem;  /* 18 */
+  --text-heading-sm: 1.25rem;   /* 20 */
+  --text-heading: 1.5rem;       /* 24 */
+  --text-heading-lg: 3rem;      /* 48 */
+  --text-display: 3.375rem;     /* 54 */
+
+  /* Radius tiers, applied by component scale rather than by taste:
+     inputs and buttons 8, cards 16, large panels 24, pills round. */
+  --radius-control: 0.5rem;
+  --radius-card: 1rem;
+  --radius-panel: 1.5rem;
 }
 
 :root {
   color-scheme: dark;
-  --bg: #030d24;
-  --fg: #e9eeff;
-  --muted: #8fa0c8;
-  /* Lines and cards pick up a blue cast so panels sit in the palette rather
-     than looking like grey rectangles dropped onto it. */
-  --line: rgba(120, 150, 255, 0.11);
-  --line-strong: rgba(120, 150, 255, 0.2);
-  --card: rgba(30, 60, 140, 0.09);
+  --bg: #0e0918;
+
+  /* Not pure white. At 15-16px, #fff on a violet-black ground is harsh
+     enough to be tiring; this is bright enough to lead and soft enough to
+     read for a while. Headings may go to white - body text does not. */
+  --fg: #ded9ea;
+  --muted: #9d97a8;
+
+  /* Lines and card fills carry the same violet cast as the base, so a panel
+     reads as the surface stepping up rather than a grey rectangle dropped
+     onto it. */
+  --line: rgba(168, 150, 255, 0.10);
+  --line-strong: rgba(168, 150, 255, 0.2);
+  --card: rgba(26, 22, 36, 0.72);
+
+  /* Surface ladder, named so components pick a level instead of a colour. */
+  --surface-1: #1a1624;
+  --surface-2: #1b1728;
+  --surface-3: #2c2834;
+
+  /*
+     One accent, used sparingly.
+     -----------------------------------------------------------
+     The reference this follows puts an ember orange on every
+     primary button, as the single warm thing on the page. The
+     same role here is played by DEVOX's own blue-to-cyan, because
+     swapping it for orange would quietly rebrand the product -
+     the mark, the token art and the collection are all built on
+     this pair. Everything else about the reference's discipline
+     holds: it appears on primary actions and almost nowhere else,
+     so it keeps its pull.
+
+     One line changes it, if the ember is ever wanted:
+       --accent: linear-gradient(30deg, #fd8925, #ff0c00); */
+  --accent: linear-gradient(112deg, #1e29f6 4%, #5a67ff 46%, #00e5ff 96%);
+  --accent-edge: rgba(0, 229, 255, 0.34);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -63,9 +126,12 @@
    These sit outside Tailwind's layers, so they win on cascade
    order without needing !important.
    ───────────────────────────────────────────────────────────── */
-.text-white\/30 { color: rgb(255 255 255 / 0.42); }
-.text-white\/35 { color: rgb(255 255 255 / 0.48); }
-.text-white\/45 { color: rgb(255 255 255 / 0.58); }
+.text-white\/25 { color: rgb(255 255 255 / 0.40); }
+.text-white\/30 { color: rgb(255 255 255 / 0.46); }
+.text-white\/35 { color: rgb(255 255 255 / 0.52); }
+.text-white\/40 { color: rgb(255 255 255 / 0.58); }
+.text-white\/45 { color: rgb(255 255 255 / 0.62); }
+.text-white\/50 { color: rgb(255 255 255 / 0.66); }
 
 * { border-color: var(--line); }
 
@@ -77,12 +143,45 @@ html, body {
 
 body {
   font-family: var(--font-display);
+  /*
+     Atmosphere, not decoration.
+     The old blooms sat at 30% and read as coloured fog over the whole
+     page, which flattened the surface ladder underneath them - a card
+     could not step up out of a glow. These are dialled to roughly a
+     third of that: enough that a large empty region is never a dead
+     rectangle, faint enough that a panel still reads as a panel. */
   background-image:
-    radial-gradient(1100px 620px at 12% -10%, rgba(30, 41, 246, 0.3), transparent 62%),
-    radial-gradient(900px 520px at 92% 4%, rgba(0, 229, 255, 0.13), transparent 58%),
-    radial-gradient(760px 700px at 50% 104%, rgba(30, 41, 246, 0.16), transparent 62%);
+    radial-gradient(1200px 680px at 10% -12%, rgba(90, 103, 255, 0.13), transparent 60%),
+    radial-gradient(900px 520px at 94% 2%, rgba(0, 229, 255, 0.06), transparent 58%),
+    radial-gradient(820px 720px at 52% 106%, rgba(107, 33, 239, 0.09), transparent 62%);
   background-attachment: fixed;
   min-height: 100dvh;
+  font-synthesis-weight: none;
+}
+
+/*
+   Display type whispers.
+   ---------------------------------------------------------------
+   Headings ran bold with default leading, which at large sizes made
+   every page open by shouting. Weight 300 with negative tracking and
+   leading under 1 stacks a headline into a dense block that reads as
+   composed rather than loud - and it makes the accent, when it does
+   appear, the loudest thing on the page instead of competing with it.
+
+   Applied by size, so a 13px label is untouched. */
+h1, .display {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+}
+h2 {
+  font-weight: 300;
+  letter-spacing: -0.018em;
+  line-height: 1.04;
+}
+h3 {
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 ::selection { background: rgba(30, 41, 246, 0.45); }
@@ -97,24 +196,153 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.5); background-clip: content-box; }
 
+/*
+   A card is the surface one step up, not a floating object.
+   ---------------------------------------------------------------
+   The fill is opaque enough to actually be a step rather than a
+   translucent wash of whatever is behind it, and the hairline is an
+   inset ring rather than a border so it does not add a pixel to the
+   box or fight the radius. No outset shadow: elevation here is
+   colour, and a drop shadow on a dark ground only adds mud. */
 @utility card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 1rem;
-  backdrop-filter: blur(12px);
+  background: var(--surface-1);
+  border: 0;
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* The large tier, for panels that hold other panels. */
+@utility panel {
+  background: var(--surface-2);
+  border: 0;
+  border-radius: var(--radius-panel);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/*
+   The highlighted variant: lit from within.
+   Transparent so the page shows through, with a hairline ring and a
+   single bright line along the top edge - the look of something
+   backlit rather than something raised. */
+@utility card-lit {
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-panel);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 2px 0 -1px rgba(0, 229, 255, 0.75),
+    inset 0 22px 30px -26px rgba(0, 229, 255, 0.5);
 }
 
 @utility card-hover {
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
 .card-hover:hover {
-  border-color: rgba(0, 229, 255, 0.4);
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--surface-2);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 0 var(--accent-edge);
   transform: translateY(-2px);
 }
 
+/* Kept for the few places that genuinely need to pull the eye - a live
+   quote, a confirmed result. Now a ring plus a contained halo rather than
+   a long drop shadow, which on this base only muddied what was under it. */
 @utility glow {
-  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.28), 0 12px 44px -12px rgba(30, 41, 246, 0.7);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 229, 255, 0.30),
+    0 0 32px -14px rgba(0, 229, 255, 0.55);
+}
+
+/*
+   Buttons, in three tiers.
+   ---------------------------------------------------------------
+   The primary style was written out by hand at 37 call sites, which
+   is why it had drifted: different radii, different weights, some
+   with a hover and some without. One utility per tier means the
+   product has one primary action style, and changing it is one
+   edit rather than thirty-seven.
+
+   The accent appears on `btn-primary` and essentially nowhere else.
+   That is the whole reason it pulls the eye - spend it on decoration
+   and there is nothing left for the action that matters. */
+@utility btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-control);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: filter 160ms ease, transform 160ms ease, opacity 160ms ease;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.12); }
+.btn-primary:active:not(:disabled) { transform: translateY(1px); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Secondary: an outline that borrows no colour, so it never competes. */
+@utility btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  border-radius: var(--radius-control);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38);
+}
+.btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Tertiary: a frosted panel-within-a-panel, for icon and inline actions
+   sitting on top of a card that is already a surface. */
+@utility btn-frosted {
+  background: rgba(44, 40, 52, 0.55);
+  color: var(--fg);
+  border-radius: var(--radius-control);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.13);
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+.btn-frosted:hover:not(:disabled) {
+  background: rgba(44, 40, 52, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+/*
+   Form fields, so they stop being invented per screen.
+   ---------------------------------------------------------------
+   The same input shape was written out at dozens of call sites and
+   had drifted apart: different radii, different border alphas, some
+   with a focus colour and some without. A field is a recessed
+   surface - darker than the card it sits on, rather than lighter -
+   which is what makes it read as somewhere to type. */
+@utility field {
+  background: rgba(9, 7, 16, 0.55);
+  border-radius: var(--radius-control);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  color: var(--fg);
+  outline: none;
+  transition: box-shadow 160ms ease, background 160ms ease;
+}
+.field::placeholder { color: rgba(255, 255, 255, 0.28); }
+.field:hover:not(:disabled) { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16); }
+.field:focus, .field:focus-within {
+  background: rgba(9, 7, 16, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(0, 229, 255, 0.45);
+}
+
+/* Focus has to be visible for anyone driving this from a keyboard, and it
+   is the one other place the accent is allowed to appear. */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px rgba(0, 229, 255, 0.55);
+  border-radius: var(--radius-control);
 }
 
 @utility text-grad {
@@ -149,8 +377,8 @@ body {
   inset: 0;
   z-index: -2;
   background-image:
-    linear-gradient(rgba(120, 160, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 160, 255, 0.055) 1px, transparent 1px);
+    linear-gradient(rgba(168, 150, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 150, 255, 0.05) 1px, transparent 1px);
   background-size: 46px 46px;
   mask-image: radial-gradient(ellipse 78% 62% at 50% 0%, #000 42%, transparent 100%);
   pointer-events: none;
@@ -165,9 +393,9 @@ body {
   height: 150%;
   z-index: -1;
   background:
-    radial-gradient(38% 44% at 18% 22%, rgba(30, 41, 246, 0.4), transparent 70%),
-    radial-gradient(34% 40% at 82% 12%, rgba(0, 229, 255, 0.24), transparent 72%),
-    radial-gradient(46% 38% at 55% 78%, rgba(45, 90, 255, 0.22), transparent 75%);
+    radial-gradient(38% 44% at 18% 22%, rgba(90, 103, 255, 0.26), transparent 70%),
+    radial-gradient(34% 40% at 82% 12%, rgba(0, 229, 255, 0.14), transparent 72%),
+    radial-gradient(46% 38% at 55% 78%, rgba(107, 33, 239, 0.18), transparent 75%);
   filter: blur(14px);
   animation: devox-drift 26s ease-in-out infinite alternate;
   pointer-events: none;
@@ -211,8 +439,8 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(30, 41, 246, 0.5),
-    rgba(0, 229, 255, 0.35),
+    rgba(90, 103, 255, 0.42),
+    rgba(0, 229, 255, 0.3),
     transparent
   );
   pointer-events: none;

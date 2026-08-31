@@ -121,7 +121,7 @@ export function AgentChat({
             <button
               onClick={submit}
               disabled={!draft.trim()}
-              className="shrink-0 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+              className="shrink-0 rounded-xl btn-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
             >
               Send
             </button>
@@ -423,7 +423,7 @@ function Empty({
           <button
             key={s}
             onClick={() => onPick(s)}
-            className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-left text-[12px] text-white/65 transition hover:border-devox-400/40 hover:text-white"
+            className="btn-ghost px-2.5 py-1.5 text-left text-[12px] text-white/65 transition hover:border-devox-400/40 hover:text-white"
           >
             {s}
           </button>

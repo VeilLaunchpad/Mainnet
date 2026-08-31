@@ -28,7 +28,7 @@ export function PrivacySwitch({ compact = false }: { compact?: boolean }) {
         aria-pressed={on}
         title={on ? "Privacy on" : "Privacy off"}
         className={
-          "group flex items-center gap-2 rounded-xl border px-2.5 py-1.5 text-[12px] font-semibold transition " +
+          "group flex items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-[12px] font-medium transition " +
           (on
             ? "border-mint-400/40 bg-mint-400/10 text-mint-400 hover:bg-mint-400/15"
             : "border-white/12 bg-white/[0.03] text-white/45 hover:text-white/70")

@@ -180,12 +180,12 @@ export function TelegramPanel({ address }: { address?: string }) {
                   placeholder="A1B2C3D4"
                   maxLength={12}
                   onKeyDown={(e) => e.key === "Enter" && !busy && redeem()}
-                  className="mono min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[15px] tracking-[0.2em] outline-none transition placeholder:text-white/20 focus:border-cy-400/50"
+                  className="mono min-w-0 flex-1 field px-3.5 py-2.5 text-[15px] tracking-[0.2em] outline-none transition placeholder:text-white/20 focus:border-cy-400/50"
                 />
                 <button
                   onClick={redeem}
                   disabled={busy || !code.trim()}
-                  className="shrink-0 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                  className="shrink-0 rounded-xl btn-primary px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                 >
                   {busy ? "Linking..." : "Link"}
                 </button>

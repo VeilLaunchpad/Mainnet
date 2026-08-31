@@ -100,7 +100,7 @@ export default function ProfileSetupPage() {
             )}
 
             <label className="text-[12px] font-semibold text-white/70">Handle</label>
-            <div className="mt-1.5 flex items-center rounded-xl border border-white/10 bg-white/[0.03] px-3.5 focus-within:border-devox-400/50">
+            <div className="mt-1.5 flex items-center field px-3.5 focus-within:border-devox-400/50">
               <span className="mono text-[15px] text-white/30">@</span>
               <input
                 value={username}
@@ -120,7 +120,7 @@ export default function ProfileSetupPage() {
               onChange={(e) => setDisplayName(e.target.value)}
               maxLength={48}
               placeholder="Night Shift"
-              className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[15px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
+              className="mt-1.5 w-full field px-3.5 py-2.5 text-[15px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
             />
 
             <label className="mt-4 block text-[12px] font-semibold text-white/70">Bio</label>
@@ -130,7 +130,7 @@ export default function ProfileSetupPage() {
               rows={3}
               maxLength={280}
               placeholder="What you build, what you trade, what you will not touch."
-              className="mt-1.5 w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
+              className="mt-1.5 w-full resize-none field px-3.5 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
             />
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -163,7 +163,7 @@ export default function ProfileSetupPage() {
             <button
               onClick={save}
               disabled={busy || !address || slugify(username).length < 3}
-              className="mt-6 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+              className="mt-6 w-full rounded-xl btn-primary py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
             >
               {busy ? "Saving…" : "Save profile"}
             </button>

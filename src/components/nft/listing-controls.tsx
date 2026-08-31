@@ -295,7 +295,7 @@ export function ListingControls({
           onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ""))}
           placeholder={formatUnits(currentPrice, 18)}
           inputMode="decimal"
-          className="mono w-28 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-[12px] outline-none focus:border-devox-400/50"
+          className="mono w-28 field px-2 py-1 text-[12px] outline-none focus:border-devox-400/50"
         />
         <span className="text-[11px] text-white/35">{unit}</span>
         <button

@@ -182,12 +182,12 @@ export default function ProfilePage() {
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
                 placeholder="yourname"
-                className="mono w-56 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+                className="mono w-56 field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
               />
               <button
                 onClick={claim}
                 disabled={saving || handle.length < 3}
-                className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                className="rounded-xl btn-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
                 {saving ? <Spinner /> : profile?.username ? "Update" : "Claim"}
               </button>

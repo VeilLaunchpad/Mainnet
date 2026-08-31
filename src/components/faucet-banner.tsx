@@ -134,7 +134,7 @@ export function FaucetBanner() {
               <button
                 onClick={claim}
                 disabled={claiming}
-                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-devox-500 to-cy-500 px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+                className="flex items-center gap-1.5 rounded-lg btn-primary px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
               >
                 {claiming && <Spinner size={12} />}
                 {claiming ? "Sending" : "Get " + info.amount + " COTI"}

@@ -71,7 +71,7 @@ export default function NewAgentPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="NOCTURNE"
                 maxLength={32}
-                className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[15px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
+                className="mt-1.5 w-full field px-3.5 py-2.5 text-[15px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
               />
               {slug && <div className="mono mt-1.5 text-[11px] text-white/30">/agents/{slug}</div>}
 
@@ -81,7 +81,7 @@ export default function NewAgentPage() {
                 onChange={(e) => setTagline(e.target.value)}
                 placeholder="Trades the night shift so you do not have to."
                 maxLength={110}
-                className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[14px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
+                className="mt-1.5 w-full field px-3.5 py-2.5 text-[14px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
               />
 
               <label className="mt-4 block text-[12px] font-semibold text-white/70">
@@ -95,7 +95,7 @@ export default function NewAgentPage() {
                 onChange={(e) => setPersona(e.target.value)}
                 rows={6}
                 placeholder="Only touch launches past 40% on the curve. Never size above 5 COTI without asking. Tell me when a thesis is invalidated, not just when it works."
-                className="mt-1.5 w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
+                className="mt-1.5 w-full resize-none field px-3.5 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
               />
             </div>
 
@@ -212,7 +212,7 @@ export default function NewAgentPage() {
             <button
               onClick={create}
               disabled={busy || !name.trim()}
-              className="w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+              className="w-full rounded-xl btn-primary py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
             >
               {busy ? "Creating…" : "Create agent"}
             </button>

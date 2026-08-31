@@ -624,7 +624,7 @@ function PoolPanel({
           <button
             onClick={submit}
             disabled={working || (mode === "stake" && (!p.active || !address))}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13.5px] font-semibold transition hover:brightness-110 disabled:opacity-45"
+            className="flex shrink-0 items-center gap-2 rounded-xl btn-primary px-4 py-2.5 text-[13.5px] font-semibold transition hover:brightness-110 disabled:opacity-45"
           >
             {working && <Spinner size={14} />}
             {mode === "stake" ? "Stake" : "Unstake"}

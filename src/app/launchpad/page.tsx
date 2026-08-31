@@ -40,7 +40,7 @@ export default function LaunchpadPage() {
         right={
           <Link
             href="/launch"
-            className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+            className="rounded-xl btn-primary px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
           >
             Launch a token
           </Link>
@@ -89,7 +89,7 @@ export default function LaunchpadPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, ticker or address…"
-            className="min-w-[220px] flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
+            className="min-w-[220px] flex-1 field px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
           />
         </div>
 

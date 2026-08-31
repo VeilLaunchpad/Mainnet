@@ -188,7 +188,7 @@ export function TokenComments({
               ? "Say something about " + symbol + ". Signed by your wallet, visible to everyone."
               : "Encrypted before it leaves this browser. Only you and the creator can read it."
           }
-          className="mt-2.5 w-full resize-none rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
+          className="mt-2.5 w-full resize-none field px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
         />
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -199,7 +199,7 @@ export function TokenComments({
               "rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40 " +
               (mode === "private"
                 ? "bg-gradient-to-r from-devox-500 to-devox-600"
-                : "bg-gradient-to-r from-devox-500 to-cy-500")
+                : "btn-primary")
             }
           >
             {busy ? step || "Working…" : mode === "private" ? "Send encrypted" : "Post comment"}

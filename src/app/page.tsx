@@ -97,7 +97,7 @@ export default async function Home() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/launch"
-              className="glow rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+              className="glow rounded-xl btn-primary px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
             >
               Launch a token
             </Link>

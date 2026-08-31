@@ -225,12 +225,12 @@ function MessagesInner() {
                 onChange={(e) => setBody(e.target.value)}
                 rows={5}
                 placeholder="Encrypted before it leaves this browser."
-                className="mt-1 w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
+                className="mt-1 w-full resize-none field px-3 py-2.5 text-[13px] leading-relaxed outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
               />
               <button
                 onClick={send}
                 disabled={sending || !address}
-                className="mt-3 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                className="mt-3 w-full rounded-xl btn-primary py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
                 {sending ? "Encrypting and sending…" : "Send encrypted"}
               </button>

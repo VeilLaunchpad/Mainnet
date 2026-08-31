@@ -444,7 +444,7 @@ function PublicColumn({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Find token"
-        className="mt-3 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[13px] outline-none transition placeholder:text-white/25 focus:border-cy-400/50"
+        className="mt-3 w-full field px-3.5 py-2.5 text-[13px] outline-none transition placeholder:text-white/25 focus:border-cy-400/50"
       />
 
       <div className="mt-2 max-h-[340px] space-y-1.5 overflow-y-auto pr-1">
@@ -577,7 +577,7 @@ function Crossing({
             </button>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-devox-400/50">
+        <div className="mt-1 flex items-center gap-2 field px-3 py-2.5 focus-within:border-devox-400/50">
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}

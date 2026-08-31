@@ -624,7 +624,7 @@ export default function CollectionPage() {
               <button
                 onClick={mint}
                 disabled={minting}
-                className="ml-auto rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-5 py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                className="ml-auto rounded-xl btn-primary px-5 py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
               >
                 {minting ? <Spinner /> : "Mint"}
               </button>
@@ -680,7 +680,7 @@ export default function CollectionPage() {
                 onChange={(e) => setListPrice(e.target.value)}
                 placeholder="Price in COTI"
                 inputMode="decimal"
-                className="mono w-40 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+                className="mono w-40 field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
               />
               <span className="text-[12px] text-white/35">
                 sets the asking price for the List buttons below
@@ -736,7 +736,7 @@ export default function CollectionPage() {
                       <button
                         onClick={() => listToken(o.tokenId)}
                         disabled={listing === o.tokenId.toString()}
-                        className="flex-1 rounded-lg border border-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
+                        className="flex-1 btn-ghost text-[12px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
                       >
                         {listing === o.tokenId.toString() ? <Spinner /> : "List"}
                       </button>

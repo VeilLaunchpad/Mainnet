@@ -139,7 +139,7 @@ export function BuyListing({
       onClick={go}
       disabled={busy}
       className={
-        "rounded-lg bg-gradient-to-r from-devox-500 to-cy-500 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 " +
+        "rounded-lg btn-primary px-3 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 " +
         (className || "")
       }
     >

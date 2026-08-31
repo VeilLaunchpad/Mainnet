@@ -134,7 +134,7 @@ export default function ExplorePage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Filter by pair, e.g. COTI/USDCe…"
-            className="mb-4 w-full max-w-md rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
+            className="mb-4 w-full max-w-md field px-3.5 py-2 text-[13px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
           />
 
           {!data ? (

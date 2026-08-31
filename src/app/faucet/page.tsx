@@ -161,7 +161,7 @@ export default function FaucetPage() {
                 <button
                   onClick={claim}
                   disabled={!canClaim}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl btn-primary py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                 >
                   {claiming && <Spinner size={15} />}
                   {!isConnected

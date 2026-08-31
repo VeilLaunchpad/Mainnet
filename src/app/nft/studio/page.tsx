@@ -391,7 +391,7 @@ export default function StudioPage() {
                         setTraits((p) => p.map((x, j) => (j === i ? { ...x, trait_type: e.target.value } : x)))
                       }
                       placeholder="Trait"
-                      className="w-1/2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+                      className="w-1/2 field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
                     />
                     <input
                       value={t.value}
@@ -399,7 +399,7 @@ export default function StudioPage() {
                         setTraits((p) => p.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))
                       }
                       placeholder="Value"
-                      className="w-1/2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+                      className="w-1/2 field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
                     />
                     <button
                       onClick={() => setTraits((p) => p.filter((_, j) => j !== i))}
@@ -446,7 +446,7 @@ export default function StudioPage() {
                   type="datetime-local"
                   value={publicStart}
                   onChange={(e) => setPublicStart(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+                  className="mt-1.5 w-full field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
                 />
                 <p className="mt-1 text-[11px] text-white/30">Leave empty to open immediately.</p>
               </div>
@@ -464,7 +464,7 @@ export default function StudioPage() {
               onChange={(e) => setSecret(e.target.value)}
               rows={3}
               placeholder="An unlock link, a key, the real art — whatever only a holder should see"
-              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+              className="w-full field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
             />
             <div className="mb-1">
               <PrivacyNote
@@ -578,7 +578,7 @@ export default function StudioPage() {
                 <button
                   onClick={launch}
                   disabled={!mined || !!busy}
-                  className="w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                  className="w-full rounded-xl btn-primary py-2.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                 >
                   {busy ? <Spinner /> : mined ? "Launch" : "Mine an address first"}
                 </button>
@@ -633,14 +633,14 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={2}
-          className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+          className="mt-1.5 w-full field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
         />
       ) : (
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="mono mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+          className="mono mt-1.5 w-full field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
         />
       )}
       {hint && <p className="mt-1 text-[11px] text-white/30">{hint}</p>}

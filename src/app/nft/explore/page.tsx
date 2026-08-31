@@ -183,7 +183,7 @@ export default function NFTExplorePage() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={mode === "listings" ? "Search a collection or #id" : "Search collections"}
-          className="w-64 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
+          className="w-64 field px-3 py-2 text-[13px] outline-none focus:border-devox-400/40"
         />
 
         {mode === "listings" && (

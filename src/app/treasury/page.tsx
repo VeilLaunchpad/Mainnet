@@ -258,7 +258,7 @@ export default function TreasuryPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href="/stake"
-              className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+              className="rounded-xl btn-primary px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
             >
               Stake and earn DEVOX
             </Link>

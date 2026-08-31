@@ -118,7 +118,7 @@ export default function TokenPage({ params }: { params: Promise<{ ca: string }> 
               {data.pool && (
                 <Link
                   href={"/swap?token=" + t.address}
-                  className="ml-auto rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+                  className="ml-auto rounded-xl btn-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
                 >
                   Trade on DevoxSwap
                 </Link>

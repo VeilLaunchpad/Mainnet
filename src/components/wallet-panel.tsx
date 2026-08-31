@@ -324,7 +324,7 @@ function Assets({
             <button
               onClick={onReveal}
               disabled={revealing}
-              className="shrink-0 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+              className="shrink-0 rounded-xl btn-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
             >
               {revealing ? stageLabel(coti.stage, coti.detail) : "Unlock balances"}
             </button>
@@ -446,7 +446,7 @@ function Send({
           value={to}
           onChange={(e) => setTo(e.target.value)}
           placeholder="0x address or @handle"
-          className="mono mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[13px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
+          className="mono mt-1.5 w-full field px-3.5 py-2.5 text-[13px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50"
         />
         {resolved && (
           <div className="mono mt-1.5 text-[11px] text-mint-400">
@@ -460,7 +460,7 @@ function Send({
         )}
 
         <label className="mt-4 block text-[12px] font-semibold text-white/70">Amount</label>
-        <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 focus-within:border-devox-400/50">
+        <div className="mt-1.5 flex items-center gap-2 field px-3.5 py-2.5 focus-within:border-devox-400/50">
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
@@ -474,7 +474,7 @@ function Send({
         <button
           onClick={submit}
           disabled={busy || !amount || !destination}
-          className="mt-5 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+          className="mt-5 w-full rounded-xl btn-primary py-3 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
         >
           {busy ? step || "Sending…" : "Send " + (selected?.symbol ?? "")}
         </button>
@@ -578,7 +578,7 @@ function Receive({ address }: { address: string }) {
         <div className="mt-3 flex gap-2">
           <button
             onClick={copy}
-            className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+            className="rounded-xl btn-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
           >
             {copied ? "Copied" : "Copy address"}
           </button>

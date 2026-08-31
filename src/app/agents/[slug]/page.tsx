@@ -147,7 +147,7 @@ export default function AgentPage({ params }: { params: Promise<{ slug: string }
             "rounded-xl px-4 py-2.5 text-[13px] font-semibold transition disabled:opacity-50 " +
             (a.heartbeatSec > 0
               ? "border border-mint-400/40 bg-mint-400/10 text-mint-400 hover:bg-mint-400/20"
-              : "bg-gradient-to-r from-devox-500 to-cy-500 text-white hover:brightness-110")
+              : "btn-primary hover:brightness-110")
           }
         >
           {a.heartbeatSec > 0 ? "Heartbeat on" : "Wake it up"}

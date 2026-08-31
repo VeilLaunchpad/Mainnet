@@ -278,7 +278,7 @@ function LockCard({
           className={
             "mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-[13.5px] font-semibold transition disabled:opacity-45 " +
             (unlocked
-              ? "bg-gradient-to-r from-devox-500 to-cy-500 text-white hover:brightness-110"
+              ? "btn-primary hover:brightness-110"
               : "border border-white/10 text-white/40")
           }
         >

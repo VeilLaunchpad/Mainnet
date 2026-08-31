@@ -15,25 +15,65 @@ import { NetworkSwitch } from "./network-switch";
  * Names say what the page does. "DeFi" and "Trade" were categories, not
  * actions, and left people guessing which one held the swap.
  */
-const LINKS = [
+/*
+ * Thirteen destinations in one row is not a navigation, it is a list.
+ *
+ * At that width every label had to shrink until nothing was scannable and the
+ * controls on the right had no room left - the privacy toggle was wrapping
+ * onto two lines. So the bar now carries the five surfaces people actually
+ * arrive for, and the rest live one click away, grouped by what they are for.
+ * Nothing was removed: the mobile sheet still lists all of it, and every
+ * route is still a route.
+ */
+const PRIMARY = [
   { href: "/launchpad", label: "Launchpad" },
   { href: "/swap", label: "Swap" },
-  { href: "/explore", label: "Explore" },
-  { href: "/desk", label: "Desk" },
-  { href: "/stake", label: "Stake" },
   { href: "/nft", label: "NFT" },
-  { href: "/treasury", label: "Treasury" },
-  { href: "/lock", label: "Lock" },
-  { href: "/portal", label: "Portal" },
-  { href: "/bridge", label: "Bridge" },
-  { href: "/agents", label: "Agents" },
-  { href: "/messages", label: "Messages" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/stake", label: "Stake" },
+  { href: "/desk", label: "Desk" },
+];
+
+const MORE: { group: string; items: { href: string; label: string; hint: string }[] }[] = [
+  {
+    group: "Markets",
+    items: [
+      { href: "/explore", label: "Explore", hint: "Every token and pool" },
+      { href: "/portal", label: "Portal", hint: "Wrap into the private twin" },
+      { href: "/bridge", label: "Bridge", hint: "Move value onto COTI" },
+    ],
+  },
+  {
+    group: "Holdings",
+    items: [
+      { href: "/dashboard", label: "Dashboard", hint: "What you hold" },
+      { href: "/lock", label: "Lock", hint: "Time-locked positions" },
+      { href: "/treasury", label: "Treasury", hint: "What backs the rewards" },
+    ],
+  },
+  {
+    group: "Agents",
+    items: [
+      { href: "/agents", label: "Agents", hint: "The roster" },
+      { href: "/messages", label: "Messages", hint: "Encrypted, wallet to wallet" },
+    ],
+  },
+];
+
+const LINKS = [
+  ...PRIMARY,
+  ...MORE.flatMap((g) => g.items.map((i) => ({ href: i.href, label: i.label }))),
 ];
 
 export function Nav() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const [more, setMore] = useState(false);
+
+  // The grouped menu shows as active when you are on one of its pages, so the
+  // bar never looks like it has forgotten where you are.
+  const moreActive = MORE.some((g) =>
+    g.items.some((i) => path === i.href || path.startsWith(i.href + "/")),
+  );
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-ink-950/70 backdrop-blur-xl">
@@ -45,22 +85,79 @@ export function Nav() {
           </span>
         </Link>
 
-        <nav className="hidden flex-1 items-center gap-1 lg:flex">
-          {LINKS.map((l) => {
+        <nav className="hidden flex-1 items-center gap-0.5 lg:flex">
+          {PRIMARY.map((l) => {
             const active = path === l.href || path.startsWith(l.href + "/");
             return (
               <Link
                 key={l.href}
                 href={l.href}
                 className={
-                  "rounded-lg px-3 py-1.5 text-[13px] font-medium transition " +
-                  (active ? "bg-white/[0.07] text-white" : "text-white/55 hover:text-white")
+                  "rounded-lg px-3 py-1.5 text-[13px] transition " +
+                  (active ? "bg-white/[0.08] text-white" : "text-white/55 hover:text-white")
                 }
               >
                 {l.label}
               </Link>
             );
           })}
+
+          {/* Hover and focus both open it, so it works for a pointer and for a
+              keyboard without needing a click to commit. */}
+          <div
+            className="relative"
+            onMouseEnter={() => setMore(true)}
+            onMouseLeave={() => setMore(false)}
+          >
+            <button
+              onClick={() => setMore((v) => !v)}
+              onFocus={() => setMore(true)}
+              aria-expanded={more}
+              className={
+                "flex items-center gap-1 rounded-lg px-3 py-1.5 text-[13px] transition " +
+                (moreActive ? "bg-white/[0.08] text-white" : "text-white/55 hover:text-white")
+              }
+            >
+              More
+              <svg width="9" height="9" viewBox="0 0 10 10" fill="none"
+                className={"transition " + (more ? "rotate-180" : "")}>
+                <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {more && (
+              <div className="absolute left-0 top-full z-50 w-[520px] pt-2">
+                <div className="panel grid grid-cols-3 gap-1 p-2">
+                  {MORE.map((g) => (
+                    <div key={g.group}>
+                      <div className="px-2.5 pb-1 pt-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/30">
+                        {g.group}
+                      </div>
+                      {g.items.map((i) => {
+                        const active = path === i.href || path.startsWith(i.href + "/");
+                        return (
+                          <Link
+                            key={i.href}
+                            href={i.href}
+                            onClick={() => setMore(false)}
+                            className={
+                              "block rounded-lg px-2.5 py-2 transition " +
+                              (active ? "bg-white/[0.08]" : "hover:bg-white/[0.05]")
+                            }
+                          >
+                            <div className="text-[13px] text-white">{i.label}</div>
+                            <div className="mt-0.5 text-[11px] leading-snug text-white/40">
+                              {i.hint}
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">

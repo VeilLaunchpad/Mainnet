@@ -343,7 +343,7 @@ export function TradePanel({
             </div>
           );
         })()}
-        <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-devox-400/50">
+        <div className="mt-1 flex items-center gap-2 field px-3 py-2.5 focus-within:border-devox-400/50">
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}

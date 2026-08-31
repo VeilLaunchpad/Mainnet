@@ -646,7 +646,7 @@ export default function BridgePage() {
               <button
                 onClick={go}
                 disabled={!canRun}
-                className="mt-4 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                className="mt-4 w-full rounded-xl btn-primary py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
                 {!isConnected
                   ? "Connect a wallet"

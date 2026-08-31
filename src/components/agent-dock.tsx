@@ -62,7 +62,7 @@ export function AgentDock() {
 
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-4 z-50 flex items-center gap-2 rounded-full bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-3 text-[13px] font-semibold text-white shadow-lg shadow-devox-500/25 transition hover:brightness-110"
+        className="fixed bottom-5 right-4 z-50 flex items-center gap-2 rounded-full btn-primary px-4 py-3 text-[13px] font-semibold text-white shadow-lg shadow-devox-500/25 transition hover:brightness-110"
       >
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
           <path

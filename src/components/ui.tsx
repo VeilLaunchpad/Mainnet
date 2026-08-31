@@ -19,15 +19,26 @@ export function Section({
   return (
     <section className={"mx-auto w-full max-w-[1400px] px-4 sm:px-6 " + className}>
       {(title || right) && (
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
+            {/* A label, not a second headline. Uppercase at 11px with wide
+                tracking reads as a category marker; coloured and bold it
+                competed with the title underneath it. */}
             {kicker && (
-              <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-devox-400">
+              <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/35">
                 {kicker}
               </div>
             )}
-            {title && <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>}
-            {sub && <p className="mt-1.5 max-w-2xl text-[14px] text-white/45">{sub}</p>}
+            {/* Light weight and tight leading, per the type scale: a heading
+                that sits as a block rather than shouting a line. */}
+            {title && (
+              <h2 className="text-[26px] leading-[1.04] tracking-[-0.018em] sm:text-[32px]">
+                {title}
+              </h2>
+            )}
+            {sub && (
+              <p className="mt-2.5 max-w-2xl text-[14px] leading-relaxed text-white/45">{sub}</p>
+            )}
           </div>
           {right}
         </div>
@@ -50,10 +61,13 @@ export function Stat({
 }) {
   const color = tone === "up" ? "text-mint-400" : tone === "down" ? "text-rose-400" : "text-white";
   return (
-    <div className="card p-4">
-      <div className="text-[11px] font-medium uppercase tracking-wider text-white/35">{label}</div>
-      <div className={"mono mt-1.5 text-xl font-semibold " + color}>{value}</div>
-      {sub && <div className="mt-0.5 text-[11px] text-white/35">{sub}</div>}
+    <div className="card px-4 py-4">
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-white/35">{label}</div>
+      {/* Light weight at this size reads as a figure being stated rather than
+          asserted, and the tabular numerals stop a changing value from
+          shifting the layout under it. */}
+      <div className={"mono mt-2 text-[22px] font-light tracking-[-0.02em] " + color}>{value}</div>
+      {sub && <div className="mt-1 text-[11px] text-white/35">{sub}</div>}
     </div>
   );
 }
@@ -76,7 +90,7 @@ export function Badge({
   return (
     <span
       className={
-        "inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider " +
+        "inline-flex items-center gap-1 rounded-full border px-2 py-[3px] text-[10px] font-medium uppercase tracking-[0.12em] " +
         tones[tone]
       }
     >
@@ -91,8 +105,8 @@ export function Progress({ pct, label }: { pct: number; label?: string }) {
     <div>
       <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-devox-500 to-cy-400 transition-[width] duration-500"
-          style={{ width: clamped + "%" }}
+          className="h-full rounded-full transition-[width] duration-500"
+          style={{ width: clamped + "%", background: "var(--accent)" }}
         />
       </div>
       {label && (
@@ -115,18 +129,18 @@ export function Empty({
   action?: { href: string; label: string };
 }) {
   return (
-    <div className="card flex flex-col items-center justify-center px-6 py-14 text-center">
+    <div className="panel flex flex-col items-center justify-center px-6 py-16 text-center">
       <div className="flex size-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-white/30">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="1.3" strokeDasharray="3 3" />
         </svg>
       </div>
-      <h3 className="mt-3 text-[15px] font-semibold">{title}</h3>
-      <p className="mt-1 max-w-sm text-[13px] text-white/40">{body}</p>
+      <h3 className="mt-4 text-[15px] font-medium">{title}</h3>
+      <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-white/40">{body}</p>
       {action && (
         <Link
           href={action.href}
-          className="mt-4 rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110"
+          className="btn-primary mt-5 px-4 py-2 text-[13px]"
         >
           {action.label}
         </Link>

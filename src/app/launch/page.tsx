@@ -460,7 +460,7 @@ function Field({
 }
 
 const input =
-  "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-[14px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50";
+  "w-full field px-3.5 py-2.5 text-[14px] outline-none transition placeholder:text-white/20 focus:border-devox-400/50";
 
 function Identity({
   symbol,
@@ -561,7 +561,7 @@ function Identity({
               ["website", "yoursite.xyz"],
             ] as const
           ).map(([key, placeholder]) => (
-            <div key={key} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 focus-within:border-devox-400/50">
+            <div key={key} className="flex items-center gap-2 field px-3 focus-within:border-devox-400/50">
               <span className="w-[62px] shrink-0 text-[11px] capitalize text-white/35">{key}</span>
               <input
                 value={socials[key]}
@@ -612,7 +612,7 @@ function DevBuy({
         Everyone can see you did it, and how much, because the buy is a public event.
       </p>
 
-      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 focus-within:border-devox-400/50">
+      <div className="flex items-center gap-2 field px-3.5 py-2.5 focus-within:border-devox-400/50">
         <input
           value={devBuy}
           onChange={(e) => setDevBuy(e.target.value.replace(/[^0-9.]/g, ""))}
@@ -1077,7 +1077,7 @@ function Confirm({
       <button
         onClick={onLaunch}
         disabled={!ready || busy}
-        className="mt-3 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+        className="mt-3 w-full rounded-xl btn-primary py-3.5 text-[14px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
       >
         {busy ? step || "Working..." : "Launch " + (symbol || "token")}
       </button>

@@ -107,7 +107,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
             ) : (
               <Link
                 href={"/messages?to=" + p.address}
-                className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
+                className="rounded-xl btn-primary px-4 py-2.5 text-[13px] font-semibold text-white transition hover:brightness-110"
               >
                 Send encrypted message
               </Link>

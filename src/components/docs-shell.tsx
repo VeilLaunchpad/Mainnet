@@ -79,7 +79,7 @@ function Sidebar({ current }: { current: string }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search docs"
-        className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[12px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
+        className="w-full field px-3 py-2 text-[12px] outline-none transition placeholder:text-white/25 focus:border-devox-400/50"
       />
 
       <nav className="mt-4 space-y-5">

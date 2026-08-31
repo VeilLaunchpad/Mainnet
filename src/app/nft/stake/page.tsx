@@ -402,21 +402,21 @@ export default function NFTStakePage() {
                       <button
                         onClick={() => stake(p)}
                         disabled={busy !== null}
-                        className="rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                        className="rounded-xl btn-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
                       >
                         {busy === "stake-" + p.id ? <Spinner /> : "Stake"}
                       </button>
                       <button
                         onClick={() => claim(p)}
                         disabled={busy !== null || !mySlot || mySlot.count === 0n}
-                        className="rounded-xl border border-white/10 px-4 py-2 text-[13px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
+                        className="btn-ghost text-[13px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
                       >
                         {busy === "claim-" + p.id ? <Spinner /> : "Claim"}
                       </button>
                       <button
                         onClick={() => unstake(p)}
                         disabled={busy !== null || !mySlot || mySlot.count === 0n}
-                        className="rounded-xl border border-white/10 px-4 py-2 text-[13px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
+                        className="btn-ghost text-[13px] font-semibold text-white/70 transition hover:bg-white/[0.06] disabled:opacity-40"
                       >
                         {busy === "unstake-" + p.id ? <Spinner /> : "Unstake"}
                       </button>

@@ -199,7 +199,7 @@ export function NetworkGuard() {
 
           <button
             onClick={addAndSwitch}
-            className="mt-4 w-full rounded-xl bg-gradient-to-r from-devox-500 to-cy-500 py-3 text-[14px] font-semibold text-white transition hover:brightness-110"
+            className="mt-4 w-full rounded-xl btn-primary py-3 text-[14px] font-semibold text-white transition hover:brightness-110"
           >
             Add and switch to {chain.name}
           </button>
